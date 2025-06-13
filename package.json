@@ -1,0 +1,12 @@
+{
+  "name": "raptor-manus-ai",
+  "version": "1.0.0",
+  "description": "Raptor: Call of the Shadows Reimagined",
+  "main": "js/main.js",
+  "scripts": {
+    "generate-placeholders": "node js/utils/generatePlaceholders.js"
+  },
+  "dependencies": {
+    "canvas": "^2.11.2"
+  }
+} 
