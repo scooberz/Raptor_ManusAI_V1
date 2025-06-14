@@ -160,11 +160,18 @@ class AssetManager {
             });
         }
         
-        // Add new enemy sprites
+        // Define and load all new enemy sprites
         const enemySprites = {
-            'testStriker': '/assets/images/enemies/striker.png'
+            'enemyStriker': 'assets/images/enemies/striker.png',
+            'enemyCyclone': 'assets/images/enemies/cyclone.png',
+            'enemyGnat':    'assets/images/enemies/gnat.png',
+            'enemyReaper':  'assets/images/enemies/reaper.png',
+            'enemyDart':    'assets/images/enemies/dart.png',
+            'enemyGoliath': 'assets/images/enemies/goliath.png',
+            'enemyCutter':  'assets/images/enemies/cutter.png',
+            'enemyMine':    'assets/images/enemies/mine.png'
         };
-        
+
         Object.entries(enemySprites).forEach(([key, src]) => {
             promises.push(this.loadImage(key, src));
         });
@@ -180,7 +187,6 @@ class AssetManager {
                 promises.push(this.loadJSON(key, src));
             });
         }
-        
         return Promise.all(promises);
     }
     
