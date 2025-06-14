@@ -16,8 +16,8 @@ class Boss1 extends Enemy {
         // --- Now, set properties specific to the Boss1 class ---
 
         // Override dimensions AFTER the parent constructor has run.
-        this.width = 256;
-        this.height = 128;
+        this.width = 178;
+        this.height = 117;
 
         // Set the critical flags and values.
         this.isBoss = true;

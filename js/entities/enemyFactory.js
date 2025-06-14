@@ -37,14 +37,52 @@ class EnemyFactory {
                 break;
                 
             case 'bomber':
-                // Note: Ensure an 'enemyBomber' asset is loaded for this to be visible.
                 enemy = new Enemy(this.game, x, y, 'bomber', stats.health, stats.scoreValue);
                 enemy.sprite = this.game.assets.getImage('enemyBomber'); 
                 break;
 
             case 'boss1':
                 enemy = new Boss1(this.game, x, y, stats.health, stats.scoreValue);
-                // The Boss1 constructor is responsible for setting its own sprite.
+                break;
+
+            case 'striker':
+                enemy = new Enemy(this.game, x, y, 'striker', stats.health, stats.scoreValue);
+                enemy.sprite = this.game.assets.getImage('enemyStriker');
+                break;
+
+            case 'cyclone':
+                enemy = new Enemy(this.game, x, y, 'cyclone', stats.health, stats.scoreValue);
+                enemy.sprite = this.game.assets.getImage('enemyCyclone');
+                break;
+
+            case 'gnat':
+                enemy = new Enemy(this.game, x, y, 'gnat', stats.health, stats.scoreValue);
+                enemy.sprite = this.game.assets.getImage('enemyGnat');
+                break;
+
+            case 'reaper':
+                enemy = new Enemy(this.game, x, y, 'reaper', stats.health, stats.scoreValue);
+                enemy.sprite = this.game.assets.getImage('enemyReaper');
+                break;
+
+            case 'dart':
+                enemy = new Enemy(this.game, x, y, 'dart', stats.health, stats.scoreValue);
+                enemy.sprite = this.game.assets.getImage('enemyDart');
+                break;
+
+            case 'goliath':
+                enemy = new Enemy(this.game, x, y, 'goliath', stats.health, stats.scoreValue);
+                enemy.sprite = this.game.assets.getImage('enemyGoliath');
+                break;
+
+            case 'cutter':
+                enemy = new Enemy(this.game, x, y, 'cutter', stats.health, stats.scoreValue);
+                enemy.sprite = this.game.assets.getImage('enemyCutter');
+                break;
+
+            case 'mine':
+                enemy = new Enemy(this.game, x, y, 'mine', stats.health, stats.scoreValue);
+                enemy.sprite = this.game.assets.getImage('enemyMine');
                 break;
 
             default:
