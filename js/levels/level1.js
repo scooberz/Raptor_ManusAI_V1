@@ -72,58 +72,96 @@ class Level1 {
             "waves": [
                 {
                     "id": 1,
-                    "name": "Initial Fighters",
+                    "name": "Scout Formation",
                     "duration": 20000,
                     "enemies": [
-                        // Simple straight-moving fighters
-                        { "type": "fighter", "x": 100, "y": -50, "delay": 0, "health": 20, "scoreValue": 100 },
-                        { "type": "fighter", "x": 300, "y": -50, "delay": 500, "health": 20, "scoreValue": 100 },
-                        { "type": "fighter", "x": 500, "y": -50, "delay": 1000, "health": 20, "scoreValue": 100 },
-                        { "type": "fighter", "x": 700, "y": -50, "delay": 1500, "health": 20, "scoreValue": 100 },
-                        // Side entries
-                        { "type": "fighter", "x": -48, "y": 100, "delay": 2500, "pattern": "straight", "patternParams": { "velocityX": 150, "velocityY": 0 }, "health": 20, "scoreValue": 100 },
-                        { "type": "fighter", "x": 900, "y": 200, "delay": 3500, "pattern": "straight", "patternParams": { "velocityX": -150, "velocityY": 0 }, "health": 20, "scoreValue": 100 },
-                        // V formation
-                        { "type": "fighter", "x": 200, "y": -100, "delay": 5000, "health": 20, "scoreValue": 100 },
-                        { "type": "fighter", "x": 300, "y": -120, "delay": 5200, "health": 20, "scoreValue": 100 },
-                        { "type": "fighter", "x": 400, "y": -140, "delay": 5400, "health": 20, "scoreValue": 100 },
-                        { "type": "fighter", "x": 500, "y": -120, "delay": 5600, "health": 20, "scoreValue": 100 },
-                        { "type": "fighter", "x": 600, "y": -100, "delay": 5800, "health": 20, "scoreValue": 100 },
-                        // More straight fighters
-                        { "type": "fighter", "x": 150, "y": -50, "delay": 8000, "health": 20, "scoreValue": 100 },
-                        { "type": "fighter", "x": 650, "y": -50, "delay": 9000, "health": 20, "scoreValue": 100 },
-                        { "type": "fighter", "x": 400, "y": -50, "delay": 10000, "health": 20, "scoreValue": 100 }
+                        // Initial gnat swarm
+                        { "type": "gnat", "x": 100, "y": -50, "delay": 0 },
+                        { "type": "gnat", "x": 200, "y": -50, "delay": 200 },
+                        { "type": "gnat", "x": 300, "y": -50, "delay": 400 },
+                        { "type": "gnat", "x": 400, "y": -50, "delay": 600 },
+                        { "type": "gnat", "x": 500, "y": -50, "delay": 800 },
+                        { "type": "gnat", "x": 600, "y": -50, "delay": 1000 },
+                        { "type": "gnat", "x": 700, "y": -50, "delay": 1200 },
+                        
+                        // Dart flankers
+                        { "type": "dart", "x": -48, "y": 100, "delay": 3000, "pattern": "straight", "patternParams": { "velocityX": 200, "velocityY": 0 } },
+                        { "type": "dart", "x": 900, "y": 200, "delay": 3200, "pattern": "straight", "patternParams": { "velocityX": -200, "velocityY": 0 } },
+                        
+                        // Striker formation
+                        { "type": "striker", "x": 200, "y": -100, "delay": 5000 },
+                        { "type": "striker", "x": 400, "y": -120, "delay": 5200 },
+                        { "type": "striker", "x": 600, "y": -100, "delay": 5400 }
                     ]
                 },
                 {
                     "id": 2,
-                    "name": "Patterned Assault",
+                    "name": "Assault Wave",
                     "duration": 30000,
                     "enemies": [
-                        // Sine wave bombers
-                        { "type": "bomber", "x": 100, "y": -60, "delay": 0, "pattern": "sine", "patternParams": { "centerX": 100, "amplitude": 120, "frequency": 2, "time": 0 }, "health": 50, "scoreValue": 250 },
-                        { "type": "bomber", "x": 700, "y": -60, "delay": 2000, "pattern": "sine", "patternParams": { "centerX": 700, "amplitude": 120, "frequency": 2, "time": 0 }, "health": 50, "scoreValue": 250 },
-                        // Zigzag fighters
-                        { "type": "fighter", "x": 200, "y": -80, "delay": 4000, "pattern": "zigzag", "patternParams": { "speed": 200, "minX": 100, "maxX": 700 }, "health": 20, "scoreValue": 100 },
-                        { "type": "fighter", "x": 600, "y": -80, "delay": 6000, "pattern": "zigzag", "patternParams": { "speed": 200, "minX": 100, "maxX": 700 }, "health": 20, "scoreValue": 100 },
-                        // Turrets with straight movement
-                        { "type": "turret", "x": 300, "y": -50, "delay": 8000, "health": 80, "scoreValue": 200 },
-                        { "type": "turret", "x": 500, "y": -50, "delay": 9000, "health": 80, "scoreValue": 200 },
-                        // More complex V formation
-                        { "type": "fighter", "x": 250, "y": -120, "delay": 12000, "health": 20, "scoreValue": 100 },
-                        { "type": "fighter", "x": 350, "y": -140, "delay": 12200, "health": 20, "scoreValue": 100 },
-                        { "type": "fighter", "x": 450, "y": -160, "delay": 12400, "health": 20, "scoreValue": 100 },
-                        { "type": "fighter", "x": 550, "y": -140, "delay": 12600, "health": 20, "scoreValue": 100 },
-                        { "type": "fighter", "x": 650, "y": -120, "delay": 12800, "health": 20, "scoreValue": 100 },
-                        // Sine wave bombers again
-                        { "type": "bomber", "x": 400, "y": -60, "delay": 16000, "pattern": "sine", "patternParams": { "centerX": 400, "amplitude": 180, "frequency": 2.5, "time": 0 }, "health": 50, "scoreValue": 250 },
-                        // More zigzag fighters
-                        { "type": "fighter", "x": 150, "y": -80, "delay": 20000, "pattern": "zigzag", "patternParams": { "speed": 250, "minX": 100, "maxX": 700 }, "health": 20, "scoreValue": 100 },
-                        { "type": "fighter", "x": 650, "y": -80, "delay": 21000, "pattern": "zigzag", "patternParams": { "speed": 250, "minX": 100, "maxX": 700 }, "health": 20, "scoreValue": 100 }
+                        // Cyclone sweepers
+                        { "type": "cyclone", "x": 100, "y": -60, "delay": 0, "pattern": "sine", "patternParams": { "centerX": 100, "amplitude": 150, "frequency": 2 } },
+                        { "type": "cyclone", "x": 700, "y": -60, "delay": 2000, "pattern": "sine", "patternParams": { "centerX": 700, "amplitude": 150, "frequency": 2 } },
+                        
+                        // Reaper ambush
+                        { "type": "reaper", "x": 200, "y": -80, "delay": 4000, "pattern": "zigzag", "patternParams": { "speed": 180, "minX": 100, "maxX": 700 } },
+                        { "type": "reaper", "x": 600, "y": -80, "delay": 6000, "pattern": "zigzag", "patternParams": { "speed": 180, "minX": 100, "maxX": 700 } },
+                        
+                        // Mine field
+                        { "type": "mine", "x": 150, "y": -50, "delay": 8000 },
+                        { "type": "mine", "x": 300, "y": -50, "delay": 8200 },
+                        { "type": "mine", "x": 450, "y": -50, "delay": 8400 },
+                        { "type": "mine", "x": 600, "y": -50, "delay": 8600 },
+                        
+                        // Cutter high-value target
+                        { "type": "cutter", "x": 400, "y": -100, "delay": 12000, "pattern": "sine", "patternParams": { "centerX": 400, "amplitude": 200, "frequency": 1.5 } }
                     ]
                 },
                 {
                     "id": 3,
+                    "name": "Heavy Assault",
+                    "duration": 30000,
+                    "enemies": [
+                        // Goliath mini-boss
+                        { "type": "goliath", "x": 400, "y": -150, "delay": 0 },
+                        
+                        // Support strikers
+                        { "type": "striker", "x": 200, "y": -100, "delay": 2000 },
+                        { "type": "striker", "x": 600, "y": -100, "delay": 2200 },
+                        
+                        // Dart escorts
+                        { "type": "dart", "x": 150, "y": -80, "delay": 4000, "pattern": "protect" },
+                        { "type": "dart", "x": 650, "y": -80, "delay": 4000, "pattern": "protect" },
+                        
+                        // Cyclone reinforcements
+                        { "type": "cyclone", "x": 100, "y": -120, "delay": 8000, "pattern": "sine", "patternParams": { "centerX": 100, "amplitude": 120, "frequency": 2 } },
+                        { "type": "cyclone", "x": 700, "y": -120, "delay": 8200, "pattern": "sine", "patternParams": { "centerX": 700, "amplitude": 120, "frequency": 2 } }
+                    ]
+                },
+                {
+                    "id": 4,
+                    "name": "Final Assault",
+                    "duration": 30000,
+                    "enemies": [
+                        // Mixed formation
+                        { "type": "reaper", "x": 200, "y": -100, "delay": 0 },
+                        { "type": "reaper", "x": 600, "y": -100, "delay": 1000 },
+                        { "type": "cutter", "x": 400, "y": -150, "delay": 2000 },
+                        
+                        // Dart swarm
+                        { "type": "dart", "x": 100, "y": -80, "delay": 4000 },
+                        { "type": "dart", "x": 300, "y": -80, "delay": 4200 },
+                        { "type": "dart", "x": 500, "y": -80, "delay": 4400 },
+                        { "type": "dart", "x": 700, "y": -80, "delay": 4600 },
+                        
+                        // Mine field
+                        { "type": "mine", "x": 150, "y": -50, "delay": 6000 },
+                        { "type": "mine", "x": 450, "y": -50, "delay": 6200 },
+                        { "type": "mine", "x": 750, "y": -50, "delay": 6400 }
+                    ]
+                },
+                {
+                    "id": 5,
                     "name": "Boss Wave",
                     "duration": 30000,
                     "enemies": [

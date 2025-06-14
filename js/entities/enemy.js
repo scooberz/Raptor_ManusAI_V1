@@ -120,6 +120,69 @@ Enemy.stats = {
         collisionDamage: 20,
         width: 48,
         height: 48
+    },
+    striker: {
+        health: 30,
+        points: 100,
+        moneyValue: 50,
+        collisionDamage: 20,
+        width: 111,
+        height: 98
+    },
+    cyclone: {
+        health: 60,
+        points: 250,
+        moneyValue: 100,
+        collisionDamage: 30,
+        width: 52,
+        height: 61
+    },
+    gnat: {
+        health: 10,
+        points: 50,
+        moneyValue: 25,
+        collisionDamage: 10,
+        width: 63,
+        height: 59
+    },
+    reaper: {
+        health: 40,
+        points: 150,
+        moneyValue: 75,
+        collisionDamage: 25,
+        width: 68,
+        height: 62
+    },
+    dart: {
+        health: 25,
+        points: 125,
+        moneyValue: 60,
+        collisionDamage: 15,
+        width: 46,
+        height: 48
+    },
+    goliath: {
+        health: 150,
+        points: 500,
+        moneyValue: 200,
+        collisionDamage: 50,
+        width: 54,
+        height: 70
+    },
+    cutter: {
+        health: 50,
+        points: 200,
+        moneyValue: 500,
+        collisionDamage: 35,
+        width: 53,
+        height: 57
+    },
+    mine: {
+        health: 20,
+        points: 75,
+        moneyValue: 10,
+        collisionDamage: 40,
+        width: 31,
+        height: 31
     }
-    // Add other enemy types here, e.g., 'bomber', 'interceptor'
 };

@@ -160,6 +160,15 @@ class AssetManager {
             });
         }
         
+        // Add new enemy sprites
+        const enemySprites = {
+            'testStriker': '/assets/images/enemies/striker.png'
+        };
+        
+        Object.entries(enemySprites).forEach(([key, src]) => {
+            promises.push(this.loadImage(key, src));
+        });
+        
         if (assets.audio) {
             Object.entries(assets.audio).forEach(([key, src]) => {
                 promises.push(this.loadAudio(key, src));
