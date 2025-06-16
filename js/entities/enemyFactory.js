@@ -80,10 +80,35 @@ class EnemyFactory {
                 enemy.sprite = this.game.assets.getImage('enemyCutter');
                 break;
 
+            // ...
             case 'mine':
                 enemy = new Enemy(this.game, x, y, 'mine', stats.health, stats.scoreValue);
                 enemy.sprite = this.game.assets.getImage('enemyMine');
-                break;
+
+                console.log('FACTORY: Attaching custom behavior to a MINE object.'); // <-- ADD THIS LINE
+                // Set default velocity to 0 so it doesn't fight our custom behavior.
+                enemy.velocityY = 20;
+                // Add the unique slow-homing behavior for the mine
+                enemy.updateBehavior = function(player, deltaTime) {
+                    // The 'this' keyword here refers to the enemy instance
+                    if (player) {
+                        const dx = player.x - this.x;
+                        const dy = player.y - this.y;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+
+                        if (distance > 0) {
+                            // Calculate direction and apply a small force
+                            this.dx += (dx / distance) * 0.03;
+                            this.dy += (dy / distance) * 0.03;
+                    }
+                }
+                // Apply drag
+                this.dx *= 0.98;
+                this.dy *= 0.98;
+            };
+
+            break;
+// ...
 
             default:
                 console.error(`Unknown enemy type requested: "${type}"`);

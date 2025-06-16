@@ -1,16 +1,14 @@
 class Enemy extends Entity {
     constructor(game, x, y, type, health, scoreValue, collisionDamage) {
-        // This is a static map to hold default stats for different enemy types
-        // We will define it outside the constructor after the class definition
         const stats = Enemy.stats[type] || {};
         const width = stats.width || 48;
         const height = stats.height || 48;
 
         super(game, x, y, width, height);
         this.layer = 'enemy';
-        this.game = game; // Ensure game context is set
+        this.game = game;
 
-        // Assign properties, prioritizing data passed from the spawner
+        // Assign properties, prioritizing data passed from the level spawner over defaults
         this.type = type;
         this.health = health !== undefined ? health : (stats.health || 20);
         this.maxHealth = this.health;
@@ -19,7 +17,7 @@ class Enemy extends Entity {
         this.collisionDamage = collisionDamage !== undefined ? collisionDamage : (stats.collisionDamage || 20);
 
         // Default movement and weapon properties
-        this.velocityY = 100;
+        this.velocityY = 100; // A base value, can be overridden by patterns
         this.pattern = 'straight';
         this.patternParams = {};
         this.canFire = false;
@@ -28,91 +26,112 @@ class Enemy extends Entity {
 
         // Visual effect properties
         this.hitTime = 0;
-        this.hitDuration = 100;
+        this.hitDuration = 100; // ms
         this.hit = false;
     }
-/**
+
+    /**
      * Sets the movement pattern for the enemy.
-     * This method is called by the EnemyFactory after the enemy is created.
      * @param {string} pattern - The name of the pattern (e.g., 'straight', 'zigzag').
      * @param {Object} params - An object containing specific parameters for that pattern.
      */
-setMovementPattern(pattern, params) {
-    this.pattern = pattern;
-    this.patternParams = params || {};
-}
-    // This method is called by the collision handler
+    setMovementPattern(pattern, params) {
+        this.pattern = pattern;
+        this.patternParams = params || {};
+    }
+
+    /**
+     * Reduces enemy health when it takes damage. Called by the collision system.
+     * @param {number} damage - The amount of damage to inflict.
+     */
     takeDamage(damage) {
         this.health -= damage;
         this.hit = true;
         this.hitTime = 0;
     }
 
+    /**
+     * The main update loop for the enemy, called every frame by the EntityManager.
+     * @param {number} deltaTime - The time elapsed since the last frame.
+     */
     update(deltaTime) {
-        // --- PRIMARY LOGIC ---
-
-        // 1. Check for death. This is the single source of truth for the death sequence.
+        // 1. Handle death sequence if health is at or below zero.
         if (this.health <= 0 && this.active) {
-            // Deactivate first to prevent this code from running more than once.
-            this.active = false;
+            this.active = false; // Deactivate immediately to prevent duplicate death sequences.
 
-            // Add score and money to the player
+            // Grant score and money to the player.
             if (this.game && this.game.player) {
                 this.game.player.addScore(this.scoreValue);
                 this.game.player.addMoney(this.moneyValue);
             }
 
-            // Create an explosion at this enemy's position
+            // Create an explosion at the enemy's location.
             this.game.entityManager.add(new Explosion(this.game, this.x, this.y, this.width, this.height));
 
-            // THIS IS THE FIX: Use the direct this.level reference to set the flag.
+            // If this enemy is a boss, notify the level that it has been defeated.
             if (this.isBoss && this.level) {
                 this.level.bossDefeated = true;
             }
 
-            // Stop any further updates for this dead enemy
+            // Stop any further processing for this (now dead) enemy.
             return;
         }
 
-        // 2. If not dead, update movement and firing
-        this.updateMovement(deltaTime);
+        // 2. Execute movement logic.
+        if (this.updateBehavior) {
+            // If a custom behavior is attached (e.g., for mines), run it instead of standard movement.
+            this.updateBehavior(this.game.player, deltaTime);
+        } else {
+            // Otherwise, perform the default movement pattern.
+            this.updateMovement(deltaTime);
+        }
+        
+        // 3. Execute firing logic if the enemy is able to shoot.
         if (this.canFire) {
             this.updateFiring(deltaTime);
         }
 
-        // 3. Update visual hit effect
+        // 4. Update the visual "hit" flash effect.
         if (this.hit) {
             this.hitTime += deltaTime;
             if (this.hitTime >= this.hitDuration) {
                 this.hit = false;
-                this.hitTime = 0; // Reset timer
+                this.hitTime = 0;
             }
         }
 
-        // 4. Remove if far off-screen
+        // 5. Remove the enemy if it goes too far off-screen.
         if (this.y > this.game.height + 200) {
             this.destroy();
         }
 
-        // --- LAST STEP: Call the base Entity's update method ---
-        // This is moved to the end to fix the race condition.
+        // 6. Call the base Entity's update method to apply physics (dx, dy).
         super.update(deltaTime);
     }
 
-    // Placeholder methods for movement and firing - assuming these exist elsewhere
-    // If they don't, this code won't error out.
+    /**
+     * Handles the enemy's standard movement based on its assigned pattern.
+     * This method is intended to be expanded with different patterns (e.g., straight, zigzag).
+     * @param {number} deltaTime - The time elapsed since the last frame.
+     */
     updateMovement(deltaTime) {
-        // Your existing movement logic (straight, zigzag, etc.) goes here.
-        // For now, we'll just use the basic velocity from the parent.
+        // Base movement logic will be applied by the parent Entity's update.
+        // Complex patterns like 'zigzag' or 'sineWave' would be implemented here.
     }
 
+    /**
+     * Handles the enemy's weapon firing logic.
+     * This method is intended to be expanded.
+     * @param {number} deltaTime - The time elapsed since the last frame.
+     */
     updateFiring(deltaTime) {
-        // Your existing firing logic goes here.
+        // Firing logic (checking fireRate, creating projectiles) would be implemented here.
     }
 }
 
-// Define the static stats object for different enemy types
-// This should eventually be loaded from a JSON file, but is here for now.
+
+// --- Static Enemy Database ---
+// Defines the default stats for each enemy type. This allows for easy balancing.
 Enemy.stats = {
     fighter: {
         health: 20,
