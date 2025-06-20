@@ -7,6 +7,7 @@ class InputHandler {
         this.keys = {};
         // NEW: An object to store the key states from the previous frame
         this.previousKeys = {}; 
+        this.skipWavePressed = false; // Add skip wave debug flag
 
         this.mousePosition = { x: 0, y: 0 };
         this.mouseButtons = { left: false, middle: false, right: false };
@@ -21,6 +22,15 @@ class InputHandler {
         window.addEventListener('keydown', (e) => {
             if(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) {
                 e.preventDefault();
+            }
+            if (e.key === '2') {
+                this.skipWavePressed = true;
+            }
+        });
+
+        window.addEventListener('keyup', (e) => {
+            if (e.key === '2') {
+                this.skipWavePressed = false;
             }
         });
     }

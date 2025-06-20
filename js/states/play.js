@@ -14,6 +14,15 @@ class PlayState extends GameState {
         this.backgroundSpeed = 100; // pixels per second
     }
 
+    forceNextWave() {
+        console.log("DEBUG: Forcing next wave.");
+        this.enemies.forEach(enemy => enemy.destroy());
+        this.enemies = [];
+        this.level++;
+        this.enemySpawnTimer = 0;
+        console.log(`DEBUG: Advanced to level ${this.level}`);
+    }
+
     enter() {
         console.log('Entering play state');
         // Initialize player
@@ -27,6 +36,11 @@ class PlayState extends GameState {
     }
 
     update(deltaTime) {
+        if (this.game.input.skipWavePressed) {
+            this.forceNextWave();
+            this.game.input.skipWavePressed = false;
+        }
+
         // Update background
         this.background.update(deltaTime);
         
