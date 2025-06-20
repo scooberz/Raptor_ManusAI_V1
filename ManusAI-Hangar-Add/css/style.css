@@ -1,0 +1,64 @@
+/* Base Styles */
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background-color: #000;
+    font-family: 'Arial', sans-serif;
+}
+
+/* Game Container */
+#game-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    max-width: 800px;
+    max-height: 600px;
+    margin: 0 auto;
+    overflow: hidden;
+}
+
+/* Canvas Layers */
+.game-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+/* UI Elements */
+#loading-screen, #menu-screen, #game-over-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+    font-size: 24px;
+    background-color: rgba(0, 0, 0, 0.8);
+    z-index: 100;
+}
+
+#loading-screen {
+    z-index: 101;
+}
+
+#menu-screen, #game-over-screen {
+    display: none;
+}
+
+/* Responsive Design */
+@media (max-width: 800px) {
+    #game-container {
+        width: 100%;
+        height: auto;
+        aspect-ratio: 4/3;
+    }
+}
+
