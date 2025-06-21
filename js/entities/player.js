@@ -2,6 +2,10 @@
  * Player class
  * Represents the player's ship
  */
+import { Entity } from '../engine/entity.js';
+import { Explosion } from './explosion.js';
+import { Projectile } from './projectile.js';
+
 class Player extends Entity {
     constructor(game) {
         super(game, game.width / 2 - 32, game.height - 80, 64, 64);
@@ -454,4 +458,6 @@ class Player extends Entity {
         }
     }
 }
+
+export { Player };
 

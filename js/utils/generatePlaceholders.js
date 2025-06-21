@@ -56,4 +56,6 @@ playerShipImages.forEach(img => {
     }
 });
 
-console.log('Placeholder generation complete!'); 
+console.log('Placeholder generation complete!');
+
+export { generatePlaceholders }; 

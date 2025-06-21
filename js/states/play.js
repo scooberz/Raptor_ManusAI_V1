@@ -1,101 +1,106 @@
-class PlayState extends GameState {
+// The new, complete play.js
+import { ScrollingBackground } from '../environment/scrolling-background.js';
+
+class PlayState {
     constructor(game) {
-        super(game);
-        this.player = null;
-        this.enemies = [];
-        this.projectiles = [];
-        this.powerups = [];
-        this.explosions = [];
-        this.score = 0;
-        this.level = 1;
-        this.enemySpawnTimer = 0;
-        this.enemySpawnInterval = 2000; // 2 seconds
-        this.background = null;
-        this.backgroundSpeed = 100; // pixels per second
+        this.game = game;
+        this.levelData = null;
+        this.currentWaveIndex = 0;
+        this.waveTimer = 0;
+        this.scrollingBackground = new ScrollingBackground(this.game);
+    }
+
+    async enter() {
+        console.log("Entering Play State");
+        this.scrollingBackground.start();
+
+        // Dynamically load the level data from the JSON file
+        try {
+            const response = await fetch('js/levels/level1.json');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            this.levelData = await response.json();
+            console.log(`Successfully loaded level: ${this.levelData.levelName}`);
+            this.currentWaveIndex = 0;
+            this.waveTimer = this.levelData.waves[0].delay_after_previous_wave_ms || 3000;
+        } catch (error) {
+            console.error("Failed to load level data:", error);
+            // Handle error, e.g., by going back to the menu
+            this.game.changeState('menu');
+        }
+    }
+
+    exit() {
+        console.log("Exiting Play State");
+        this.scrollingBackground.stop();
+        // Clear out any remaining enemies when exiting the state
+        this.game.entityManager.clear();
     }
 
     forceNextWave() {
         console.log("DEBUG: Forcing next wave.");
-        this.enemies.forEach(enemy => enemy.destroy());
-        this.enemies = [];
-        this.level++;
-        this.enemySpawnTimer = 0;
-        console.log(`DEBUG: Advanced to level ${this.level}`);
-    }
+        // Clear out any remaining enemies from the current wave.
+        this.game.entityManager.getEnemies().forEach(enemy => enemy.destroy());
 
-    enter() {
-        console.log('Entering play state');
-        // Initialize player
-        this.player = new Player(this.game);
-        
-        // Initialize scrolling background
-        this.background = new ScrollingBackground(this.game, this.backgroundSpeed);
-        
-        // Start spawning enemies
-        this.enemySpawnTimer = 0;
+        if (this.currentWaveIndex < this.levelData.waves.length - 1) {
+            this.currentWaveIndex++;
+            this.waveTimer = this.levelData.waves[this.currentWaveIndex].delay_after_previous_wave_ms || 1000;
+            console.log(`DEBUG: Advanced to wave index ${this.currentWaveIndex}`);
+        } else {
+            console.log("DEBUG: Already on the last wave.");
+        }
     }
 
     update(deltaTime) {
+        console.log(`PLAY_STATE: Checking flag. Value is: ${this.game.input.skipWavePressed}`);
         if (this.game.input.skipWavePressed) {
             this.forceNextWave();
-            this.game.input.skipWavePressed = false;
+            this.game.input.skipWavePressed = false; // Reset the flag
         }
 
-        // Update background
-        this.background.update(deltaTime);
-        
-        // Update player
-        this.player.update(deltaTime);
-        
-        // Update enemies
-        this.enemies.forEach(enemy => enemy.update(deltaTime));
-        
-        // Update projectiles
-        this.projectiles.forEach(projectile => projectile.update(deltaTime));
-        
-        // Update powerups
-        this.powerups.forEach(powerup => powerup.update(deltaTime));
-        
-        // Update explosions
-        this.explosions.forEach(explosion => explosion.update(deltaTime));
-        
-        // Spawn enemies
-        this.enemySpawnTimer += deltaTime;
-        if (this.enemySpawnTimer >= this.enemySpawnInterval) {
-            this.spawnEnemy();
-            this.enemySpawnTimer = 0;
+        if (!this.levelData) {
+            // If level data hasn't loaded, do nothing.
+            return;
         }
-        
-        // Check collisions
-        this.checkCollisions();
-        
-        // Remove dead entities
-        this.cleanupEntities();
+
+        // --- WAVE SPAWNING LOGIC ---
+        if (this.currentWaveIndex < this.levelData.waves.length) {
+            this.waveTimer -= deltaTime;
+
+            if (this.waveTimer <= 0) {
+                const currentWave = this.levelData.waves[this.currentWaveIndex];
+
+                // Spawn enemies for the current wave
+                currentWave.enemies.forEach(enemyInfo => {
+                    this.game.enemyFactory.createEnemy(
+                        enemyInfo.type,
+                        enemyInfo.spawn_x,
+                        enemyInfo.spawn_y
+                    );
+                });
+
+                // Move to the next wave
+                this.currentWaveIndex++;
+
+                // Set timer for the NEXT wave, if it exists
+                if (this.currentWaveIndex < this.levelData.waves.length) {
+                    this.waveTimer = this.levelData.waves[this.currentWaveIndex].delay_after_previous_wave_ms || 3000;
+                }
+            }
+        }
+
+        // --- UPDATE GAME ENTITIES ---
+        this.scrollingBackground.update(deltaTime);
+        this.game.entityManager.update(deltaTime);
+        this.game.collision.checkCollisions();
     }
 
-    render() {
-        const backgroundCtx = this.game.getContext('background');
-        const gameCtx = this.game.getContext('game');
-        const uiCtx = this.game.getContext('ui');
-        
-        // Clear all layers
-        backgroundCtx.clearRect(0, 0, this.game.width, this.game.height);
-        gameCtx.clearRect(0, 0, this.game.width, this.game.height);
-        uiCtx.clearRect(0, 0, this.game.width, this.game.height);
-        
-        // Render background
-        this.background.render(backgroundCtx);
-        
-        // Render game objects
-        this.player.render(gameCtx);
-        this.enemies.forEach(enemy => enemy.render(gameCtx));
-        this.projectiles.forEach(projectile => projectile.render(gameCtx));
-        this.powerups.forEach(powerup => powerup.render(gameCtx));
-        this.explosions.forEach(explosion => explosion.render(gameCtx));
-        
-        // Render UI
-        this.renderUI(uiCtx);
+    render(contexts) {
+        this.scrollingBackground.render(contexts.background);
+        this.game.entityManager.render(contexts);
+        // Any specific PlayState UI rendering would go here
     }
+}
 
-    // ... rest of the PlayState class implementation ...
-} 
+export { PlayState };

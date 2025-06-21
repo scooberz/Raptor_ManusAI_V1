@@ -263,3 +263,5 @@ class AssetManager {
     }
 }
 
+export { AssetManager };
+

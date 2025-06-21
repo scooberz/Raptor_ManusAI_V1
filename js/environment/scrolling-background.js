@@ -50,6 +50,8 @@ class ProceduralEnvironment {
  * Creates and manages a multi-layered, procedural, vertically scrolling background
  * to give a better "Raptor" feel.
  */
+import { Environment } from '../entities/environment.js';
+
 class ScrollingBackground {
     constructor(game, speed) {
         this.game = game;
@@ -167,4 +169,10 @@ class ScrollingBackground {
         // Render the near layer last
         this.nearLayerObjects.forEach(obj => obj.render(bgContext));
     }
-} 
+
+    stop() {
+        this.isScrolling = false;
+    }
+}
+
+export { ScrollingBackground }; 

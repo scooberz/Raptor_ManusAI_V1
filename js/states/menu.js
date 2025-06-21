@@ -1,50 +1,31 @@
 /**
  * MenuState class
- * Handles the main menu state, providing options to start a new game,
- * load a saved game, access options, and view credits. This state serves
- * as the primary entry point for the game.
+ * Handles the main menu of the game
  */
 class MenuState {
-    /**
-     * Create a new MenuState instance
-     * @param {Game} game - Reference to the main game instance
-     */
     constructor(game) {
         this.game = game;
         this.logo = null;
-        this.isTransitioning = false;
-        
-        // Define menu options with their associated actions
         this.menuOptions = [
-            { text: 'New Game', action: () => this.startNewGame() },
-            { text: 'Load Game', action: () => this.loadGame() },
-            { text: 'Options', action: () => this.showOptions() },
+            { text: 'Start Game', action: () => this.startGame() },
+            { text: 'Instructions', action: () => this.showInstructions() },
             { text: 'Credits', action: () => this.showCredits() }
         ];
-        
         this.selectedOption = 0;
-        this.keyDelay = 200; // Delay between key presses to prevent too rapid menu navigation
+        this.keyDelay = 200;
         this.lastKeyTime = 0;
-        this.showingOptions = false; // Flag for options menu visibility
-        this.showingCredits = false; // Flag for credits screen visibility
     }
     
     /**
      * Enter the menu state
-     * Initializes the menu screen and resets menu state
      */
     enter() {
         console.log('Entering Menu State');
         
-        // Show menu screen and hide other screens
+        // Show menu screen
         document.getElementById('menu-screen').style.display = 'flex';
-        document.getElementById('game-over-screen').style.display = 'none';
         document.getElementById('loading-screen').style.display = 'none';
-        
-        // Reset menu state
-        this.showingOptions = false;
-        this.showingCredits = false;
-        this.selectedOption = 0;
+        document.getElementById('game-over-screen').style.display = 'none';
         
         // Get logo from assets
         this.logo = this.game.assets.getImage('logo');
@@ -129,202 +110,159 @@ class MenuState {
     }
     
     /**
+     * Start the game
+     */
+    startGame() {
+        this.game.changeState('game');
+    }
+    
+    /**
+     * Show game instructions
+     */
+    showInstructions() {
+        // Create instructions screen
+        const menuScreen = document.getElementById('menu-screen');
+        menuScreen.innerHTML = '';
+        
+        const instructionsContainer = document.createElement('div');
+        instructionsContainer.style.display = 'flex';
+        instructionsContainer.style.flexDirection = 'column';
+        instructionsContainer.style.alignItems = 'center';
+        instructionsContainer.style.justifyContent = 'center';
+        instructionsContainer.style.width = '80%';
+        instructionsContainer.style.height = '80%';
+        instructionsContainer.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+        instructionsContainer.style.padding = '20px';
+        instructionsContainer.style.borderRadius = '10px';
+        
+        // Add title
+        const title = document.createElement('h2');
+        title.textContent = 'Instructions';
+        title.style.color = '#ffcc00';
+        title.style.marginBottom = '20px';
+        instructionsContainer.appendChild(title);
+        
+        // Add instructions text
+        const instructions = document.createElement('div');
+        instructions.style.color = 'white';
+        instructions.style.fontSize = '18px';
+        instructions.style.lineHeight = '1.5';
+        instructions.style.textAlign = 'left';
+        instructions.style.marginBottom = '30px';
+        instructions.innerHTML = `
+            <p><strong>Movement:</strong> Arrow Keys or WASD</p>
+            <p><strong>Fire Primary Weapon:</strong> Space or Ctrl</p>
+            <p><strong>Fire Special Weapon:</strong> Shift</p>
+            <p><strong>Cycle Special Weapons:</strong> Alt</p>
+            <p><strong>Megabomb:</strong> B</p>
+            <p><strong>Pause:</strong> P or Esc</p>
+        `;
+        instructionsContainer.appendChild(instructions);
+        
+        // Add back button
+        const backButton = document.createElement('button');
+        backButton.textContent = 'Back to Menu';
+        backButton.style.padding = '10px 20px';
+        backButton.style.backgroundColor = '#333';
+        backButton.style.color = 'white';
+        backButton.style.border = 'none';
+        backButton.style.borderRadius = '5px';
+        backButton.style.cursor = 'pointer';
+        backButton.addEventListener('click', () => {
+            this.setupMenuScreen();
+        });
+        instructionsContainer.appendChild(backButton);
+        
+        menuScreen.appendChild(instructionsContainer);
+    }
+    
+    /**
+     * Show credits
+     */
+    showCredits() {
+        // Create credits screen
+        const menuScreen = document.getElementById('menu-screen');
+        menuScreen.innerHTML = '';
+        
+        const creditsContainer = document.createElement('div');
+        creditsContainer.style.display = 'flex';
+        creditsContainer.style.flexDirection = 'column';
+        creditsContainer.style.alignItems = 'center';
+        creditsContainer.style.justifyContent = 'center';
+        creditsContainer.style.width = '80%';
+        creditsContainer.style.height = '80%';
+        creditsContainer.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+        creditsContainer.style.padding = '20px';
+        creditsContainer.style.borderRadius = '10px';
+        
+        // Add title
+        const title = document.createElement('h2');
+        title.textContent = 'Credits';
+        title.style.color = '#ffcc00';
+        title.style.marginBottom = '20px';
+        creditsContainer.appendChild(title);
+        
+        // Add credits text
+        const credits = document.createElement('div');
+        credits.style.color = 'white';
+        credits.style.fontSize = '18px';
+        credits.style.lineHeight = '1.5';
+        credits.style.textAlign = 'center';
+        credits.style.marginBottom = '30px';
+        credits.innerHTML = `
+            <p><strong>Raptor: Call of the Shadows Reimagined</strong></p>
+            <p>A fan project created as a tribute to the original game</p>
+            <p>Original game by Cygnus Studios / Apogee Software (1994)</p>
+            <p>This reimagining created by Manus AI (2025)</p>
+            <p>All assets and code created for educational purposes</p>
+        `;
+        creditsContainer.appendChild(credits);
+        
+        // Add back button
+        const backButton = document.createElement('button');
+        backButton.textContent = 'Back to Menu';
+        backButton.style.padding = '10px 20px';
+        backButton.style.backgroundColor = '#333';
+        backButton.style.color = 'white';
+        backButton.style.border = 'none';
+        backButton.style.borderRadius = '5px';
+        backButton.style.cursor = 'pointer';
+        backButton.addEventListener('click', () => {
+            this.setupMenuScreen();
+        });
+        creditsContainer.appendChild(backButton);
+        
+        menuScreen.appendChild(creditsContainer);
+    }
+    
+    /**
      * Update the menu state
-     * Handles menu navigation and option selection
      * @param {number} deltaTime - Time since last update in milliseconds
      */
-    update(deltaTime) {
-        const now = Date.now();
-        
-        // Handle keyboard navigation with delay to prevent too rapid menu movement
-        if (now - this.lastKeyTime > this.keyDelay) {
-            // Navigate up in menu
-            if (this.game.input.isKeyPressed('ArrowUp') || this.game.input.isKeyPressed('w')) {
-                this.selectedOption = (this.selectedOption - 1 + this.menuOptions.length) % this.menuOptions.length;
-                this.updateMenuSelection();
-                this.lastKeyTime = now;
-            }
-            
-            // Navigate down in menu
-            if (this.game.input.isKeyPressed('ArrowDown') || this.game.input.isKeyPressed('s')) {
-                this.selectedOption = (this.selectedOption + 1) % this.menuOptions.length;
-                this.updateMenuSelection();
-                this.lastKeyTime = now;
-            }
-            
-            // Select current menu option
-            if (this.game.input.isKeyPressed('Enter') || this.game.input.isKeyPressed(' ')) {
-                this.menuOptions[this.selectedOption].action();
-                this.lastKeyTime = now;
-            }
-            
-            // Handle back button for sub-menus
-            if (this.game.input.isKeyPressed('Escape')) {
-                if (this.showingOptions || this.showingCredits) {
-                    this.showingOptions = false;
-                    this.showingCredits = false;
-                }
-                this.lastKeyTime = now;
-            }
-        }
+    // The new update method for menu.js
+update(deltaTime) {
+    // We no longer need the time-based delay check, because wasKeyJustPressed handles it.
+    
+    if (this.game.input.wasKeyJustPressed('ArrowUp') || this.game.input.wasKeyJustPressed('w')) {
+        this.selectedOption = (this.selectedOption - 1 + this.menuOptions.length) % this.menuOptions.length;
+        this.updateMenuSelection();
     }
+        
+    if (this.game.input.wasKeyJustPressed('ArrowDown') || this.game.input.wasKeyJustPressed('s')) {
+        this.selectedOption = (this.selectedOption + 1) % this.menuOptions.length;
+        this.updateMenuSelection();
+    }
+        
+    if (this.game.input.wasKeyJustPressed('Enter') || this.game.input.wasKeyJustPressed(' ')) {
+        this.menuOptions[this.selectedOption].action();
+    }
+}
     
     /**
      * Render the menu state
-     * Draws the appropriate menu screen based on current state
      */
     render() {
-        const ctx = this.game.contexts.ui;
-        
-        // Clear the screen
-        ctx.clearRect(0, 0, this.game.width, this.game.height);
-        
-        // Render appropriate screen based on state
-        if (this.showingOptions) {
-            this.renderOptions(ctx);
-        } else if (this.showingCredits) {
-            this.renderCredits(ctx);
-        } else {
-            this.renderMainMenu(ctx);
-        }
-    }
-    
-    /**
-     * Render the main menu
-     * Draws the main menu with all available options
-     * @param {CanvasRenderingContext2D} ctx - The canvas context
-     */
-    renderMainMenu(ctx) {
-        // Draw game title
-        ctx.fillStyle = '#ffcc00';
-        ctx.font = '48px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText('RAPTOR MANUS', this.game.width / 2, this.game.height / 4);
-        
-        // Draw menu options with appropriate highlighting
-        ctx.font = '24px Arial';
-        this.menuOptions.forEach((option, index) => {
-            // Gray out Load Game option if no save exists
-            if (option.text === 'Load Game' && !this.game.saveManager.hasSaveGame()) {
-                ctx.fillStyle = '#666666';
-            } else {
-                ctx.fillStyle = index === this.selectedOption ? '#ffcc00' : 'white';
-            }
-            ctx.fillText(option.text, this.game.width / 2, this.game.height / 2 + index * 40);
-        });
-        
-        // Draw controls reminder
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
-        ctx.font = '16px Arial';
-        ctx.fillText('Use Arrow Keys or W/S to navigate, Enter to select', this.game.width / 2, this.game.height - 50);
-    }
-    
-    /**
-     * Render the options menu
-     * Draws the options screen with available settings
-     * @param {CanvasRenderingContext2D} ctx - The canvas context
-     */
-    renderOptions(ctx) {
-        // Draw options title
-        ctx.fillStyle = '#ffcc00';
-        ctx.font = '36px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText('Options', this.game.width / 2, this.game.height / 4);
-        
-        // TODO: Add options menu content
-        
-        // Draw back button reminder
-        ctx.fillStyle = 'white';
-        ctx.font = '20px Arial';
-        ctx.fillText('Press ESC to return', this.game.width / 2, this.game.height - 50);
-    }
-    
-    /**
-     * Render the credits screen
-     * Draws the credits screen with game information
-     * @param {CanvasRenderingContext2D} ctx - The canvas context
-     */
-    renderCredits(ctx) {
-        // Draw credits title
-        ctx.fillStyle = '#ffcc00';
-        ctx.font = '36px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText('Credits', this.game.width / 2, this.game.height / 4);
-        
-        // TODO: Add credits content
-        
-        // Draw back button reminder
-        ctx.fillStyle = 'white';
-        ctx.font = '20px Arial';
-        ctx.fillText('Press ESC to return', this.game.width / 2, this.game.height - 50);
-    }
-    
-    /**
-     * Start a new game
-     * Deletes any existing save and initializes a new game
-     */
-    startNewGame() {
-        // Prevent multiple rapid transitions
-        if (this.isTransitioning) return;
-        this.isTransitioning = true;
-        
-        // Delete any existing save game
-        this.game.saveManager.deleteSaveGame();
-        
-        // Change to game state
-        this.game.changeState('game');
-        
-        // Reset transition flag after a short delay
-        setTimeout(() => {
-            this.isTransitioning = false;
-        }, 1000);
-    }
-    
-    /**
-     * Load a saved game
-     * Attempts to load and apply saved game data
-     */
-    loadGame() {
-        // Prevent multiple rapid transitions
-        if (this.isTransitioning) return;
-        this.isTransitioning = true;
-        
-        if (!this.game.saveManager.hasSaveGame()) {
-            this.isTransitioning = false;
-            return;
-        }
-        
-        const saveData = this.game.saveManager.loadGame();
-        if (saveData) {
-            // Change to game state
-            this.game.changeState('game');
-            
-            // Apply save data to restore game state
-            this.game.saveManager.applySaveData(saveData);
-        }
-        
-        // Reset transition flag after a short delay
-        setTimeout(() => {
-            this.isTransitioning = false;
-        }, 1000);
-    }
-    
-    /**
-     * Show the options menu
-     * Sets the menu state to display options
-     */
-    showOptions() {
-        this.showingOptions = true;
-        this.showingCredits = false;
-    }
-    
-    /**
-     * Show the credits screen
-     * Sets the menu state to display credits
-     */
-    showCredits() {
-        this.showingOptions = false;
-        this.showingCredits = true;
+        // Menu is rendered using HTML/CSS in the menu-screen element
     }
     
     /**
@@ -340,4 +278,6 @@ class MenuState {
         this.game.audio.stopMusic();
     }
 }
+
+export { MenuState };
 

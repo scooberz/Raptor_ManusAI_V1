@@ -176,3 +176,5 @@ checkGroupCollision(groupA, groupB, handler) {
     }
 }
 
+export { CollisionSystem };
+

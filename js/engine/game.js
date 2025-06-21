@@ -3,6 +3,21 @@
  * The main engine that runs the entire game, manages the canvas layers,
  * the game loop, and the state machine.
  */
+import { InputHandler } from './input.js';
+import { AssetManager } from './assets.js';
+import { AudioManager } from './audio.js';
+import { CollisionSystem } from './collision.js';
+import { EntityManager } from './entity.js';
+import { SaveManager } from './saveManager.js';
+import { BootState } from '../states/boot.js';
+import { LoadingState } from '../states/loading.js';
+import { MenuState } from '../states/menu.js';
+import { GameState } from '../states/gameState.js';
+import { PauseState } from '../states/pause.js';
+import { GameOverState } from '../states/gameover.js';
+import { HangarState } from '../states/hangar.js';
+import { SupplyState } from '../states/supply.js';
+
 class Game {
     constructor() {
         // Find all the canvas layers from the HTML
@@ -62,7 +77,10 @@ class Game {
         this.currentState = null;
 
         // --- Start the Game ---
-        this.changeState('boot'); // Start with the boot state
+        // Use an immediately invoked async function to handle the async changeState
+        (async () => {
+            await this.changeState('boot'); // Start with the boot state
+        })();
 
         // Start the main game loop
         this.lastTime = 0;
@@ -168,7 +186,7 @@ class Game {
      * Change the current game state
      * @param {string} stateName - The name of the state to switch to
      */
-    changeState(stateName) {
+    async changeState(stateName) {
         if (this.currentState && typeof this.currentState.exit === 'function') {
             this.currentState.exit();
         }
@@ -177,10 +195,16 @@ class Game {
         if (newState) {
             this.currentState = newState;
             if (typeof this.currentState.enter === 'function') {
-                this.currentState.enter();
+                // Handle both sync and async enter methods
+                const result = this.currentState.enter();
+                if (result && typeof result.then === 'function') {
+                    await result;
+                }
             }
         } else {
             console.error(`State "${stateName}" not found!`);
         }
     }
 }
+
+export { Game };

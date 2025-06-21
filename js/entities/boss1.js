@@ -2,6 +2,10 @@
  * Boss1 class
  * The first boss of the game.
  */
+import { Enemy } from './enemy.js';
+import { Projectile } from './projectile.js';
+import { HomingProjectile } from './homingProjectile.js';
+
 class Boss1 extends Enemy {
     constructor(game, x, y) {
         // Define the boss's stats to pass to the parent Enemy constructor.
@@ -37,6 +41,7 @@ class Boss1 extends Enemy {
         this.lastMachineGunShot = 0;
         this.homingMissileCooldown = 7000;
         this.lastHomingMissileLaunch = 0;
+        this.isBoss = true;
     }
 
     // The update method's only job is to run boss-specific logic,
@@ -131,3 +136,5 @@ class Boss1 extends Enemy {
         super.render(context);
     }
 }
+
+export { Boss1 };

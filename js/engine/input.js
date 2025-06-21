@@ -1,61 +1,78 @@
 /**
  * InputHandler class
- * Handles keyboard and mouse input with state tracking
+ * Handles keyboard and mouse input with state tracking for a single frame.
  */
 class InputHandler {
     constructor() {
+        // Keyboard state
         this.keys = {};
-        // NEW: An object to store the key states from the previous frame
-        this.previousKeys = {}; 
-        this.skipWavePressed = false; // Add skip wave debug flag
+        this.previousKeys = {};
 
+        // Mouse state
         this.mousePosition = { x: 0, y: 0 };
         this.mouseButtons = { left: false, middle: false, right: false };
-        
-        // Set up event listeners
-        window.addEventListener('keydown', this.handleKeyDown.bind(this));
-        window.addEventListener('keyup', this.handleKeyUp.bind(this));
-        window.addEventListener('mousemove', this.handleMouseMove.bind(this));
-        window.addEventListener('mousedown', this.handleMouseDown.bind(this));
-        window.addEventListener('mouseup', this.handleMouseUp.bind(this));
-        
-        window.addEventListener('keydown', (e) => {
-            if(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) {
-                e.preventDefault();
-            }
-            if (e.key === '2') {
-                this.skipWavePressed = true;
-            }
-        });
 
-        window.addEventListener('keyup', (e) => {
-            if (e.key === '2') {
-                this.skipWavePressed = false;
-            }
-        });
+        // Debug-specific flags
+        this.skipWavePressed = false;
+
+        // Bind 'this' context once to prevent issues in event listeners
+        this.handleKeyDown = this.handleKeyDown.bind(this);
+        this.handleKeyUp = this.handleKeyUp.bind(this);
+        this.handleMouseMove = this.handleMouseMove.bind(this);
+        this.handleMouseDown = this.handleMouseDown.bind(this);
+        this.handleMouseUp = this.handleMouseUp.bind(this);
+
+        // Set up event listeners
+        window.addEventListener('keydown', this.handleKeyDown);
+        window.addEventListener('keyup', this.handleKeyUp);
+        window.addEventListener('mousemove', this.handleMouseMove);
+        window.addEventListener('mousedown', this.handleMouseDown);
+        window.addEventListener('mouseup', this.handleMouseUp);
     }
 
-    // NEW: The update method, to be called once per game loop
-    // This is how we track the state between frames.
+    // This method MUST be called once per game loop (from game.js)
     update() {
-        // Copy the current key states to the previous key states
+        // Copy the current key states to the previous key states for wasKeyJustPressed logic
         this.previousKeys = { ...this.keys };
     }
-    
+
+    // Replace your existing handleKeyDown method with this one
+
     handleKeyDown(event) {
+        // For debugging, let's see every key press
+        console.log(`Key pressed: ${event.key}`);
+
+        // Set the state for continuous-press keys
         this.keys[event.key] = true;
+
+        // --- Handle single-press debug flags ---
+        if (event.key === '2' || event.key === 'Numpad2') {
+            this.skipWavePressed = true;
+            console.log(`INPUT_HANDLER: skipWavePressed flag SET to: ${this.skipWavePressed}`);
+        }
+
+        // Prevent default browser actions for game keys to stop the window from scrolling
+        if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(event.key)) {
+            event.preventDefault();
+        }
     }
-    
+
     handleKeyUp(event) {
         this.keys[event.key] = false;
+
+        if (event.key === '2' || event.key === 'Numpad2') {
+            this.skipWavePressed = false;
+        }
     }
-    
+
     handleMouseMove(event) {
-        const rect = document.querySelector('#game-container canvas').getBoundingClientRect();
+        const canvas = document.querySelector('#game-container canvas');
+        if (!canvas) return;
+        const rect = canvas.getBoundingClientRect();
         this.mousePosition.x = event.clientX - rect.left;
         this.mousePosition.y = event.clientY - rect.top;
     }
-    
+
     handleMouseDown(event) {
         switch (event.button) {
             case 0: this.mouseButtons.left = true; break;
@@ -63,7 +80,7 @@ class InputHandler {
             case 2: this.mouseButtons.right = true; break;
         }
     }
-    
+
     handleMouseUp(event) {
         switch (event.button) {
             case 0: this.mouseButtons.left = false; break;
@@ -71,32 +88,22 @@ class InputHandler {
             case 2: this.mouseButtons.right = false; break;
         }
     }
-    
+
     isKeyPressed(key) {
         return this.keys[key] === true;
     }
 
-    // NEW: The function we will use for single-press actions like pausing
     wasKeyJustPressed(key) {
-        // A key was "just pressed" if it's down now AND it was not down last frame.
-        return this.keys[key] === true && this.previousKeys[key] !== true;
+        return this.isKeyPressed(key) && !this.previousKeys[key];
     }
-    
+
     isMouseButtonPressed(button) {
         return this.mouseButtons[button] === true;
     }
-    
+
     getMousePosition() {
         return this.mousePosition;
     }
-    
-    anyKeyPressed(keys) {
-        return keys.some(key => this.isKeyPressed(key));
-    }
-    
-    reset() {
-        this.keys = {};
-        this.previousKeys = {};
-        this.mouseButtons = { left: false, middle: false, right: false };
-    }
 }
+
+export { InputHandler };

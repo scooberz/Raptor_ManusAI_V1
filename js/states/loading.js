@@ -246,3 +246,5 @@ class LoadingState {
         ctx.clearRect(0, 0, this.game.width, this.game.height);
     }
 }
+
+export { LoadingState };

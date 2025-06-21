@@ -90,3 +90,5 @@ class BootState {
     }
 }
 
+export { BootState };
+

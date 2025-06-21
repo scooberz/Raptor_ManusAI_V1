@@ -1,7 +1,9 @@
 /**
  * Environment class
- * Represents background and environment elements
+ * Represents environmental objects
  */
+import { Entity } from '../engine/entity.js';
+
 class Environment extends Entity {
     constructor(game, x, y, width, height, type) {
         super(game, x, y, width, height);
@@ -44,4 +46,6 @@ class Environment extends Entity {
         }
     }
 }
+
+export { Environment };
 

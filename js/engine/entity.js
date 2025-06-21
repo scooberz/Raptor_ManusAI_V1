@@ -154,3 +154,5 @@ class EntityManager {
         this.entities = [];
     }
 }
+
+export { Entity, EntityManager };

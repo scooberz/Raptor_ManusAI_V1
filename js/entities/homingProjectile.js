@@ -1,7 +1,10 @@
 /**
  * HomingProjectile class
- * Represents a projectile that homes in on a target
+ * A projectile that homes in on a target
  */
+import { Projectile } from './projectile.js';
+import { Explosion } from './explosion.js';
+
 class HomingProjectile extends Projectile {
     /**
      * Create a new homing projectile
@@ -158,4 +161,6 @@ class HomingProjectile extends Projectile {
         }
     }
 }
+
+export { HomingProjectile };
 

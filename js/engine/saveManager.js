@@ -110,4 +110,6 @@ class SaveManager {
         // Restore game time
         gameState.gameTime = saveData.gameTime;
     }
-} 
+}
+
+export { SaveManager }; 

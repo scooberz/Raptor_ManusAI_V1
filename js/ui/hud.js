@@ -2,6 +2,7 @@
  * HUD class
  * Handles the heads-up display for the game
  */
+import { Boss1 } from '../entities/boss1.js';
 class HUD {
     constructor(game) {
         this.game = game;
@@ -248,4 +249,6 @@ class HUD {
         }
     }
 }
+
+export { HUD };
 

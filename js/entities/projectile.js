@@ -1,7 +1,9 @@
 /**
  * Projectile class
- * Represents projectiles fired by player and enemies
+ * Represents projectiles fired by the player and enemies
  */
+import { Entity } from '../engine/entity.js';
+
 class Projectile extends Entity {
     constructor(game, x, y, width, height, velocityX, velocityY, damage, owner) {
         super(game, x, y, width, height);
@@ -82,3 +84,5 @@ class Projectile extends Entity {
         );
     }
 }
+
+export { Projectile };

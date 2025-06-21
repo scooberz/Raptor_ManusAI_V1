@@ -2,6 +2,11 @@
  * GameState class
  * Handles the main gameplay state
  */
+import { Level1 } from '../levels/level1.js';
+import { Level2 } from '../levels/level2.js';
+import { Player } from '../entities/player.js';
+import { HUD } from '../ui/hud.js';
+
 class GameState {
     constructor(game) {
         this.game = game;
@@ -22,7 +27,7 @@ class GameState {
     /**
      * Enter the game state
      */
-    enter() {
+    async enter() {
         console.log('Entering Game State');
         
         // Prevent multiple rapid transitions
@@ -30,7 +35,7 @@ class GameState {
         this.isInitializing = true;
         
         // Initialize game components
-        this.initializeGame();
+        await this.initializeGame();
         this.isPaused = false;
         
         // Reset initialization flag after a short delay
@@ -42,7 +47,7 @@ class GameState {
     /**
      * Initialize game components
      */
-    initializeGame() {
+    async initializeGame() {
         // Clear all old entities from the collision system to prevent "ghost" collisions.
         this.game.collision.clearAll();
         
@@ -65,7 +70,7 @@ class GameState {
         this.hud = new HUD(this.game);
         
         // Initialize the current level
-        this.initializeLevel();
+        await this.initializeLevel();
         
         // Start level music
         this.game.audio.playMusic('level1Music');
@@ -74,22 +79,21 @@ class GameState {
     /**
      * Initialize the current level
      */
-    initializeLevel() {
+    async initializeLevel() {
         if (this.currentLevel) {
             this.currentLevel.cleanup();
         }
 
         if (this.level === 1) {
-            this.currentLevel = new Level1(this.game);
+            this.currentLevel = await new Level1(this.game).init(); // Use await for async init
         } else if (this.level === 2) {
             this.currentLevel = new Level2(this.game);
+            this.currentLevel.init(); // Level2 still uses sync init for now
         } else {
             // No more levels, game is won
             this.game.changeState('gameover');
             return;
         }
-        
-        this.currentLevel.init();
     }
     
     /**
@@ -221,3 +225,5 @@ class GameState {
         }
     }
 }
+
+export { GameState };

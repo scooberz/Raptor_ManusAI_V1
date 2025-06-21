@@ -1,3 +1,6 @@
+import { Entity } from '../engine/entity.js';
+import { Explosion } from './explosion.js';
+
 class Enemy extends Entity {
     constructor(game, x, y, type, health, scoreValue, collisionDamage) {
         const stats = Enemy.stats[type] || {};
@@ -115,8 +118,10 @@ class Enemy extends Entity {
      * @param {number} deltaTime - The time elapsed since the last frame.
      */
     updateMovement(deltaTime) {
-        // Base movement logic will be applied by the parent Entity's update.
-        // Complex patterns like 'zigzag' or 'sineWave' would be implemented here.
+        // Call the assigned movement behavior function if it exists
+        if (this.movementUpdate) {
+            this.movementUpdate(this, deltaTime);
+        }
     }
 
     /**
@@ -125,7 +130,10 @@ class Enemy extends Entity {
      * @param {number} deltaTime - The time elapsed since the last frame.
      */
     updateFiring(deltaTime) {
-        // Firing logic (checking fireRate, creating projectiles) would be implemented here.
+        // Call the assigned firing behavior function if it exists
+        if (this.firingUpdate) {
+            this.firingUpdate(this, this.game.player, deltaTime);
+        }
     }
 }
 
@@ -205,3 +213,5 @@ Enemy.stats = {
         height: 31
     }
 };
+
+export { Enemy };

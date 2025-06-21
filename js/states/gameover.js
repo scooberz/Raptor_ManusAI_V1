@@ -195,3 +195,5 @@ class GameOverState {
     }
 }
 
+export { GameOverState };
+

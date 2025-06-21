@@ -1,0 +1,336 @@
+{
+    "level": 1,
+    "levelName": "Bravo Sector - Wave 1",
+    "background": "backgroundLevel1",
+    "music": "gameMusic1",
+    "waves": [
+        {
+            "id": 1,
+            "name": "Scout Formation",
+            "duration": 20000,
+            "delay_after_previous_wave_ms": 3000,
+            "enemies": [
+                {
+                    "type": "gnat",
+                    "spawn_x": 100,
+                    "spawn_y": -50,
+                    "delay": 0
+                },
+                {
+                    "type": "gnat",
+                    "spawn_x": 200,
+                    "spawn_y": -50,
+                    "delay": 200
+                },
+                {
+                    "type": "gnat",
+                    "spawn_x": 300,
+                    "spawn_y": -50,
+                    "delay": 400
+                },
+                {
+                    "type": "gnat",
+                    "spawn_x": 400,
+                    "spawn_y": -50,
+                    "delay": 600
+                },
+                {
+                    "type": "gnat",
+                    "spawn_x": 500,
+                    "spawn_y": -50,
+                    "delay": 800
+                },
+                {
+                    "type": "gnat",
+                    "spawn_x": 600,
+                    "spawn_y": -50,
+                    "delay": 1000
+                },
+                {
+                    "type": "gnat",
+                    "spawn_x": 700,
+                    "spawn_y": -50,
+                    "delay": 1200
+                },
+                {
+                    "type": "dart",
+                    "spawn_x": -48,
+                    "spawn_y": 100,
+                    "delay": 3000,
+                    "pattern": "straight",
+                    "patternParams": {
+                        "velocityX": 200,
+                        "velocityY": 0
+                    }
+                },
+                {
+                    "type": "dart",
+                    "spawn_x": 900,
+                    "spawn_y": 200,
+                    "delay": 3200,
+                    "pattern": "straight",
+                    "patternParams": {
+                        "velocityX": -200,
+                        "velocityY": 0
+                    }
+                },
+                {
+                    "type": "striker",
+                    "spawn_x": 200,
+                    "spawn_y": -100,
+                    "delay": 5000
+                },
+                {
+                    "type": "striker",
+                    "spawn_x": 400,
+                    "spawn_y": -120,
+                    "delay": 5200
+                },
+                {
+                    "type": "striker",
+                    "spawn_x": 600,
+                    "spawn_y": -100,
+                    "delay": 5400
+                }
+            ]
+        },
+        {
+            "id": 2,
+            "name": "Assault Wave",
+            "duration": 30000,
+            "delay_after_previous_wave_ms": 3000,
+            "enemies": [
+                {
+                    "type": "cyclone",
+                    "spawn_x": 100,
+                    "spawn_y": -60,
+                    "delay": 0,
+                    "overrides": {
+                        "movementPattern": "sine_wave_slow",
+                        "firingPattern": "single_aimed_shot",
+                        "fireRate": 3000
+                    }
+                },
+                {
+                    "type": "cyclone",
+                    "spawn_x": 700,
+                    "spawn_y": -60,
+                    "delay": 2000,
+                    "overrides": {
+                        "movementPattern": "sine_wave_slow",
+                        "firingPattern": "single_aimed_shot",
+                        "fireRate": 3000
+                    }
+                },
+                {
+                    "type": "reaper",
+                    "spawn_x": 200,
+                    "spawn_y": -80,
+                    "delay": 4000,
+                    "pattern": "zigzag",
+                    "patternParams": {
+                        "speed": 180,
+                        "minX": 100,
+                        "maxX": 700
+                    }
+                },
+                {
+                    "type": "reaper",
+                    "spawn_x": 600,
+                    "spawn_y": -80,
+                    "delay": 6000,
+                    "pattern": "zigzag",
+                    "patternParams": {
+                        "speed": 180,
+                        "minX": 100,
+                        "maxX": 700
+                    }
+                },
+                {
+                    "type": "mine",
+                    "spawn_x": 150,
+                    "spawn_y": -50,
+                    "delay": 8000
+                },
+                {
+                    "type": "mine",
+                    "spawn_x": 300,
+                    "spawn_y": -50,
+                    "delay": 8200
+                },
+                {
+                    "type": "mine",
+                    "spawn_x": 450,
+                    "spawn_y": -50,
+                    "delay": 8400
+                },
+                {
+                    "type": "mine",
+                    "spawn_x": 600,
+                    "spawn_y": -50,
+                    "delay": 8600
+                },
+                {
+                    "type": "cutter",
+                    "spawn_x": 400,
+                    "spawn_y": -100,
+                    "delay": 12000,
+                    "pattern": "sine",
+                    "patternParams": {
+                        "centerX": 400,
+                        "amplitude": 200,
+                        "frequency": 1.5
+                    }
+                }
+            ]
+        },
+        {
+            "id": 3,
+            "name": "Heavy Assault",
+            "duration": 30000,
+            "delay_after_previous_wave_ms": 3000,
+            "enemies": [
+                {
+                    "type": "goliath",
+                    "spawn_x": 400,
+                    "spawn_y": -150,
+                    "delay": 0
+                },
+                {
+                    "type": "striker",
+                    "spawn_x": 200,
+                    "spawn_y": -100,
+                    "delay": 2000
+                },
+                {
+                    "type": "striker",
+                    "spawn_x": 600,
+                    "spawn_y": -100,
+                    "delay": 2200
+                },
+                {
+                    "type": "dart",
+                    "spawn_x": 150,
+                    "spawn_y": -80,
+                    "delay": 4000,
+                    "pattern": "protect"
+                },
+                {
+                    "type": "dart",
+                    "spawn_x": 650,
+                    "spawn_y": -80,
+                    "delay": 4000,
+                    "pattern": "protect"
+                },
+                {
+                    "type": "cyclone",
+                    "spawn_x": 100,
+                    "spawn_y": -120,
+                    "delay": 8000,
+                    "pattern": "sine",
+                    "patternParams": {
+                        "centerX": 100,
+                        "amplitude": 120,
+                        "frequency": 2
+                    }
+                },
+                {
+                    "type": "cyclone",
+                    "spawn_x": 700,
+                    "spawn_y": -120,
+                    "delay": 8200,
+                    "pattern": "sine",
+                    "patternParams": {
+                        "centerX": 700,
+                        "amplitude": 120,
+                        "frequency": 2
+                    }
+                }
+            ]
+        },
+        {
+            "id": 4,
+            "name": "Final Assault",
+            "duration": 30000,
+            "delay_after_previous_wave_ms": 3000,
+            "enemies": [
+                {
+                    "type": "reaper",
+                    "spawn_x": 200,
+                    "spawn_y": -100,
+                    "delay": 0
+                },
+                {
+                    "type": "reaper",
+                    "spawn_x": 600,
+                    "spawn_y": -100,
+                    "delay": 1000
+                },
+                {
+                    "type": "cutter",
+                    "spawn_x": 400,
+                    "spawn_y": -150,
+                    "delay": 2000
+                },
+                {
+                    "type": "dart",
+                    "spawn_x": 100,
+                    "spawn_y": -80,
+                    "delay": 4000
+                },
+                {
+                    "type": "dart",
+                    "spawn_x": 300,
+                    "spawn_y": -80,
+                    "delay": 4200
+                },
+                {
+                    "type": "dart",
+                    "spawn_x": 500,
+                    "spawn_y": -80,
+                    "delay": 4400
+                },
+                {
+                    "type": "dart",
+                    "spawn_x": 700,
+                    "spawn_y": -80,
+                    "delay": 4600
+                },
+                {
+                    "type": "mine",
+                    "spawn_x": 150,
+                    "spawn_y": -50,
+                    "delay": 6000
+                },
+                {
+                    "type": "mine",
+                    "spawn_x": 450,
+                    "spawn_y": -50,
+                    "delay": 6200
+                },
+                {
+                    "type": "mine",
+                    "spawn_x": 750,
+                    "spawn_y": -50,
+                    "delay": 6400
+                }
+            ]
+        },
+        {
+            "id": 5,
+            "name": "Boss Wave",
+            "duration": 30000,
+            "delay_after_previous_wave_ms": 3000,
+            "enemies": [
+                {
+                    "type": "boss1",
+                    "spawn_x": 272,
+                    "spawn_y": -150,
+                    "delay": 2000,
+                    "health": 750,
+                    "scoreValue": 5000
+                }
+            ]
+        }
+    ]
+} 

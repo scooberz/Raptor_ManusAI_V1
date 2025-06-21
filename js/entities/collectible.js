@@ -2,6 +2,8 @@
  * Collectible class
  * Represents collectible items like power-ups and pickups
  */
+import { Entity } from '../engine/entity.js';
+
 class Collectible extends Entity {
     constructor(game, x, y, width, height, type, value) {
         super(game, x, y, width, height);
@@ -204,4 +206,6 @@ class Collectible extends Entity {
         this.game.audio.playSound('pickup');
     }
 }
+
+export { Collectible };
 

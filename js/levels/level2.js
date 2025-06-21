@@ -2,6 +2,13 @@
  * Level2 class
  * Implements the second level of the game with more advanced enemy patterns
  */
+import { EnemyFactory } from '../entities/enemyFactory.js';
+import { Projectile } from '../entities/projectile.js';
+import { HomingProjectile } from '../entities/homingProjectile.js';
+import { ScrollingBackground } from '../environment/scrolling-background.js';
+import { Collectible } from '../entities/collectible.js';
+import { Enemy } from '../entities/enemy.js';
+
 class Level2 {
     constructor(game) {
         this.game = game;
@@ -184,6 +191,12 @@ class Level2 {
      * @param {number} deltaTime - Time since last update in milliseconds
      */
     update(deltaTime) {
+        // Check for wave-skipper debug feature
+        if (this.game.input.skipWavePressed) {
+            this.forceNextWave();
+            this.game.input.skipWavePressed = false; // Reset the flag
+        }
+
         // Update level time
         this.levelTime += deltaTime;
         
@@ -377,12 +390,13 @@ class Level2 {
                 break;
                 
             default:
-                enemy = this.enemyFactory.createEnemy(enemyData.type, enemyData.x, enemyData.y);
+                // Use the new factory signature with the entire enemyData object
+                enemy = this.enemyFactory.createEnemy(enemyData);
                 break;
         }
         
-        // Apply movement pattern if specified
-        if (enemy && enemyData.pattern) {
+        // Apply movement pattern if specified (legacy support)
+        if (enemy && enemyData.pattern && !enemyData.overrides?.movementPattern) {
             this.applyMovementPattern(enemy, enemyData.pattern);
         }
         
@@ -903,6 +917,29 @@ class Level2 {
     }
     
     /**
+     * Force advance to the next wave (debug feature)
+     */
+    forceNextWave() {
+        console.log("DEBUG: Forcing next wave.");
+        
+        // Clear out any remaining enemies from the current wave
+        const enemies = this.game.collision.collisionGroups.enemies;
+        enemies.forEach(enemy => {
+            if (enemy.active) {
+                enemy.destroy();
+            }
+        });
+        
+        if (this.waveIndex < this.levelData.waves.length - 1) {
+            this.waveIndex++;
+            this.waveStartTime = this.levelTime;
+            console.log(`DEBUG: Advanced to wave index ${this.waveIndex + 1}: ${this.levelData.waves[this.waveIndex].name}`);
+        } else {
+            console.log("DEBUG: Already on the last wave.");
+        }
+    }
+    
+    /**
      * Check if the level is complete
      */
     checkLevelCompletion() {
@@ -944,4 +981,6 @@ class Level2 {
         this.game.audio.stopMusic();
     }
 }
+
+export { Level2 };
 

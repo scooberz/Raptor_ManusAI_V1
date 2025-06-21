@@ -2,6 +2,8 @@
  * Explosion class
  * Represents explosion effects
  */
+import { Entity } from '../engine/entity.js';
+
 class Explosion extends Entity {
     constructor(game, x, y, width, height) {
         super(game, x, y, width, height);
@@ -78,4 +80,6 @@ class Explosion extends Entity {
         }
     }
 }
+
+export { Explosion };
 

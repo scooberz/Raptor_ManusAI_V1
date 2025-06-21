@@ -92,5 +92,11 @@ class HangarState {
             context.fillText(option, this.game.width / 2, menuY + index * menuSpacing);
         });
     }
+
+    exit() {
+        console.log('Exiting Hangar State');
+    }
 }
+
+export { HangarState };
 

@@ -183,5 +183,11 @@ class PauseState {
         // Change to menu state
         this.game.changeState('menu');
     }
+
+    exit() {
+        console.log('Exiting Pause State');
+    }
 }
+
+export { PauseState };
 

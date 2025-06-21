@@ -41,3 +41,5 @@ class SupplyState {
     }
 }
 
+export { SupplyState };
+

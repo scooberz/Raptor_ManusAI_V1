@@ -2,6 +2,7 @@
  * Raptor: Call of the Shadows Reimagined
  * Main entry point for the game
  */
+import { Game } from './engine/game.js';
 
 window.addEventListener('load', () => {
     // Create and start the game
