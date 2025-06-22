@@ -116,9 +116,15 @@ class LoadingState {
                 // Projectile assets
                 'playerBullet': 'assets/images/projectiles/enemy_bullet.png',
                 'enemyBullet': 'assets/images/projectiles/enemy_bullet.png',
+                'missile': 'assets/images/projectiles/MISSILE.png',
                 
                 // Environment assets (only first level)
                 'backgroundLevel1': 'assets/images/environment/background_level2.png',
+                
+                // Destructible environment assets
+                'fuelTank': 'assets/images/environment/FUEL_TANK.png',
+                'bunker': 'assets/images/environment/BUNKER.png',
+                'radarDish': 'assets/images/environment/RADAR_DISH.png',
                 
                 // UI assets (only essential)
                 'healthBar': 'assets/images/ui/health_bar.png',

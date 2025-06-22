@@ -4,6 +4,7 @@
  */
 import { Enemy } from './enemy.js';
 import { Boss1 } from './boss1.js';
+import { DestructibleObject } from './destructibleObject.js';
 import { movementPatterns, firingPatterns } from './enemyBehaviors.js';
 
 class EnemyFactory {
@@ -116,6 +117,21 @@ class EnemyFactory {
                     this.dy *= 0.98;
                 };
 
+                break;
+
+            case 'FUEL_TANK':
+                enemy = new DestructibleObject(this.game, spawn_x, spawn_y, 'FUEL_TANK');
+                enemy.sprite = this.game.assets.getImage('fuelTank');
+                break;
+
+            case 'BUNKER':
+                enemy = new DestructibleObject(this.game, spawn_x, spawn_y, 'BUNKER');
+                enemy.sprite = this.game.assets.getImage('bunker');
+                break;
+
+            case 'RADAR_DISH':
+                enemy = new DestructibleObject(this.game, spawn_x, spawn_y, 'RADAR_DISH');
+                enemy.sprite = this.game.assets.getImage('radarDish');
                 break;
 
             default:

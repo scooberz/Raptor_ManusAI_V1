@@ -3,6 +3,7 @@
  * Contains reusable movement and firing pattern functions for enemies
  */
 import { Projectile } from './projectile.js';
+import { Missile } from './missile.js';
 
 export const movementPatterns = {
     // Enemy just moves based on its default velocity (usually straight down)
@@ -135,6 +136,22 @@ export const firingPatterns = {
             enemy.game.entityManager.add(new Projectile(enemy.game, enemy.x, enemy.y, 8, 16, rightVelocityX, rightVelocityY, 10, 'enemy'));
             
             enemy.fireTimer = enemy.fireRate || 4000; // Reset timer
+        }
+    },
+
+    // Fires a missile straight down with constant high speed
+    fire_straight_missile: function(enemy, player, deltaTime) {
+        if (enemy.fireTimer === undefined) {
+            enemy.fireTimer = enemy.fireRate || 5000;
+        }
+        enemy.fireTimer -= deltaTime;
+
+        if (enemy.fireTimer <= 0) {
+            const missileDamage = 40;
+            // Enemy missiles get a high, constant velocity and do not accelerate.
+            const missileVelocity = { x: 0, y: 300 }; 
+            enemy.game.entityManager.add(new Missile(enemy.game, enemy.x, enemy.y, missileDamage, 'enemy', missileVelocity));
+            enemy.fireTimer = enemy.fireRate || 5000;
         }
     }
 }; 

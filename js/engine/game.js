@@ -23,6 +23,7 @@ class Game {
         // Find all the canvas layers from the HTML
         this.layers = {
             background: document.getElementById('background-layer'),
+            environment: document.getElementById('environment-layer'), // NEW: Added environment layer
             enemy: document.getElementById('enemy-layer'),
             projectile: document.getElementById('projectile-layer'),
             player: document.getElementById('player-layer'),
@@ -35,24 +36,15 @@ class Game {
         for (const key in this.layers) {
             const canvas = this.layers[key];
             const ctx = canvas.getContext('2d', { alpha: true });
-            
-            // Enable transparency
             ctx.globalCompositeOperation = 'source-over';
             ctx.imageSmoothingEnabled = true;
-            
-            // Clear the canvas with transparency
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
             this.contexts[key] = ctx;
         }
 
-        // Set initial game dimensions
         this.resize();
-
-        // Handle window resize
         window.addEventListener('resize', () => this.resize());
 
-        // Initialize persistent player data
         this.playerData = { score: 0, money: 0 };
 
         // --- Core Engine Components ---
@@ -76,116 +68,76 @@ class Game {
         };
         this.currentState = null;
 
-        // --- Start the Game ---
-        // Use an immediately invoked async function to handle the async changeState
-        (async () => {
-            await this.changeState('boot'); // Start with the boot state
-        })();
-
-        // Start the main game loop
+        // --- UPGRADE: Game Loop Properties for Fixed Timestep ---
         this.lastTime = 0;
         this.accumulator = 0;
-        this.timeStep = 1000 / 60; // 60 FPS
+        this.timeStep = 1000 / 60; // 60 updates per second
+
+        // --- Start the Game ---
+        (async () => {
+            await this.changeState('boot');
+        })();
+
         this.gameLoop = this.gameLoop.bind(this);
         requestAnimationFrame(this.gameLoop);
     }
 
-    /**
-     * Resize all canvas layers to match window size
-     */
     resize() {
-        // Get the window dimensions
-        const windowWidth = window.innerWidth;
-        const windowHeight = window.innerHeight;
-        
-        // Set a minimum game size
-        const minWidth = 800;
-        const minHeight = 600;
-        
-        // Calculate the game dimensions while maintaining aspect ratio
-        const targetAspectRatio = 16 / 9; // Standard widescreen aspect ratio
-        let gameWidth, gameHeight;
-        
-        // Calculate dimensions based on window size
-        if (windowWidth / windowHeight > targetAspectRatio) {
-            // Window is wider than target aspect ratio
-            gameHeight = Math.max(minHeight, windowHeight);
-            gameWidth = gameHeight * targetAspectRatio;
-        } else {
-            // Window is taller than target aspect ratio
-            gameWidth = Math.max(minWidth, windowWidth);
-            gameHeight = gameWidth / targetAspectRatio;
-        }
-        
-        // Update game dimensions
-        this.width = gameWidth;
-        this.height = gameHeight;
-        
-        // Calculate scale factor for pixel-perfect rendering
-        const scaleX = windowWidth / gameWidth;
-        const scaleY = windowHeight / gameHeight;
-        const scale = Math.min(scaleX, scaleY);
+        // Set game dimensions
+        this.width = window.innerWidth;
+        this.height = window.innerHeight;
         
         // Resize all canvas layers
         for (const key in this.layers) {
             const canvas = this.layers[key];
-            
-            // Set the canvas size to the game dimensions
-            canvas.width = gameWidth;
-            canvas.height = gameHeight;
-            
-            // Scale the canvas to fit the window while maintaining aspect ratio
-            const scaledWidth = gameWidth * scale;
-            const scaledHeight = gameHeight * scale;
-            
-            // Center the canvas in the window
-            canvas.style.width = `${scaledWidth}px`;
-            canvas.style.height = `${scaledHeight}px`;
-            canvas.style.position = 'absolute';
-            canvas.style.left = `${(windowWidth - scaledWidth) / 2}px`;
-            canvas.style.top = `${(windowHeight - scaledHeight) / 2}px`;
-            
-            // Enable pixel-perfect rendering
-            const ctx = this.contexts[key];
-            ctx.imageSmoothingEnabled = false;
+            if (canvas) {
+                canvas.width = this.width;
+                canvas.height = this.height;
+                
+                // Update the context after resize
+                const ctx = this.contexts[key];
+                if (ctx) {
+                    ctx.globalCompositeOperation = 'source-over';
+                    ctx.imageSmoothingEnabled = true;
+                }
+            }
         }
         
-        // Notify current state of resize if it has a resize handler
-        if (this.currentState && typeof this.currentState.resize === 'function') {
-            this.currentState.resize();
-        }
+        console.log(`Game resized to ${this.width}x${this.height}`);
     }
 
-    /**
-     * The main game loop, called for every frame
-     * @param {number} timestamp - The current time provided by the browser
-     */
+    // --- UPGRADE: Game Loop now uses a Fixed Timestep for stable physics ---
     gameLoop(timestamp) {
         const deltaTime = timestamp - this.lastTime;
         this.lastTime = timestamp;
+        this.accumulator += deltaTime;
 
-        if (this.currentState) {
-            // Clear all canvas layers using their contexts
-            for (const key in this.contexts) {
-                this.contexts[key].clearRect(0, 0, this.width, this.height);
+        // Update the game logic in fixed steps. This prevents physics from changing
+        // based on the frame rate, which is more stable.
+        while (this.accumulator >= this.timeStep) {
+            if (this.currentState) {
+                this.currentState.update(this.timeStep);
             }
-
-            // 1. Update game logic based on the current state
-            this.currentState.update(deltaTime);
-
-            // 2. Render game objects, passing the contexts object
-            this.currentState.render(this.contexts);
-            this.input.update();
+            this.input.update(); // Input should also update on the fixed step
+            this.accumulator -= this.timeStep;
         }
 
-        // Request the next frame to continue the loop
+        // Render as fast as possible, independent of the logic update rate.
+        if (this.currentState && this.width && this.height) {
+            // Clear all canvas layers
+            for (const key in this.contexts) {
+                const ctx = this.contexts[key];
+                if (ctx) {
+                    ctx.clearRect(0, 0, this.width, this.height);
+                }
+            }
+            this.currentState.render(this.contexts);
+        }
+
         requestAnimationFrame(this.gameLoop);
     }
-
-    /**
-     * Change the current game state
-     * @param {string} stateName - The name of the state to switch to
-     */
+    
+    // --- This is our current, correct, async-aware changeState method ---
     async changeState(stateName) {
         if (this.currentState && typeof this.currentState.exit === 'function') {
             this.currentState.exit();
@@ -195,8 +147,8 @@ class Game {
         if (newState) {
             this.currentState = newState;
             if (typeof this.currentState.enter === 'function') {
-                // Handle both sync and async enter methods
                 const result = this.currentState.enter();
+                // This correctly handles states with an async enter() method
                 if (result && typeof result.then === 'function') {
                     await result;
                 }

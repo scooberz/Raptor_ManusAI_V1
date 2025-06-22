@@ -9,6 +9,7 @@
 <body>
     <div id="game-container">
         <canvas id="background-layer" class="game-layer"></canvas>
+        <canvas id="environment-layer" class="game-layer"></canvas>
         <canvas id="enemy-layer" class="game-layer"></canvas>
         <canvas id="projectile-layer" class="game-layer"></canvas>
         <canvas id="player-layer" class="game-layer"></canvas>
@@ -37,11 +38,14 @@
     <script type="module" src="js/entities/player.js"></script>
     <script type="module" src="js/entities/enemy.js"></script>
     <script type="module" src="js/entities/enemyFactory.js"></script>
+    <script type="module" src="js/entities/environmentFactory.js"></script>
     <script type="module" src="js/entities/projectile.js"></script>
+    <script type="module" src="js/entities/missile.js"></script>
     <script type="module" src="js/entities/homingProjectile.js"></script>
     <script type="module" src="js/entities/collectible.js"></script>
     <script type="module" src="js/entities/explosion.js"></script>
     <script type="module" src="js/entities/environment.js"></script>
+    <script type="module" src="js/entities/destructibleObject.js"></script>
     <script type="module" src="js/entities/boss1.js"></script>
     
     <!-- UI -->
@@ -61,6 +65,9 @@
     <script type="module" src="js/states/gameover.js"></script>
     <script type="module" src="js/states/hangar.js"></script>
     <script type="module" src="js/states/supply.js"></script>
+    
+    <!-- Data -->
+    <script type="module" src="assets/data/environmentData.js"></script>
     
     <!-- Main -->
     <script type="module" src="js/main.js"></script>

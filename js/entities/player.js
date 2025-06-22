@@ -5,10 +5,11 @@
 import { Entity } from '../engine/entity.js';
 import { Explosion } from './explosion.js';
 import { Projectile } from './projectile.js';
+import { Missile } from './missile.js';
 
 class Player extends Entity {
-    constructor(game) {
-        super(game, game.width / 2 - 32, game.height - 80, 64, 64);
+    constructor(game, x, y) {
+        super(game, x, y, 64, 64);
         this.layer = 'player'; // Define the rendering layer
         
         // Player stats
@@ -22,19 +23,12 @@ class Player extends Entity {
         this.collisionDamage = 20;
         
         // Weapon system
+        this.weaponOrder = ['MISSILE']; // Only missiles in the cycle
+        this.currentWeaponIndex = 0;
+        this.currentWeapon = this.weaponOrder[this.currentWeaponIndex];
         this.weapons = {
-            primary: {
-                type: 'machineGun',
-                level: 1,
-                cooldown: 50, // Much faster firing rate
-                lastFired: 0
-            },
-            special: {
-                type: null,
-                count: 0,
-                cooldown: 500,
-                lastFired: 0
-            }
+            'CANNON': { name: 'Autocannon', fireRate: 100, lastFired: 0, level: 1 }, // Slower fire rate
+            'MISSILE': { name: 'Missiles', fireRate: 600, lastFired: 0 }
         };
         
         // Special weapons
@@ -63,6 +57,9 @@ class Player extends Entity {
         this.invulnerabilityDuration = 1000; // 1 second
         this.blinkInterval = 100;
         this.visible = true;
+        
+        // Missile auto-fire toggle
+        this.missileAutoFire = false;
     }
     
     /**
@@ -166,25 +163,28 @@ class Player extends Entity {
     handleWeapons() {
         const now = Date.now();
         
-        // Primary weapon - machine gun (now using left mouse button)
-        if (this.game.input.isMouseButtonPressed('left')) {
-            if (now - this.weapons.primary.lastFired > this.weapons.primary.cooldown) {
-                this.weapons.primary.lastFired = now;
-                this.firePrimary();
+        // Primary weapon firing (machine gun) - left mouse button
+        if (this.game.input.isMouseButtonPressed('left')) { // Left mouse button
+            const cannon = this.weapons['CANNON'];
+            if (now - cannon.lastFired >= cannon.fireRate) {
+                this.fireCannon();
+                cannon.lastFired = now;
+            }
+            
+            // Auto-fire missiles while holding left mouse button (only if enabled)
+            if (this.missileAutoFire) {
+                const missile = this.weapons['MISSILE'];
+                if (now - missile.lastFired >= missile.fireRate) {
+                    this.fireMissile();
+                    missile.lastFired = now;
+                }
             }
         }
         
-        // Special weapon selection
-        if (this.game.input.isKeyPressed('Alt')) {
-            this.cycleSpecialWeapon();
-        }
-        
-        // Special weapon firing
-        if (this.game.input.isKeyPressed('Shift')) {
-            if (this.weapons.special.type && now - this.weapons.special.lastFired > this.weapons.special.cooldown) {
-                this.weapons.special.lastFired = now;
-                this.fireSpecial();
-            }
+        // Right mouse button toggles missile auto-fire mode
+        if (this.game.input.wasMouseButtonJustPressed('right')) { // Right mouse button
+            this.missileAutoFire = !this.missileAutoFire;
+            console.log(`Missile auto-fire mode: ${this.missileAutoFire ? 'ON' : 'OFF'}`);
         }
         
         // Megabomb
@@ -257,64 +257,57 @@ class Player extends Entity {
     }
     
     /**
-     * Fire the primary weapon
+     * Fire the primary weapon (machine gun)
      */
-    firePrimary() {
-        switch (this.weapons.primary.type) {
-            case 'machineGun':
-                this.createMachineGunProjectile();
-                break;
-            // Add more weapon types as needed
-        }
+    fireCannon() {
+        // Fire two bullets side by side for double machine gun effect
+        const bulletSpacing = 8; // Space between bullets
         
-        // Play sound effect
-        this.game.audio.playSound('playerShoot');
-    }
-    
-    /**
-     * Create a machine gun projectile
-     */
-    createMachineGunProjectile() {
-        const numBullets = 2; // Two streams
-        const spreadWidth = 15; // Narrower spread
-        const bulletWidth = 4;
-        const bulletHeight = 8;
-        const bulletSpeed = -600; // Slower velocity
+        // Left bullet
+        const leftProjectile = new Projectile(
+            this.game,
+            this.x + this.width / 2 - bulletSpacing,
+            this.y,
+            4, // width
+            8, // height
+            0, // velocityX
+            -500, // velocityY - 500 pixels per second
+            1, // damage
+            'player' // owner
+        );
+        this.game.entityManager.add(leftProjectile);
+        this.game.collision.addToGroup(leftProjectile, 'playerProjectiles');
         
-        for (let i = 0; i < numBullets; i++) {
-            const spreadOffset = (i - (numBullets - 1) / 2) * (spreadWidth / (numBullets - 1));
-            
-            const projectile = new Projectile(
-                this.game,
-                this.x + this.width / 2 - bulletWidth / 2 + spreadOffset,
-                this.y,
-                bulletWidth,
-                bulletHeight,
-                0,
-                bulletSpeed,
-                5 * this.weapons.primary.level,
-                'player'
-            );
-            
-            this.game.entityManager.add(projectile);
-            this.game.collision.addToGroup(projectile, 'playerProjectiles');
-        }
+        // Right bullet
+        const rightProjectile = new Projectile(
+            this.game,
+            this.x + this.width / 2 + bulletSpacing,
+            this.y,
+            4, // width
+            8, // height
+            0, // velocityX
+            -500, // velocityY - 500 pixels per second
+            1, // damage
+            'player' // owner
+        );
+        this.game.entityManager.add(rightProjectile);
+        this.game.collision.addToGroup(rightProjectile, 'playerProjectiles');
     }
-    
+
     /**
-     * Cycle through special weapons
+     * Fire the secondary weapon (missiles)
      */
-    cycleSpecialWeapon() {
-        // Implement special weapon cycling logic
-        // This would be called when the Alt key is pressed
-    }
-    
-    /**
-     * Fire the special weapon
-     */
-    fireSpecial() {
-        // Implement special weapon firing logic
-        // This would be called when the Shift key is pressed
+    fireMissile() {
+        const missile = new Missile(
+            this.game,
+            this.x + this.width / 2,
+            this.y,
+            8, // damage
+            'player', // owner
+            {x: 0, y: -6} // initialVelocity
+        );
+        this.game.entityManager.add(missile);
+        this.game.collision.addToGroup(missile, 'playerProjectiles');
     }
     
     /**
@@ -450,11 +443,12 @@ class Player extends Entity {
      * Upgrade primary weapon
      */
     upgradePrimaryWeapon() {
-        if (this.weapons.primary.level < 5) {
-            this.weapons.primary.level++;
+        const weapon = this.weapons['CANNON'];
+        if (weapon && weapon.level < 5) {
+            weapon.level++;
             
-            // Adjust cooldown based on level
-            this.weapons.primary.cooldown = Math.max(50, 200 - (this.weapons.primary.level - 1) * 30);
+            // Adjust fireRate based on level
+            weapon.fireRate = Math.max(100, 150 - (weapon.level - 1) * 25);
         }
     }
 }

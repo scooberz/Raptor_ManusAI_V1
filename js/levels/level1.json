@@ -104,6 +104,20 @@
                         "fireRate": 3000
                     }
                 }
+            ],
+            "environment_objects": [
+                {
+                    "type": "FUEL_TANK",
+                    "x": 150,
+                    "y": 500,
+                    "delay": 0
+                },
+                {
+                    "type": "RADAR_DISH",
+                    "x": 450,
+                    "y": 400,
+                    "delay": 0
+                }
             ]
         },
         {
@@ -193,6 +207,14 @@
                         "amplitude": 200,
                         "frequency": 1.5
                     }
+                }
+            ],
+            "environment_objects": [
+                {
+                    "type": "BUNKER",
+                    "x": 300,
+                    "y": 500,
+                    "delay": 0
                 }
             ]
         },
@@ -286,7 +308,11 @@
                     "type": "reaper",
                     "spawn_x": 200,
                     "spawn_y": -100,
-                    "delay": 0
+                    "delay": 0,
+                    "overrides": {
+                        "firingPattern": "fire_straight_missile",
+                        "fireRate": 4000
+                    }
                 },
                 {
                     "type": "reaper",

@@ -1,6 +1,7 @@
 /**
  * HUD class
  * Handles the heads-up display for the game
+ * Updated to remove duplicate weapon displays
  */
 import { Boss1 } from '../entities/boss1.js';
 class HUD {
@@ -23,13 +24,8 @@ class HUD {
      * @param {CanvasRenderingContext2D} context - The canvas context to render to
      */
     render(context) {
-        // Make sure we have a player reference
-        if (!this.game.player) return;
-        
-        // Load assets if needed
-        if (!this.healthBar) {
-            this.loadAssets();
-        }
+        // Load assets if not already loaded
+        this.loadAssets();
         
         // Render health bar
         this.renderHealthBar(context);
@@ -40,14 +36,11 @@ class HUD {
         // Render score and money
         this.renderStats(context);
         
-        // Render weapon info
-        this.renderWeaponInfo(context);
-        
-        // Render megabombs
+        // Render megabomb count
         this.renderMegabombs(context);
-
-        // Render boss health bar if boss is present
-        this.renderBossHealthBar(context);
+        
+        // Render missile UI
+        this.renderMissileUI(context);
     }
     
     /**
@@ -56,40 +49,25 @@ class HUD {
      */
     renderHealthBar(context) {
         const player = this.game.player;
-        const barWidth = 200;
-        const barHeight = 20;
-        const barX = 20;
-        const barY = 20;
-        const healthPercent = player.health / player.maxHealth;
+        const healthBarWidth = 200;
+        const healthBarHeight = 20;
+        const healthBarX = 10; // Top left
+        const healthBarY = 10;
         
-        if (this.healthBar) {
-            // Draw health bar background
-            context.drawImage(this.healthBar, barX, barY, barWidth, barHeight);
-            
-            // Draw health fill
-            context.fillStyle = this.getHealthColor(healthPercent);
-            context.fillRect(barX + 10, barY + 5, (barWidth - 20) * healthPercent, barHeight - 10);
-        } else {
-            // Fallback rendering if image not loaded
-            // Background
-            context.fillStyle = '#333';
-            context.fillRect(barX, barY, barWidth, barHeight);
-            
-            // Health
-            context.fillStyle = this.getHealthColor(healthPercent);
-            context.fillRect(barX, barY, barWidth * healthPercent, barHeight);
-            
-            // Border
-            context.strokeStyle = 'white';
-            context.lineWidth = 2;
-            context.strokeRect(barX, barY, barWidth, barHeight);
-        }
+        // Health bar background
+        context.fillStyle = '#333';
+        context.fillRect(healthBarX, healthBarY, healthBarWidth, healthBarHeight);
+        
+        // Health bar fill
+        const healthPercentage = player.health / player.maxHealth;
+        context.fillStyle = healthPercentage > 0.5 ? '#0f0' : healthPercentage > 0.25 ? '#ff0' : '#f00';
+        context.fillRect(healthBarX, healthBarY, healthBarWidth * healthPercentage, healthBarHeight);
         
         // Health text
-        context.fillStyle = 'white';
+        context.fillStyle = '#fff';
         context.font = '14px Arial';
-        context.textAlign = 'left';
-        context.fillText(`Health: ${Math.floor(player.health)}/${player.maxHealth}`, barX + 10, barY + barHeight + 15);
+        context.textAlign = 'center';
+        context.fillText(`Health: ${player.health}/${player.maxHealth}`, healthBarX + healthBarWidth / 2, healthBarY + 15);
     }
     
     /**
@@ -98,40 +76,25 @@ class HUD {
      */
     renderShieldBar(context) {
         const player = this.game.player;
-        const barWidth = 200;
-        const barHeight = 20;
-        const barX = 20;
-        const barY = 60;
-        const shieldPercent = player.shield / player.maxShield;
+        const shieldBarWidth = 200;
+        const shieldBarHeight = 20;
+        const shieldBarX = 10; // Top left
+        const shieldBarY = 40; // Below health bar
         
-        if (this.shieldBar) {
-            // Draw shield bar background
-            context.drawImage(this.shieldBar, barX, barY, barWidth, barHeight);
-            
-            // Draw shield fill
-            context.fillStyle = 'rgba(0, 100, 255, 0.8)';
-            context.fillRect(barX + 10, barY + 5, (barWidth - 20) * shieldPercent, barHeight - 10);
-        } else {
-            // Fallback rendering if image not loaded
-            // Background
-            context.fillStyle = '#333';
-            context.fillRect(barX, barY, barWidth, barHeight);
-            
-            // Shield
-            context.fillStyle = 'rgba(0, 100, 255, 0.8)';
-            context.fillRect(barX, barY, barWidth * shieldPercent, barHeight);
-            
-            // Border
-            context.strokeStyle = 'white';
-            context.lineWidth = 2;
-            context.strokeRect(barX, barY, barWidth, barHeight);
-        }
+        // Shield bar background
+        context.fillStyle = '#333';
+        context.fillRect(shieldBarX, shieldBarY, shieldBarWidth, shieldBarHeight);
+        
+        // Shield bar fill
+        const shieldPercentage = player.shield / player.maxShield;
+        context.fillStyle = '#00f';
+        context.fillRect(shieldBarX, shieldBarY, shieldBarWidth * shieldPercentage, shieldBarHeight);
         
         // Shield text
-        context.fillStyle = 'white';
+        context.fillStyle = '#fff';
         context.font = '14px Arial';
-        context.textAlign = 'left';
-        context.fillText(`Shield: ${Math.floor(player.shield)}/${player.maxShield}`, barX + 10, barY + barHeight + 15);
+        context.textAlign = 'center';
+        context.fillText(`Shield: ${player.shield}/${player.maxShield}`, shieldBarX + shieldBarWidth / 2, shieldBarY + 15);
     }
     
     /**
@@ -141,35 +104,15 @@ class HUD {
     renderStats(context) {
         const player = this.game.player;
         
-        // Score
-        context.fillStyle = 'white';
-        context.font = '18px Arial';
+        // Score and Money - top right
+        context.fillStyle = '#fff';
+        context.font = '20px Arial';
         context.textAlign = 'right';
-        context.fillText(`Score: ${player.score}`, this.game.width - 20, 30);
+        context.fillText(`Score: ${this.game.score || 0}`, this.game.width - 10, 25);
         
-        // Money
+        // Money - top right below score
         context.fillStyle = '#ffcc00';
-        context.fillText(`$${player.money}`, this.game.width - 20, 60);
-    }
-    
-    /**
-     * Render weapon information
-     * @param {CanvasRenderingContext2D} context - The canvas context to render to
-     */
-    renderWeaponInfo(context) {
-        const player = this.game.player;
-        const x = 20;
-        const y = this.game.height - 60;
-        
-        // Primary weapon
-        context.fillStyle = 'white';
-        context.font = '16px Arial';
-        context.textAlign = 'left';
-        context.fillText(`Primary: ${this.getWeaponName(player.weapons.primary.type)} Lv.${player.weapons.primary.level}`, x, y);
-        
-        // Special weapon
-        const specialWeapon = player.weapons.special.type ? this.getWeaponName(player.weapons.special.type) : 'None';
-        context.fillText(`Special: ${specialWeapon}`, x, y + 25);
+        context.fillText(`$${player.money || 0}`, this.game.width - 10, 50);
     }
     
     /**
@@ -242,11 +185,37 @@ class HUD {
     getWeaponName(type) {
         switch (type) {
             case 'machineGun': return 'Machine Gun';
-            case 'laser': return 'Laser';
             case 'missile': return 'Missile';
+            case 'CANNON': return 'Cannon';
+            case 'MISSILE': return 'Missile';
+            case 'laser': return 'Laser';
             case 'plasma': return 'Plasma Cannon';
             default: return type;
         }
+    }
+    
+    /**
+     * Render missile UI
+     * @param {CanvasRenderingContext2D} context - The canvas context to render to
+     */
+    renderMissileUI(context) {
+        if (!this.game.player) return;
+        
+        const player = this.game.player;
+        
+        // Missile status - bottom left
+        context.fillStyle = '#fff';
+        context.font = '14px Arial';
+        context.textAlign = 'left';
+        
+        // Show auto-fire mode status
+        const isAutoFire = player.missileAutoFire || false;
+        context.fillText(`Missiles: ${isAutoFire ? 'ON' : 'OFF'}`, 10, this.game.height - 30);
+        
+        // Controls hint
+        context.fillStyle = '#888';
+        context.font = '10px Arial';
+        context.fillText('Right-click to toggle missiles', 10, this.game.height - 15);
     }
 }
 

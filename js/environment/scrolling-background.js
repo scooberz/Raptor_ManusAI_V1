@@ -56,6 +56,7 @@ class ScrollingBackground {
     constructor(game, speed) {
         this.game = game;
         this.speed = speed;
+        this.game.mainScrollSpeed = this.speed; // Make scroll speed globally accessible
         this.farLayerObjects = [];   // Slower, darker objects for parallax
         this.nearLayerObjects = [];  // Faster, lighter objects
         this.backgrounds = [];       // Original background images
@@ -172,6 +173,15 @@ class ScrollingBackground {
 
     stop() {
         this.isScrolling = false;
+    }
+
+    /**
+     * Update the scroll speed and keep global reference in sync
+     * @param {number} newSpeed - The new scroll speed
+     */
+    setSpeed(newSpeed) {
+        this.speed = newSpeed;
+        this.game.mainScrollSpeed = this.speed;
     }
 }
 

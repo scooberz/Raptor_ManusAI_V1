@@ -15,7 +15,7 @@ class PauseState {
         
         // Define menu options with their associated actions
         this.menuOptions = [
-            { text: 'Resume Game', action: () => this.resumeGame() },
+            { text: 'Resume Game', action: async () => await this.resumeGame() },
             { text: 'Save Game', action: () => this.saveGame() },
             { text: 'Return to Menu', action: () => this.returnToMenu() }
         ];
@@ -118,7 +118,7 @@ class PauseState {
      * Resume the game
      * Restores the previous state and resumes game audio
      */
-    resumeGame() {
+    async resumeGame() {
         if (this.previousState) {
             // Resume game audio
             this.game.audio.resumeMusic();
@@ -134,8 +134,8 @@ class PauseState {
                 }
             }
             
-            // Use changeState to properly transition back
-            this.game.changeState('game');
+            // Use the proper state transition mechanism
+            await this.game.changeState('game');
             
             console.log('Resuming Game');
         }

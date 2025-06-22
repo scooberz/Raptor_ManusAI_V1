@@ -11,6 +11,10 @@ class InputHandler {
         // Mouse state
         this.mousePosition = { x: 0, y: 0 };
         this.mouseButtons = { left: false, middle: false, right: false };
+        this.previousMouseButtons = { left: false, middle: false, right: false };
+
+        // Mouse wheel state
+        this.wheelDeltaY = 0;
 
         // Debug-specific flags
         this.skipWavePressed = false;
@@ -21,6 +25,7 @@ class InputHandler {
         this.handleMouseMove = this.handleMouseMove.bind(this);
         this.handleMouseDown = this.handleMouseDown.bind(this);
         this.handleMouseUp = this.handleMouseUp.bind(this);
+        this.handleWheel = this.handleWheel.bind(this);
 
         // Set up event listeners
         window.addEventListener('keydown', this.handleKeyDown);
@@ -28,12 +33,19 @@ class InputHandler {
         window.addEventListener('mousemove', this.handleMouseMove);
         window.addEventListener('mousedown', this.handleMouseDown);
         window.addEventListener('mouseup', this.handleMouseUp);
+        window.addEventListener('wheel', this.handleWheel);
     }
 
     // This method MUST be called once per game loop (from game.js)
     update() {
         // Copy the current key states to the previous key states for wasKeyJustPressed logic
         this.previousKeys = { ...this.keys };
+        
+        // Copy the current mouse button states to the previous mouse button states for wasMouseButtonJustPressed logic
+        this.previousMouseButtons = { ...this.mouseButtons };
+        
+        // Reset wheel delta each frame after it's been processed
+        this.wheelDeltaY = 0;
     }
 
     // Replace your existing handleKeyDown method with this one
@@ -89,6 +101,10 @@ class InputHandler {
         }
     }
 
+    handleWheel(event) {
+        this.wheelDeltaY = Math.sign(event.deltaY);
+    }
+
     isKeyPressed(key) {
         return this.keys[key] === true;
     }
@@ -101,8 +117,16 @@ class InputHandler {
         return this.mouseButtons[button] === true;
     }
 
+    wasMouseButtonJustPressed(button) {
+        return this.isMouseButtonPressed(button) && !this.previousMouseButtons[button];
+    }
+
     getMousePosition() {
         return this.mousePosition;
+    }
+
+    getWheelDeltaY() {
+        return this.wheelDeltaY;
     }
 }
 

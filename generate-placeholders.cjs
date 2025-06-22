@@ -1,4 +1,4 @@
-// generate_placeholders.js
+// generate-placeholders.js
 
 const fs = require('fs');
 const { createCanvas } = require('canvas');
@@ -40,6 +40,12 @@ const newImages = [
     { name: 'player_ship_base.png', width: 64, height: 64, dir: 'assets/images/player' },
     { name: 'player_ship_left.png', width: 64, height: 64, dir: 'assets/images/player' },
     { name: 'player_ship_right.png', width: 64, height: 64, dir: 'assets/images/player' },
+    // Environment objects for destructible environments
+    { name: 'FUEL_TANK.png', width: 48, height: 48, dir: 'assets/images/environment' },
+    { name: 'BUNKER.png', width: 80, height: 60, dir: 'assets/images/environment' },
+    { name: 'RADAR_DISH.png', width: 64, height: 64, dir: 'assets/images/environment' },
+    // Missile weapon
+    { name: 'MISSILE.png', width: 12, height: 24, dir: 'assets/images/projectiles' },
     // You can add any other missing files here too
 ];
 // --- Generate the new placeholder images ---

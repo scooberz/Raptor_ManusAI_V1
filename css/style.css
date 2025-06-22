@@ -35,24 +35,28 @@ body, html {
     z-index: 1;
 }
 
-#enemy-layer {
+#environment-layer {
     z-index: 2;
 }
 
-#projectile-layer {
+#enemy-layer {
     z-index: 3;
 }
 
-#player-layer {
+#projectile-layer {
     z-index: 4;
 }
 
-#explosion-layer {
+#player-layer {
     z-index: 5;
 }
 
-#ui-layer {
+#explosion-layer {
     z-index: 6;
+}
+
+#ui-layer {
+    z-index: 7;
 }
 
 /* Screen overlays */

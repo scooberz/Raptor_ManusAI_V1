@@ -30,6 +30,13 @@ class GameState {
     async enter() {
         console.log('Entering Game State');
         
+        // Check if we're resuming from pause
+        if (this.player && this.currentLevel) {
+            console.log('Resuming from pause - skipping re-initialization');
+            this.isPaused = false;
+            return;
+        }
+        
         // Prevent multiple rapid transitions
         if (this.isInitializing) return;
         this.isInitializing = true;
@@ -161,13 +168,33 @@ class GameState {
         this.game.entityManager.render(contexts);
         this.hud.render(contexts.ui);
         
-        // Render debug mode indicator
+        // Debug rendering to help identify issues
         if (this.debugMode) {
             const ctx = contexts.ui;
             ctx.fillStyle = 'rgba(255, 0, 0, 0.5)';
             ctx.font = '20px Arial';
             ctx.textAlign = 'left';
             ctx.fillText('DEBUG MODE', 10, 30);
+            
+            // Show player position and status
+            if (this.player) {
+                ctx.fillText(`Player: ${Math.floor(this.player.x)}, ${Math.floor(this.player.y)}`, 10, 60);
+                ctx.fillText(`Health: ${this.player.health}`, 10, 90);
+                ctx.fillText(`Visible: ${this.player.visible}`, 10, 120);
+            } else {
+                ctx.fillText('Player: NULL', 10, 60);
+            }
+            
+            // Show game dimensions
+            ctx.fillText(`Game: ${this.game.width}x${this.game.height}`, 10, 150);
+            
+            // Show entity counts
+            const entities = this.game.entityManager.entities;
+            ctx.fillText(`Entities: ${entities.length}`, 10, 180);
+            
+            // Show canvas contexts
+            const contextKeys = Object.keys(contexts);
+            ctx.fillText(`Contexts: ${contextKeys.join(', ')}`, 10, 210);
         }
         
         // Render level complete message if needed
@@ -213,16 +240,22 @@ class GameState {
      */
     exit() {
         console.log('Exiting Game State');
-        // Don't set isPaused here as it might be a temporary exit (pause)
-        // Only cleanup if we're actually leaving the game
-        if (this.game.currentState.name !== 'pause') {
-            if (this.currentLevel) {
-                this.currentLevel.cleanup();
-            }
-            // Clear references
-            this.game.player = null;
-            this.currentLevel = null;
+        
+        // Check if we're transitioning to pause state
+        // If the game's current state is already pause, we're pausing
+        if (this.game.currentState && this.game.currentState.name === 'pause') {
+            console.log('Pausing - skipping cleanup');
+            return;
         }
+        
+        // Full cleanup when actually leaving the game
+        if (this.currentLevel && typeof this.currentLevel.cleanup === 'function') {
+            this.currentLevel.cleanup();
+        }
+        
+        // Clear references
+        this.game.player = null;
+        this.currentLevel = null;
     }
 }
 
