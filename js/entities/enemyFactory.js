@@ -69,6 +69,15 @@ class EnemyFactory {
             case 'dart':
                 enemy = new Enemy(this.game, spawn_x, spawn_y, 'dart', overrides.health, overrides.scoreValue);
                 enemy.sprite = this.game.assets.getImage('enemyDart');
+                
+                // Set default swooping behavior for all dart enemies
+                if (!overrides.movementPattern) {
+                    // Randomly choose between left and right swooping
+                    const swoopDirection = Math.random() < 0.5 ? 'swoop_from_left' : 'swoop_from_right';
+                    enemy.movementUpdate = movementPatterns[swoopDirection];
+                    enemy.velocityY = 400; // High speed by default
+                    console.log(`Dart assigned ${swoopDirection} pattern`);
+                }
                 break;
 
             case 'goliath':
@@ -131,7 +140,10 @@ class EnemyFactory {
             // Assign behavior functions from the library
             enemy.movementUpdate = movementPatterns[overrides.movementPattern] || movementPatterns['default'];
             enemy.firingUpdate = firingPatterns[overrides.firingPattern] || firingPatterns['none'];
-
+            // If the enemy has been assigned a real firing pattern, enable its ability to fire.
+            if (overrides.firingPattern && overrides.firingPattern !== 'none') {
+                enemy.canFire = true;
+            }
             // Legacy pattern support (for backward compatibility)
             if (enemyInfo.pattern && !overrides.movementPattern) {
                 enemy.setMovementPattern(enemyInfo.pattern, enemyInfo.patternParams || {});
