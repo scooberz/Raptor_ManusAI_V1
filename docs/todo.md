@@ -54,11 +54,19 @@
 - [ ] Debug and fix issues
 - [ ] Balance difficulty and gameplay
 - [ ] Implement sound effects and music (optional)
+- [ ] Suggest potential improvements or extensions
 
 ## Phase 8: Package and deliver final game to user
 - [ ] Package game files for easy deployment
 - [ ] Create user documentation and instructions
 - [ ] Provide source code with comments
 - [ ] Deliver final game to user
-- [ ] Suggest potential improvements or extensions
+
+## Phase 9: Future Architectural Goals & Features
+- [ ] Refactor to a Generic, Reusable Level Class
+- [ ] Implement a Robust AudioManager with volume controls
+- [ ] Implement a full Tilemap-based Environment System
+- [ ] Design and build the Hangar/Shop System
+- [ ] Design and build the Data-Pad Level Editor
+- [ ] Design and build a Power-up/Collectibles System
 
