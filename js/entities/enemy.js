@@ -1,5 +1,6 @@
 import { Entity } from '../engine/entity.js';
 import { Explosion } from './explosion.js';
+import { Collectible } from './collectible.js';
 
 class Enemy extends Entity {
     constructor(game, x, y, type, health, scoreValue, collisionDamage) {
@@ -34,16 +35,6 @@ class Enemy extends Entity {
     }
 
     /**
-     * Sets the movement pattern for the enemy.
-     * @param {string} pattern - The name of the pattern (e.g., 'straight', 'zigzag').
-     * @param {Object} params - An object containing specific parameters for that pattern.
-     */
-    setMovementPattern(pattern, params) {
-        this.pattern = pattern;
-        this.patternParams = params || {};
-    }
-
-    /**
      * Reduces enemy health when it takes damage. Called by the collision system.
      * @param {number} damage - The amount of damage to inflict.
      */
@@ -61,6 +52,20 @@ class Enemy extends Entity {
         // 1. Handle death sequence if health is at or below zero.
         if (this.health <= 0 && this.active) {
             this.active = false; // Deactivate immediately to prevent duplicate death sequences.
+
+            // --- NEW LOOT DROP LOGIC ---
+            // Check if there's a specific loot drop defined in the overrides.
+            if (this.overrides && this.overrides.loot) {
+                const loot = this.overrides.loot;
+                // Create a collectible with the specified type and value
+                const collectible = new Collectible(this.game, this.x, this.y, 30, 30, loot.type, loot.value);
+                this.game.entityManager.add(collectible);
+                this.game.collision.addToGroup(collectible, 'collectibles');
+            } else {
+                // Fallback to the old random loot drop system if no specific loot is defined.
+                this.dropLoot();
+            }
+            // --- END NEW LOGIC ---
 
             // Grant score and money to the player.
             if (this.game && this.game.player) {
@@ -133,6 +138,24 @@ class Enemy extends Entity {
         // Call the assigned firing behavior function if it exists
         if (this.firingUpdate) {
             this.firingUpdate(this, this.game.player, deltaTime);
+        }
+    }
+
+    /**
+     * Handles random loot drops when no specific loot is defined.
+     * This is the fallback system for enemies without specific loot overrides.
+     */
+    dropLoot() {
+        // Simple random loot drop system
+        const dropChance = 0.1; // 10% chance to drop loot
+        if (Math.random() < dropChance) {
+            const lootTypes = ['health', 'megabomb'];
+            const randomType = lootTypes[Math.floor(Math.random() * lootTypes.length)];
+            const value = randomType === 'health' ? 25 : 1;
+            
+            const collectible = new Collectible(this.game, this.x, this.y, 30, 30, randomType, value);
+            this.game.entityManager.add(collectible);
+            this.game.collision.addToGroup(collectible, 'collectibles');
         }
     }
 }

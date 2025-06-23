@@ -11,6 +11,8 @@ class AssetManager {
         this.loadedAssets = 0;
         this.onProgress = null;
         this.onComplete = null;
+        this.gameplayAssetsLoaded = false; // Track gameplay assets loading status
+        this.onGameplayAssetsLoaded = null; // Callback when gameplay assets finish loading
     }
     
     /**
@@ -260,6 +262,89 @@ class AssetManager {
      */
     setCompleteCallback(callback) {
         this.onComplete = callback;
+    }
+    
+    /**
+     * Set a callback for when gameplay assets finish loading
+     * @param {Function} callback - The callback function
+     */
+    setGameplayAssetsLoadedCallback(callback) {
+        this.onGameplayAssetsLoaded = callback;
+    }
+    
+    /**
+     * Load gameplay assets in the background
+     * This method loads all the heavy assets needed for actual gameplay
+     */
+    async loadGameplayAssets() {
+        console.log("Starting background load of gameplay assets...");
+        this.gameplayAssetsLoaded = false;
+        
+        // Define all gameplay assets
+        const gameplayAssets = {
+            images: {
+                // Player assets
+                'playerShipBase': 'assets/images/player/player_ship_base.png',
+                'playerShipLeft': 'assets/images/player/player_ship_left.png',
+                'playerShipRight': 'assets/images/player/player_ship_right.png',
+                'playerShipThrust': 'assets/images/player/player_ship_thrust.png',
+                
+                // Enemy assets
+                'enemyFighter': 'assets/images/enemies/enemy_turret.png',
+                'enemyStriker': 'assets/images/enemies/striker.png',
+                'enemyCyclone': 'assets/images/enemies/cyclone.png',
+                'enemyGnat': 'assets/images/enemies/gnat.png',
+                'enemyReaper': 'assets/images/enemies/reaper.png',
+                'enemyDart': 'assets/images/enemies/dart.png',
+                'enemyGoliath': 'assets/images/enemies/goliath.png',
+                'enemyCutter': 'assets/images/enemies/cutter.png',
+                'enemyMine': 'assets/images/enemies/mine.png',
+                'enemyTurret': 'assets/images/enemies/enemy_turret.png',
+                'bossLevel1': 'assets/images/enemies/boss_level1.png',
+                
+                // Projectile assets
+                'playerBullet': 'assets/images/projectiles/enemy_bullet.png',
+                'enemyBullet': 'assets/images/projectiles/ENEMY_BULLET.png',
+                'enemyMissile': 'assets/images/projectiles/ENEMY_MISSILE.png',
+                'missile': 'assets/images/projectiles/MISSILE.png',
+                
+                // Environment assets
+                'backgroundLevel1': 'assets/images/environment/background_level2.png',
+                'backgroundLevel2': 'assets/images/environment/background_level2.png',
+                
+                // Destructible environment assets
+                'fuelTank': 'assets/images/environment/FUEL_TANK.png',
+                'bunker': 'assets/images/environment/BUNKER.png',
+                'radarDish': 'assets/images/environment/RADAR_DISH.png',
+                
+                // Effects
+                'explosion1': 'assets/images/explosions/explosion_2.png',
+                'explosion2': 'assets/images/explosions/explosion_2.png',
+                
+                // Collectibles
+                'healthPickup': 'assets/images/collectibles/shield_pickup.png',
+                'shieldPickup': 'assets/images/collectibles/shield_pickup.png',
+                'megabombPickup': 'assets/images/collectibles/megabomb_pickup.png',
+                
+                // UI assets
+                'healthBar': 'assets/images/ui/health_bar.png',
+                'shieldBar': 'assets/images/ui/shield_bar.png'
+            }
+        };
+        
+        try {
+            await this.loadAssets(gameplayAssets);
+            this.gameplayAssetsLoaded = true;
+            console.log("Gameplay assets have been successfully loaded in the background.");
+            
+            // Notify callback if set
+            if (this.onGameplayAssetsLoaded) {
+                this.onGameplayAssetsLoaded();
+            }
+        } catch (error) {
+            console.error("Failed to load gameplay assets:", error);
+            // Don't throw error - let the game continue with partial assets
+        }
     }
 }
 

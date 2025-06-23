@@ -46,6 +46,9 @@ const newImages = [
     { name: 'RADAR_DISH.png', width: 64, height: 64, dir: 'assets/images/environment' },
     // Missile weapon
     { name: 'MISSILE.png', width: 12, height: 24, dir: 'assets/images/projectiles' },
+    // New projectile sprites
+    { name: 'ENEMY_BULLET.png', width: 8, height: 8, dir: 'assets/images/projectiles' },
+    { name: 'ENEMY_MISSILE.png', width: 12, height: 24, dir: 'assets/images/projectiles' },
     // You can add any other missing files here too
 ];
 // --- Generate the new placeholder images ---

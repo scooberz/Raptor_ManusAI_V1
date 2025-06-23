@@ -6,8 +6,12 @@ export class Missile extends Projectile {
     constructor(game, x, y, damage, owner, initialVelocity = {x: 0, y: -50}) {
         const width = 12;
         const height = 24;
+        
+        // Determine which sprite to use based on the owner
+        const spriteName = (owner === 'player') ? 'missile' : 'enemyMissile';
 
-        super(game, x, y, width, height, initialVelocity.x, initialVelocity.y, damage, owner);
+        // Call the parent constructor with the correct sprite name
+        super(game, x, y, width, height, initialVelocity.x, initialVelocity.y, damage, owner, spriteName);
         
         // Player-specific properties for acceleration
         if (this.owner === 'player') {

@@ -112,7 +112,8 @@ class Boss1 extends Enemy {
                 Math.cos(angle) * projectileSpeed, // velocityX
                 Math.sin(angle) * projectileSpeed, // velocityY
                 projectileDamage,
-                'enemy'
+                'enemy',
+                'enemyBullet' // spriteName
             );
             
             this.game.entityManager.add(projectile);

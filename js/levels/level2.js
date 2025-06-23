@@ -353,7 +353,8 @@ class Level2 {
                             0,
                             300,
                             15,
-                            'enemy'
+                            'enemy',
+                            'enemyBullet'
                         );
                         
                         this.game.entityManager.add(projectile);
@@ -442,7 +443,8 @@ class Level2 {
                     Math.cos(projectileAngle) * speed,
                     Math.sin(projectileAngle) * speed,
                     15,
-                    'enemy'
+                    'enemy',
+                    'enemyBullet'
                 );
                 
                 this.game.entityManager.add(projectile);
@@ -485,7 +487,8 @@ class Level2 {
                     0,
                     200,
                     20,
-                    'enemy'
+                    'enemy',
+                    'enemyBullet'
                 );
                 
                 this.game.entityManager.add(bomb);
@@ -532,7 +535,8 @@ class Level2 {
                     Math.cos(angle) * speed,
                     Math.sin(angle) * speed,
                     10,
-                    'enemy'
+                    'enemy',
+                    'enemyBullet'
                 );
                 
                 this.game.entityManager.add(projectile);

@@ -30,9 +30,6 @@ class HUD {
         // Render health bar
         this.renderHealthBar(context);
         
-        // Render shield bar
-        this.renderShieldBar(context);
-        
         // Render score and money
         this.renderStats(context);
         
@@ -41,6 +38,12 @@ class HUD {
         
         // Render missile UI
         this.renderMissileUI(context);
+        
+        // Render boss health bar if boss is active
+        this.renderBossHealthBar(context);
+        
+        // Render boss approaching message if needed
+        this.renderBossApproachingMessage(context);
     }
     
     /**
@@ -68,33 +71,6 @@ class HUD {
         context.font = '14px Arial';
         context.textAlign = 'center';
         context.fillText(`Health: ${player.health}/${player.maxHealth}`, healthBarX + healthBarWidth / 2, healthBarY + 15);
-    }
-    
-    /**
-     * Render shield bar
-     * @param {CanvasRenderingContext2D} context - The canvas context to render to
-     */
-    renderShieldBar(context) {
-        const player = this.game.player;
-        const shieldBarWidth = 200;
-        const shieldBarHeight = 20;
-        const shieldBarX = 10; // Top left
-        const shieldBarY = 40; // Below health bar
-        
-        // Shield bar background
-        context.fillStyle = '#333';
-        context.fillRect(shieldBarX, shieldBarY, shieldBarWidth, shieldBarHeight);
-        
-        // Shield bar fill
-        const shieldPercentage = player.shield / player.maxShield;
-        context.fillStyle = '#00f';
-        context.fillRect(shieldBarX, shieldBarY, shieldBarWidth * shieldPercentage, shieldBarHeight);
-        
-        // Shield text
-        context.fillStyle = '#fff';
-        context.font = '14px Arial';
-        context.textAlign = 'center';
-        context.fillText(`Shield: ${player.shield}/${player.maxShield}`, shieldBarX + shieldBarWidth / 2, shieldBarY + 15);
     }
     
     /**
@@ -136,14 +112,25 @@ class HUD {
      * @param {CanvasRenderingContext2D} context - The canvas context to render to
      */
     renderBossHealthBar(context) {
-        // Find active boss in entity manager
-        const boss = this.game.entityManager.getEntitiesByType(Boss1).find(b => b.active);
+        // Find active boss in entity manager - try multiple detection methods
+        let boss = this.game.entityManager.getEntitiesByType(Boss1).find(b => b.active);
+        
+        // Fallback: look for any entity with isBoss flag
+        if (!boss) {
+            boss = this.game.entityManager.entities.find(e => e.active && e.isBoss);
+        }
+        
+        // Fallback: look for any entity with type 'boss1'
+        if (!boss) {
+            boss = this.game.entityManager.entities.find(e => e.active && e.type === 'boss1');
+        }
+        
         if (!boss) return;
 
         const barWidth = this.game.width * 0.8;
         const barHeight = 30;
         const barX = (this.game.width - barWidth) / 2;
-        const barY = 20;
+        const barY = 5; // Moved to very top to avoid overlap with player health bar
         const healthPercent = boss.health / boss.maxHealth;
 
         // Background
@@ -216,6 +203,59 @@ class HUD {
         context.fillStyle = '#888';
         context.font = '10px Arial';
         context.fillText('Right-click to toggle missiles', 10, this.game.height - 15);
+    }
+    
+    /**
+     * Render boss approaching message
+     * @param {CanvasRenderingContext2D} context - The canvas context to render to
+     */
+    renderBossApproachingMessage(context) {
+        // Check if there's a boss currently active
+        let boss = this.game.entityManager.getEntitiesByType(Boss1).find(b => b.active);
+        if (!boss) {
+            boss = this.game.entityManager.entities.find(e => e.active && e.isBoss);
+        }
+        if (!boss) {
+            boss = this.game.entityManager.entities.find(e => e.active && e.type === 'boss1');
+        }
+        
+        // If no boss is currently active, check if we're approaching the boss wave
+        if (!boss) {
+            // Check if we're in the last wave (boss wave is always last)
+            const currentLevel = this.game.currentState?.currentLevel;
+            if (currentLevel && currentLevel.levelData?.waves) {
+                const totalWaves = currentLevel.levelData.waves.length;
+                const currentWaveIndex = currentLevel.currentWaveIndex;
+                
+                // Show boss approaching when we're in the last wave (boss wave)
+                if (currentWaveIndex === totalWaves - 1) {
+                    this.renderBossMessage(context, 'BOSS APPROACHING');
+                }
+            }
+        }
+    }
+    
+    /**
+     * Render a boss-related message
+     * @param {CanvasRenderingContext2D} context - The canvas context to render to
+     * @param {string} message - The message to display
+     */
+    renderBossMessage(context, message) {
+        // Semi-transparent background
+        context.fillStyle = 'rgba(0, 0, 0, 0.7)';
+        context.fillRect(0, this.game.height / 2 - 50, this.game.width, 100);
+        
+        // Message text
+        context.fillStyle = '#ff0000';
+        context.font = 'bold 32px Arial';
+        context.textAlign = 'center';
+        context.textBaseline = 'middle';
+        context.shadowColor = 'black';
+        context.shadowBlur = 5;
+        context.fillText(message, this.game.width / 2, this.game.height / 2);
+        
+        // Reset shadow
+        context.shadowBlur = 0;
     }
 }
 

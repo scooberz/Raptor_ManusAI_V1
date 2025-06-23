@@ -49,7 +49,7 @@ class LoadingState {
                     
                     // Transition to menu after fade
                     setTimeout(() => {
-                        this.game.changeState('menu');
+                        this.game.changeState('introCutscene');
                     }, 500);
                 }, 300);
             } else {
@@ -64,7 +64,7 @@ class LoadingState {
                         
                         // Transition to menu after fade
                         setTimeout(() => {
-                            this.game.changeState('menu');
+                            this.game.changeState('introCutscene');
                         }, 500);
                     } else {
                         console.error('Failed to load all assets');
@@ -101,74 +101,25 @@ class LoadingState {
      * Load all game assets
      */
     loadAllAssets() {
-        // Split assets into essential and non-essential
-        const essentialAssets = {
+        // Initial assets - only what's needed for intro and menu
+        const initialAssets = {
             images: {
-                // Player assets
-                'playerShipBase': 'assets/images/player/player_ship_base.png',
-                'playerShipLeft': 'assets/images/player/player_ship_left.png',
-                'playerShipRight': 'assets/images/player/player_ship_right.png',
-                'playerShipThrust': 'assets/images/player/player_ship_thrust.png',
+                // Cutscene assets
+                'cutscenePanel1': 'assets/images/ui/Raptor intro cutscene 1.png',
+                'cutscenePanel2': 'assets/images/ui/Raptor intro cutscene 2.png',
                 
-                // Enemy assets (only load first level enemies)
-                'enemyFighter': 'assets/images/enemies/enemy_turret.png',
-                
-                // Projectile assets
-                'playerBullet': 'assets/images/projectiles/enemy_bullet.png',
-                'enemyBullet': 'assets/images/projectiles/enemy_bullet.png',
-                'missile': 'assets/images/projectiles/MISSILE.png',
-                
-                // Environment assets (only first level)
-                'backgroundLevel1': 'assets/images/environment/background_level2.png',
-                
-                // Destructible environment assets
-                'fuelTank': 'assets/images/environment/FUEL_TANK.png',
-                'bunker': 'assets/images/environment/BUNKER.png',
-                'radarDish': 'assets/images/environment/RADAR_DISH.png',
-                
-                // UI assets (only essential)
-                'healthBar': 'assets/images/ui/health_bar.png',
-                'shieldBar': 'assets/images/ui/shield_bar.png'
+                // UI assets (only essential for menu)
+                'logo': 'assets/images/ui/game_logo.png'
             }
         };
 
-        // Load essential assets first
-        this.game.assets.loadAssets(essentialAssets)
+        // Load only initial assets for fast startup
+        this.game.assets.loadAssets(initialAssets)
             .then(() => {
-                // Once essential assets are loaded, start loading non-essential assets in the background
-                const nonEssentialAssets = {
-                    images: {
-                        // Additional player assets
-                        'playerShipThrust': 'assets/images/player/player_ship_thrust.png',
-                        
-                        // Additional enemy assets
-                        'enemyTurret': 'assets/images/enemies/enemy_turret.png',
-                        'bossLevel1': 'assets/images/enemies/boss_level1.png',
-                        
-                        // Additional effects
-                        'explosion1': 'assets/images/explosions/explosion_2.png',
-                        'explosion2': 'assets/images/explosions/explosion_2.png',
-                        
-                        // Additional collectibles
-                        'healthPickup': 'assets/images/collectibles/shield_pickup.png',
-                        'shieldPickup': 'assets/images/collectibles/shield_pickup.png',
-                        'megabombPickup': 'assets/images/collectibles/megabomb_pickup.png',
-                        
-                        // Additional environment
-                        'backgroundLevel2': 'assets/images/environment/background_level2.png',
-                        
-                        // Additional UI
-                        'logo': 'assets/images/ui/game_logo.png'
-                    }
-                };
-
-                // Load non-essential assets in the background
-                this.game.assets.loadAssets(nonEssentialAssets).catch(error => {
-                    console.warn('Non-essential assets failed to load:', error);
-                });
+                console.log('Initial assets loaded successfully');
             })
             .catch(error => {
-                console.error('Error loading essential assets:', error);
+                console.error('Error loading initial assets:', error);
                 document.getElementById('loading-screen').textContent = 'Error loading game assets. Please refresh the page.';
             });
     }

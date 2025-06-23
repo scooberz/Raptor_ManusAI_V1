@@ -1,0 +1,27 @@
+{
+  "events": [
+    {
+      "type": "show_image_with_text",
+      "asset": "cutscenePanel1",
+      "text": "A.D. 2248. The Outer Rim colonies teeter on the brink of war.",
+      "duration": 5000
+    },
+    {
+      "type": "fade_to_black",
+      "duration": 1000
+    },
+    {
+      "type": "show_image_with_text",
+      "asset": "cutscenePanel2",
+      "text": "Only one pilot was daring enough to take the contract.",
+      "duration": 5000
+    },
+    {
+      "type": "fade_to_black",
+      "duration": 1000
+    },
+    {
+      "type": "end_scene"
+    }
+  ]
+} 

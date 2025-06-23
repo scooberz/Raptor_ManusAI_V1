@@ -38,9 +38,6 @@ class Collectible extends Entity {
             case 'health':
                 this.sprite = this.game.assets.getImage('healthPickup');
                 break;
-            case 'shield':
-                this.sprite = this.game.assets.getImage('shieldPickup');
-                break;
             case 'megabomb':
                 this.sprite = this.game.assets.getImage('megabombPickup');
                 break;
@@ -155,7 +152,6 @@ class Collectible extends Entity {
     getColorByType() {
         switch (this.type) {
             case 'health': return 'green';
-            case 'shield': return 'blue';
             case 'megabomb': return 'orange';
             case 'weapon': return 'purple';
             case 'money': return 'gold';
@@ -170,7 +166,6 @@ class Collectible extends Entity {
     getGlowColor() {
         switch (this.type) {
             case 'health': return 'rgba(0, 255, 0, 0.5)';
-            case 'shield': return 'rgba(0, 100, 255, 0.5)';
             case 'megabomb': return 'rgba(255, 100, 0, 0.5)';
             case 'weapon': return 'rgba(200, 0, 255, 0.5)';
             case 'money': return 'rgba(255, 215, 0, 0.5)';
@@ -186,9 +181,6 @@ class Collectible extends Entity {
         switch (this.type) {
             case 'health':
                 player.addHealth(this.value);
-                break;
-            case 'shield':
-                player.addShield(this.value);
                 break;
             case 'megabomb':
                 player.addMegabomb();

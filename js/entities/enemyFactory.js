@@ -94,29 +94,6 @@ class EnemyFactory {
             case 'mine':
                 enemy = new Enemy(this.game, spawn_x, spawn_y, 'mine', overrides.health, overrides.scoreValue);
                 enemy.sprite = this.game.assets.getImage('enemyMine');
-
-                console.log('FACTORY: Attaching custom behavior to a MINE object.'); // <-- ADD THIS LINE
-                // Set default velocity to 0 so it doesn't fight our custom behavior.
-                enemy.velocityY = 20;
-                // Add the unique slow-homing behavior for the mine
-                enemy.updateBehavior = function (player, deltaTime) {
-                    // The 'this' keyword here refers to the enemy instance
-                    if (player) {
-                        const dx = player.x - this.x;
-                        const dy = player.y - this.y;
-                        const distance = Math.sqrt(dx * dx + dy * dy);
-
-                        if (distance > 0) {
-                            // Calculate direction and apply a small force
-                            this.dx += (dx / distance) * 0.03;
-                            this.dy += (dy / distance) * 0.03;
-                        }
-                    }
-                    // Apply drag
-                    this.dx *= 0.98;
-                    this.dy *= 0.98;
-                };
-
                 break;
 
             case 'FUEL_TANK':
@@ -146,6 +123,7 @@ class EnemyFactory {
 
         // --- Apply Overrides ---
         if (enemy) {
+            enemy.overrides = overrides;
             // Apply simple stat overrides
             if (overrides.health) enemy.health = overrides.health;
             if (overrides.fireRate) enemy.fireRate = overrides.fireRate;
@@ -159,10 +137,6 @@ class EnemyFactory {
             // If the enemy has been assigned a real firing pattern, enable its ability to fire.
             if (overrides.firingPattern && overrides.firingPattern !== 'none') {
                 enemy.canFire = true;
-            }
-            // Legacy pattern support (for backward compatibility)
-            if (enemyInfo.pattern && !overrides.movementPattern) {
-                enemy.setMovementPattern(enemyInfo.pattern, enemyInfo.patternParams || {});
             }
         }
 

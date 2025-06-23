@@ -30,6 +30,11 @@ class MenuState {
         // Get logo from assets
         this.logo = this.game.assets.getImage('logo');
         
+        // Set up callback to update menu when assets finish loading
+        this.game.assets.setGameplayAssetsLoadedCallback(() => {
+            this.updateMenuForLoadedAssets();
+        });
+        
         // Play menu music
         this.game.audio.playMusic('menuMusic');
         
@@ -65,11 +70,20 @@ class MenuState {
         // Add menu options
         this.menuOptions.forEach((option, index) => {
             const optionElement = document.createElement('div');
-            optionElement.textContent = option.text;
-            optionElement.style.color = index === this.selectedOption ? '#ffcc00' : 'white';
+            
+            // Check if this is the Start Game option and assets are still loading
+            if (option.text === 'Start Game' && !this.game.assets.gameplayAssetsLoaded) {
+                optionElement.textContent = 'Start Game (Loading...)';
+                optionElement.style.color = '#888'; // Grayed out
+                optionElement.style.cursor = 'not-allowed';
+            } else {
+                optionElement.textContent = option.text;
+                optionElement.style.color = index === this.selectedOption ? '#ffcc00' : 'white';
+                optionElement.style.cursor = 'pointer';
+            }
+            
             optionElement.style.fontSize = '24px';
             optionElement.style.margin = '10px';
-            optionElement.style.cursor = 'pointer';
             optionElement.style.textShadow = index === this.selectedOption ? '0 0 10px #ffcc00' : 'none';
             
             // Add hover effect
@@ -93,6 +107,16 @@ class MenuState {
         instructions.textContent = 'Use Arrow Keys to navigate, Enter to select';
         menuContainer.appendChild(instructions);
         
+        // Add loading indicator for background assets
+        const loadingIndicator = document.createElement('div');
+        loadingIndicator.id = 'background-loading-indicator';
+        loadingIndicator.style.position = 'absolute';
+        loadingIndicator.style.bottom = '50px';
+        loadingIndicator.style.color = '#666';
+        loadingIndicator.style.fontSize = '14px';
+        loadingIndicator.textContent = 'Loading game assets...';
+        menuContainer.appendChild(loadingIndicator);
+        
         menuScreen.appendChild(menuContainer);
     }
     
@@ -113,7 +137,43 @@ class MenuState {
      * Start the game
      */
     startGame() {
-        this.game.changeState('game');
+        // Check if gameplay assets are loaded
+        if (this.game.assets.gameplayAssetsLoaded) {
+            console.log('Starting game - all assets loaded');
+            this.game.changeState('game');
+        } else {
+            console.log('Cannot start game - gameplay assets still loading');
+            // Optionally show a message to the user
+            this.showLoadingMessage();
+        }
+    }
+    
+    /**
+     * Show loading message when trying to start game before assets are ready
+     */
+    showLoadingMessage() {
+        // Create a temporary loading message
+        const menuScreen = document.getElementById('menu-screen');
+        const loadingMsg = document.createElement('div');
+        loadingMsg.style.position = 'fixed';
+        loadingMsg.style.top = '50%';
+        loadingMsg.style.left = '50%';
+        loadingMsg.style.transform = 'translate(-50%, -50%)';
+        loadingMsg.style.backgroundColor = 'rgba(0, 0, 0, 0.9)';
+        loadingMsg.style.color = 'white';
+        loadingMsg.style.padding = '20px';
+        loadingMsg.style.borderRadius = '10px';
+        loadingMsg.style.zIndex = '1000';
+        loadingMsg.textContent = 'Loading game assets... Please wait.';
+        
+        menuScreen.appendChild(loadingMsg);
+        
+        // Remove message after 2 seconds
+        setTimeout(() => {
+            if (loadingMsg.parentNode) {
+                loadingMsg.parentNode.removeChild(loadingMsg);
+            }
+        }, 2000);
     }
     
     /**
@@ -236,27 +296,48 @@ class MenuState {
     }
     
     /**
+     * Update menu when gameplay assets finish loading
+     */
+    updateMenuForLoadedAssets() {
+        // Re-setup the menu screen to show updated Start Game option
+        this.setupMenuScreen();
+        
+        // Update loading indicator
+        const loadingIndicator = document.getElementById('background-loading-indicator');
+        if (loadingIndicator) {
+            loadingIndicator.textContent = 'Game assets loaded!';
+            loadingIndicator.style.color = '#4CAF50';
+            
+            // Remove indicator after 3 seconds
+            setTimeout(() => {
+                if (loadingIndicator.parentNode) {
+                    loadingIndicator.parentNode.removeChild(loadingIndicator);
+                }
+            }, 3000);
+        }
+    }
+    
+    /**
      * Update the menu state
      * @param {number} deltaTime - Time since last update in milliseconds
      */
-    // The new update method for menu.js
-update(deltaTime) {
-    // We no longer need the time-based delay check, because wasKeyJustPressed handles it.
-    
-    if (this.game.input.wasKeyJustPressed('ArrowUp') || this.game.input.wasKeyJustPressed('w')) {
-        this.selectedOption = (this.selectedOption - 1 + this.menuOptions.length) % this.menuOptions.length;
-        this.updateMenuSelection();
-    }
+    update(deltaTime) {
+        // We no longer need the time-based delay check, because wasKeyJustPressed handles it.
         
-    if (this.game.input.wasKeyJustPressed('ArrowDown') || this.game.input.wasKeyJustPressed('s')) {
-        this.selectedOption = (this.selectedOption + 1) % this.menuOptions.length;
-        this.updateMenuSelection();
-    }
+        if (this.game.input.wasKeyJustPressed('ArrowUp') || this.game.input.wasKeyJustPressed('w')) {
+            this.selectedOption = (this.selectedOption - 1 + this.menuOptions.length) % this.menuOptions.length;
+            this.updateMenuSelection();
+        }
         
-    if (this.game.input.wasKeyJustPressed('Enter') || this.game.input.wasKeyJustPressed(' ')) {
-        this.menuOptions[this.selectedOption].action();
+        if (this.game.input.wasKeyJustPressed('ArrowDown') || this.game.input.wasKeyJustPressed('s')) {
+            this.selectedOption = (this.selectedOption + 1) % this.menuOptions.length;
+            this.updateMenuSelection();
+        }
+        
+        if (this.game.input.wasKeyJustPressed('Enter') || this.game.input.wasKeyJustPressed(' ')) {
+            this.menuOptions[this.selectedOption].action();
+        }
     }
-}
     
     /**
      * Render the menu state
@@ -280,4 +361,3 @@ update(deltaTime) {
 }
 
 export { MenuState };
-
