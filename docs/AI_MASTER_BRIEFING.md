@@ -54,4 +54,11 @@ When presented with a new task or bug, I follow this internal process:
 5.  **The "Save Point":** The Director commits and pushes the (working) changes to GitHub. This creates a stable save point.
 6.  **The Review & Repeat:** The Director asks the Architect to review the new state of the code via the GitHub integration. We analyze the results and begin the next loop. This "Commit & Push Before Review" is our Golden Rule.
 
+## Final Boss AI Overhaul (2024-06)
+- Boss now uses a `boss_patrol` movement pattern: enters, then patrols between three upper-screen waypoints, pausing initial descent at y=80.
+- Firing pattern is `boss_multi_weapon_fire`: rapid straight missiles, burst-aimed shots (3-shot burst after a pause), periodic reposition pauses, and a desperation ring attack at 25% health.
+- All boss fire rates are 3x faster than before.
+- Projectiles use asset keys: `enemyMissile` (ENEMY_MISSILE.png) and `enemyBullet` (orange ball).
+- See `asset_inventory.md` for pattern and asset details.
+
 Please create this master briefing document in the docs/ folder. 

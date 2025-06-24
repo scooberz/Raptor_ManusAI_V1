@@ -108,8 +108,12 @@ class Enemy extends Entity {
             }
         }
 
-        // 5. Remove the enemy if it goes too far off-screen.
-        if (this.y > this.game.height + 200) {
+        // 5. Remove the enemy if it goes too far off-screen (bottom or sides of the screen)
+        if (
+            this.y > this.game.height + this.height ||
+            this.x < -this.width ||
+            this.x > this.game.width + this.width
+        ) {
             this.destroy();
         }
 
@@ -172,68 +176,68 @@ Enemy.stats = {
         height: 48
     },
     striker: {
-        health: 30,
+        health: 60,
         points: 100,
         moneyValue: 50,
         collisionDamage: 20,
-        width: 111,
-        height: 98
+        width: 64,
+        height: 64
     },
     cyclone: {
         health: 60,
         points: 250,
         moneyValue: 100,
         collisionDamage: 30,
-        width: 52,
-        height: 61
+        width: 64,
+        height: 64
     },
     gnat: {
-        health: 10,
+        health: 30,
         points: 50,
         moneyValue: 25,
         collisionDamage: 10,
-        width: 63,
-        height: 59
+        width: 64,
+        height: 64
     },
     reaper: {
-        health: 40,
+        health: 90,
         points: 150,
         moneyValue: 75,
         collisionDamage: 25,
-        width: 68,
-        height: 62
+        width: 64,
+        height: 64
     },
     dart: {
-        health: 25,
+        health: 60,
         points: 125,
         moneyValue: 60,
         collisionDamage: 15,
-        width: 46,
-        height: 48
+        width: 64,
+        height: 64
     },
     goliath: {
-        health: 150,
+        health: 180,
         points: 500,
         moneyValue: 200,
         collisionDamage: 50,
-        width: 54,
-        height: 70
+        width: 96,
+        height: 96
     },
     cutter: {
-        health: 50,
+        health: 60,
         points: 200,
         moneyValue: 500,
         collisionDamage: 35,
-        width: 53,
-        height: 57
+        width: 64,
+        height: 64
     },
     mine: {
         health: 20,
         points: 75,
         moneyValue: 10,
         collisionDamage: 40,
-        width: 31,
-        height: 31
+        width: 32,
+        height: 32
     }
 };
 

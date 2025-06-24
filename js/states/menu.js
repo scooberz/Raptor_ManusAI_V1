@@ -7,8 +7,9 @@ class MenuState {
         this.game = game;
         this.logo = null;
         this.menuOptions = [
-            { text: 'Start Game', action: () => this.startGame() },
-            { text: 'Instructions', action: () => this.showInstructions() },
+            { text: 'Start New Game', action: () => this.startNewGame() },
+            { text: 'Load Game', action: () => this.loadGame() },
+            { text: 'Readme', action: () => this.showReadme() },
             { text: 'Credits', action: () => this.showCredits() }
         ];
         this.selectedOption = 0;
@@ -49,31 +50,51 @@ class MenuState {
         const menuScreen = document.getElementById('menu-screen');
         menuScreen.innerHTML = '';
         
-        // Create menu container
+        // Create main container with black background
+        const mainContainer = document.createElement('div');
+        mainContainer.style.display = 'flex';
+        mainContainer.style.flexDirection = 'column';
+        mainContainer.style.alignItems = 'center';
+        mainContainer.style.justifyContent = 'center';
+        mainContainer.style.width = '100%';
+        mainContainer.style.height = '100%';
+        mainContainer.style.backgroundColor = 'black';
+        mainContainer.style.position = 'relative';
+        
+        // Add logo if available - make it larger and centered
+        if (this.logo) {
+            const logoImg = document.createElement('img');
+            logoImg.src = this.logo.src;
+            logoImg.style.maxWidth = '90%';
+            logoImg.style.maxHeight = '70vh';
+            logoImg.style.objectFit = 'contain';
+            logoImg.style.position = 'absolute';
+            logoImg.style.top = '50%';
+            logoImg.style.left = '50%';
+            logoImg.style.transform = 'translate(-50%, -50%)';
+            logoImg.style.zIndex = '1';
+            mainContainer.appendChild(logoImg);
+        }
+        
+        // Create menu container - positioned on top of logo
         const menuContainer = document.createElement('div');
         menuContainer.style.display = 'flex';
         menuContainer.style.flexDirection = 'column';
         menuContainer.style.alignItems = 'center';
         menuContainer.style.justifyContent = 'center';
-        menuContainer.style.width = '100%';
-        menuContainer.style.height = '100%';
+        menuContainer.style.position = 'absolute';
+        menuContainer.style.bottom = '20%';
+        menuContainer.style.left = '50%';
+        menuContainer.style.transform = 'translateX(-50%)';
+        menuContainer.style.zIndex = '2';
         
-        // Add logo if available
-        if (this.logo) {
-            const logoImg = document.createElement('img');
-            logoImg.src = this.logo.src;
-            logoImg.style.maxWidth = '80%';
-            logoImg.style.marginBottom = '40px';
-            menuContainer.appendChild(logoImg);
-        }
-        
-        // Add menu options
+        // Add menu options with simplified styling
         this.menuOptions.forEach((option, index) => {
             const optionElement = document.createElement('div');
             
-            // Check if this is the Start Game option and assets are still loading
-            if (option.text === 'Start Game' && !this.game.assets.gameplayAssetsLoaded) {
-                optionElement.textContent = 'Start Game (Loading...)';
+            // Check if this is the Start New Game option and assets are still loading
+            if (option.text === 'Start New Game' && !this.game.assets.gameplayAssetsLoaded) {
+                optionElement.textContent = 'Start New Game (Loading...)';
                 optionElement.style.color = '#888'; // Grayed out
                 optionElement.style.cursor = 'not-allowed';
             } else {
@@ -82,9 +103,11 @@ class MenuState {
                 optionElement.style.cursor = 'pointer';
             }
             
-            optionElement.style.fontSize = '24px';
-            optionElement.style.margin = '10px';
-            optionElement.style.textShadow = index === this.selectedOption ? '0 0 10px #ffcc00' : 'none';
+            optionElement.style.fontSize = '28px';
+            optionElement.style.margin = '8px';
+            optionElement.style.padding = '5px 15px';
+            optionElement.style.transition = 'all 0.2s ease';
+            optionElement.style.textShadow = index === this.selectedOption ? '0 0 15px #ffcc00' : '2px 2px 4px rgba(0,0,0,0.8)';
             
             // Add hover effect
             optionElement.addEventListener('mouseover', () => {
@@ -98,26 +121,44 @@ class MenuState {
             menuContainer.appendChild(optionElement);
         });
         
-        // Add instructions
+        // Add instructions - positioned at top right
         const instructions = document.createElement('div');
         instructions.style.position = 'absolute';
-        instructions.style.bottom = '20px';
+        instructions.style.top = '20px';
+        instructions.style.right = '20px';
         instructions.style.color = '#aaa';
-        instructions.style.fontSize = '16px';
-        instructions.textContent = 'Use Arrow Keys to navigate, Enter to select';
-        menuContainer.appendChild(instructions);
+        instructions.style.fontSize = '14px';
+        instructions.style.textAlign = 'right';
+        instructions.style.maxWidth = '200px';
+        instructions.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+        instructions.style.padding = '10px';
+        instructions.style.borderRadius = '5px';
+        instructions.style.border = '1px solid #333';
+        instructions.style.zIndex = '3';
+        instructions.innerHTML = 'Use Arrow Keys to navigate<br>Enter to select';
+        mainContainer.appendChild(instructions);
         
-        // Add loading indicator for background assets
-        const loadingIndicator = document.createElement('div');
-        loadingIndicator.id = 'background-loading-indicator';
-        loadingIndicator.style.position = 'absolute';
-        loadingIndicator.style.bottom = '50px';
-        loadingIndicator.style.color = '#666';
-        loadingIndicator.style.fontSize = '14px';
-        loadingIndicator.textContent = 'Loading game assets...';
-        menuContainer.appendChild(loadingIndicator);
+        // Add loading indicator for background assets - only show if assets are still loading
+        if (!this.game.assets.gameplayAssetsLoaded) {
+            const loadingIndicator = document.createElement('div');
+            loadingIndicator.id = 'background-loading-indicator';
+            loadingIndicator.style.position = 'absolute';
+            loadingIndicator.style.bottom = '20px';
+            loadingIndicator.style.left = '20px';
+            loadingIndicator.style.color = '#666';
+            loadingIndicator.style.fontSize = '14px';
+            loadingIndicator.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+            loadingIndicator.style.padding = '8px 12px';
+            loadingIndicator.style.borderRadius = '5px';
+            loadingIndicator.style.border = '1px solid #333';
+            loadingIndicator.style.zIndex = '3';
+            loadingIndicator.textContent = 'Loading game assets...';
+            mainContainer.appendChild(loadingIndicator);
+        }
         
-        menuScreen.appendChild(menuContainer);
+        // Assemble the layout
+        mainContainer.appendChild(menuContainer);
+        menuScreen.appendChild(mainContainer);
     }
     
     /**
@@ -125,27 +166,183 @@ class MenuState {
      */
     updateMenuSelection() {
         const menuScreen = document.getElementById('menu-screen');
-        const options = menuScreen.querySelectorAll('div > div:not(:last-child)');
+        const options = menuScreen.querySelectorAll('div > div > div');
         
         options.forEach((option, index) => {
+            if (option.textContent.includes('(')) return; // Skip loading text
+            
             option.style.color = index === this.selectedOption ? '#ffcc00' : 'white';
-            option.style.textShadow = index === this.selectedOption ? '0 0 10px #ffcc00' : 'none';
+            option.style.textShadow = index === this.selectedOption ? '0 0 15px #ffcc00' : '2px 2px 4px rgba(0,0,0,0.8)';
         });
     }
     
     /**
-     * Start the game
+     * Start a new game
      */
-    startGame() {
+    startNewGame() {
         // Check if gameplay assets are loaded
         if (this.game.assets.gameplayAssetsLoaded) {
-            console.log('Starting game - all assets loaded');
-            this.game.changeState('game');
+            console.log('Starting new game - all assets loaded');
+            this.game.changeState('hangar');
         } else {
             console.log('Cannot start game - gameplay assets still loading');
             // Optionally show a message to the user
             this.showLoadingMessage();
         }
+    }
+    
+    /**
+     * Load a saved game
+     */
+    loadGame() {
+        // Check if gameplay assets are loaded
+        if (this.game.assets.gameplayAssetsLoaded) {
+            console.log('Loading saved game');
+            // TODO: Implement save/load functionality
+            this.showLoadGameScreen();
+        } else {
+            console.log('Cannot load game - gameplay assets still loading');
+            this.showLoadingMessage();
+        }
+    }
+    
+    /**
+     * Show load game screen
+     */
+    showLoadGameScreen() {
+        const menuScreen = document.getElementById('menu-screen');
+        menuScreen.innerHTML = '';
+        
+        const loadContainer = document.createElement('div');
+        loadContainer.style.display = 'flex';
+        loadContainer.style.flexDirection = 'column';
+        loadContainer.style.alignItems = 'center';
+        loadContainer.style.justifyContent = 'center';
+        loadContainer.style.width = '80%';
+        loadContainer.style.height = '80%';
+        loadContainer.style.backgroundColor = 'rgba(0, 0, 0, 0.9)';
+        loadContainer.style.padding = '20px';
+        loadContainer.style.borderRadius = '10px';
+        loadContainer.style.border = '2px solid #ffcc00';
+        
+        // Add title
+        const title = document.createElement('h2');
+        title.textContent = 'Load Game';
+        title.style.color = '#ffcc00';
+        title.style.marginBottom = '20px';
+        loadContainer.appendChild(title);
+        
+        // Add message
+        const message = document.createElement('div');
+        message.style.color = 'white';
+        message.style.fontSize = '18px';
+        message.style.textAlign = 'center';
+        message.style.marginBottom = '30px';
+        message.innerHTML = 'Save/Load functionality is coming soon!<br><br>For now, use "Start New Game" to begin playing.';
+        loadContainer.appendChild(message);
+        
+        // Add back button
+        const backButton = document.createElement('button');
+        backButton.textContent = 'Back to Menu';
+        backButton.style.padding = '10px 20px';
+        backButton.style.backgroundColor = '#333';
+        backButton.style.color = 'white';
+        backButton.style.border = 'none';
+        backButton.style.borderRadius = '5px';
+        backButton.style.cursor = 'pointer';
+        backButton.style.fontSize = '16px';
+        backButton.addEventListener('click', () => {
+            this.setupMenuScreen();
+        });
+        loadContainer.appendChild(backButton);
+        
+        menuScreen.appendChild(loadContainer);
+    }
+    
+    /**
+     * Show game readme
+     */
+    showReadme() {
+        const menuScreen = document.getElementById('menu-screen');
+        menuScreen.innerHTML = '';
+        
+        const readmeContainer = document.createElement('div');
+        readmeContainer.style.display = 'flex';
+        readmeContainer.style.flexDirection = 'column';
+        readmeContainer.style.alignItems = 'center';
+        readmeContainer.style.justifyContent = 'center';
+        readmeContainer.style.width = '80%';
+        readmeContainer.style.height = '80%';
+        readmeContainer.style.backgroundColor = 'rgba(0, 0, 0, 0.9)';
+        readmeContainer.style.padding = '20px';
+        readmeContainer.style.borderRadius = '10px';
+        readmeContainer.style.border = '2px solid #ffcc00';
+        readmeContainer.style.overflowY = 'auto';
+        
+        // Add title
+        const title = document.createElement('h2');
+        title.textContent = 'Raptor: Call of the Shadows - Readme';
+        title.style.color = '#ffcc00';
+        title.style.marginBottom = '20px';
+        title.style.textAlign = 'center';
+        readmeContainer.appendChild(title);
+        
+        // Add readme content
+        const content = document.createElement('div');
+        content.style.color = 'white';
+        content.style.fontSize = '16px';
+        content.style.lineHeight = '1.6';
+        content.style.textAlign = 'left';
+        content.style.marginBottom = '30px';
+        content.innerHTML = `
+            <h3 style="color: #ffcc00;">About This Game</h3>
+            <p>This is a reimagined version of the classic 1994 vertical shooter "Raptor: Call of the Shadows" by Cygnus Studios. 
+            This fan project was created as a tribute to the original game using modern web technologies.</p>
+            
+            <h3 style="color: #ffcc00;">Controls</h3>
+            <p><strong>Movement:</strong> Arrow Keys or WASD</p>
+            <p><strong>Fire Primary Weapon:</strong> Space or Ctrl</p>
+            <p><strong>Fire Special Weapon:</strong> Shift</p>
+            <p><strong>Cycle Special Weapons:</strong> Alt</p>
+            <p><strong>Megabomb:</strong> B</p>
+            <p><strong>Pause:</strong> P or Esc</p>
+            
+            <h3 style="color: #ffcc00;">Gameplay</h3>
+            <p>Navigate through enemy formations, collect power-ups, and defeat bosses to progress through the game. 
+            Your ship has both health and shield systems - manage them carefully!</p>
+            
+            <h3 style="color: #ffcc00;">Features</h3>
+            <ul>
+                <li>Classic 4:3 aspect ratio gameplay</li>
+                <li>Multiple enemy types with unique behaviors</li>
+                <li>Power-up collection system</li>
+                <li>Boss battles</li>
+                <li>Progressive difficulty</li>
+                <li>Score tracking</li>
+            </ul>
+            
+            <h3 style="color: #ffcc00;">Technical Notes</h3>
+            <p>This game is built using vanilla JavaScript and HTML5 Canvas. All assets have been recreated for this project. 
+            The game runs entirely in your browser - no downloads required!</p>
+        `;
+        readmeContainer.appendChild(content);
+        
+        // Add back button
+        const backButton = document.createElement('button');
+        backButton.textContent = 'Back to Menu';
+        backButton.style.padding = '10px 20px';
+        backButton.style.backgroundColor = '#333';
+        backButton.style.color = 'white';
+        backButton.style.border = 'none';
+        backButton.style.borderRadius = '5px';
+        backButton.style.cursor = 'pointer';
+        backButton.style.fontSize = '16px';
+        backButton.addEventListener('click', () => {
+            this.setupMenuScreen();
+        });
+        readmeContainer.appendChild(backButton);
+        
+        menuScreen.appendChild(readmeContainer);
     }
     
     /**
@@ -174,66 +371,6 @@ class MenuState {
                 loadingMsg.parentNode.removeChild(loadingMsg);
             }
         }, 2000);
-    }
-    
-    /**
-     * Show game instructions
-     */
-    showInstructions() {
-        // Create instructions screen
-        const menuScreen = document.getElementById('menu-screen');
-        menuScreen.innerHTML = '';
-        
-        const instructionsContainer = document.createElement('div');
-        instructionsContainer.style.display = 'flex';
-        instructionsContainer.style.flexDirection = 'column';
-        instructionsContainer.style.alignItems = 'center';
-        instructionsContainer.style.justifyContent = 'center';
-        instructionsContainer.style.width = '80%';
-        instructionsContainer.style.height = '80%';
-        instructionsContainer.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
-        instructionsContainer.style.padding = '20px';
-        instructionsContainer.style.borderRadius = '10px';
-        
-        // Add title
-        const title = document.createElement('h2');
-        title.textContent = 'Instructions';
-        title.style.color = '#ffcc00';
-        title.style.marginBottom = '20px';
-        instructionsContainer.appendChild(title);
-        
-        // Add instructions text
-        const instructions = document.createElement('div');
-        instructions.style.color = 'white';
-        instructions.style.fontSize = '18px';
-        instructions.style.lineHeight = '1.5';
-        instructions.style.textAlign = 'left';
-        instructions.style.marginBottom = '30px';
-        instructions.innerHTML = `
-            <p><strong>Movement:</strong> Arrow Keys or WASD</p>
-            <p><strong>Fire Primary Weapon:</strong> Space or Ctrl</p>
-            <p><strong>Fire Special Weapon:</strong> Shift</p>
-            <p><strong>Cycle Special Weapons:</strong> Alt</p>
-            <p><strong>Megabomb:</strong> B</p>
-            <p><strong>Pause:</strong> P or Esc</p>
-        `;
-        instructionsContainer.appendChild(instructions);
-        
-        // Add back button
-        const backButton = document.createElement('button');
-        backButton.textContent = 'Back to Menu';
-        backButton.style.padding = '10px 20px';
-        backButton.style.backgroundColor = '#333';
-        backButton.style.color = 'white';
-        backButton.style.border = 'none';
-        backButton.style.borderRadius = '5px';
-        backButton.style.cursor = 'pointer';
-        backButton.addEventListener('click', () => {
-            this.setupMenuScreen();
-        });
-        instructionsContainer.appendChild(backButton);
-        
-        menuScreen.appendChild(instructionsContainer);
     }
     
     /**
@@ -299,22 +436,30 @@ class MenuState {
      * Update menu when gameplay assets finish loading
      */
     updateMenuForLoadedAssets() {
-        // Re-setup the menu screen to show updated Start Game option
-        this.setupMenuScreen();
-        
-        // Update loading indicator
+        // Update loading indicator if it exists
         const loadingIndicator = document.getElementById('background-loading-indicator');
         if (loadingIndicator) {
             loadingIndicator.textContent = 'Game assets loaded!';
             loadingIndicator.style.color = '#4CAF50';
             
-            // Remove indicator after 3 seconds
+            // Remove indicator after 2 seconds
             setTimeout(() => {
                 if (loadingIndicator.parentNode) {
                     loadingIndicator.parentNode.removeChild(loadingIndicator);
                 }
-            }, 3000);
+            }, 2000);
         }
+        
+        // Update the Start Game option to be clickable
+        const menuScreen = document.getElementById('menu-screen');
+        const options = menuScreen.querySelectorAll('div > div');
+        options.forEach((option, index) => {
+            if (option.textContent.includes('Start New Game')) {
+                option.textContent = 'Start New Game';
+                option.style.color = index === this.selectedOption ? '#ffcc00' : 'white';
+                option.style.cursor = 'pointer';
+            }
+        });
     }
     
     /**

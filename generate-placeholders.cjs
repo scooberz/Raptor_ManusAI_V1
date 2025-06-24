@@ -49,6 +49,7 @@ const newImages = [
     // New projectile sprites
     { name: 'ENEMY_BULLET.png', width: 8, height: 8, dir: 'assets/images/projectiles' },
     { name: 'ENEMY_MISSILE.png', width: 12, height: 24, dir: 'assets/images/projectiles' },
+    { name: 'SMOKE_PUFF.png', width: 16, height: 16, dir: 'assets/images/effects' },
     // You can add any other missing files here too
 ];
 // --- Generate the new placeholder images ---

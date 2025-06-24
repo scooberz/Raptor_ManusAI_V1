@@ -71,9 +71,9 @@ This lists the reusable "Lego bricks" in the `enemyBehaviors.js` library that ca
 ### Movement Patterns
 | Pattern Name | Description |
 | :--- | :--- |
-| `default` | Standard downward movement based on enemy's `speed`. |
-| `sine_wave_slow` | Moves down in a slow, wide weaving pattern. |
-| `sine_wave_fast` | Moves down in a fast, aggressive weaving pattern. |
+| `default` | Enemy moves straight down at its base velocity. |
+| `sine_wave_slow` | Enemy moves in a slow sine wave. |
+| `sine_wave_fast` | Enemy moves in a fast sine wave. |
 | `swoop_from_left` / `swoop_from_right` | Enters from the side and arcs towards the center. Used by Darts. |
 | `move_straight_down` | Moves straight down using base velocity. |
 | `move_to_point_and_hold` | Flies to a specific point, holds for a duration, then descends. Used by Formation Strikers. |
@@ -91,7 +91,7 @@ This lists the reusable "Lego bricks" in the `enemyBehaviors.js` library that ca
 | `split_and_descend` | Descends, then splits off to the side. Used by V-formation followers. |
 | `descend_and_diverge` | Flies down, then angles away from the center of the screen. |
 | `criss_cross` | Flies in a straight diagonal line, intended for coordinated group attacks. |
-| `boss_movement` | Multi-phase movement for bosses. |
+| `boss_patrol` | Boss enters, then patrols between three upper-screen waypoints, pausing initial descent at y=80. |
 
 ### Firing Patterns
 | Pattern Name | Description |
@@ -103,5 +103,9 @@ This lists the reusable "Lego bricks" in the `enemyBehaviors.js` library that ca
 | `fire_straight_missile` | Fires a powerful, non-homing missile straight ahead. |
 | `burst_fire` | Fires a quick volley of 3 aimed shots. Used by Cutters. |
 | `wide_v_shot` | Fires two projectiles in a wide V-pattern. Used by Goliaths. |
-| `boss_multi_weapon_fire` | The boss's unique pattern controlling its cannons and missiles. |
+| `boss_multi_weapon_fire` | The boss's advanced pattern: rapid straight missiles, burst-aimed shots (3-shot burst after a pause), periodic reposition pauses, and a desperation ring attack at 25% health. Fire rates are 3x faster than normal. |
+
+### Projectile Asset Keys
+- `enemyMissile`: Uses `ENEMY_MISSILE.png` (for boss and advanced enemy missiles)
+- `enemyBullet`: Uses `enemy_bullet.png` (orange ball, for most enemy projectiles)
 

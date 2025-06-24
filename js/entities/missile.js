@@ -1,17 +1,21 @@
 import { Projectile } from './projectile.js';
 import { Entity } from '../engine/entity.js';
 import { Explosion } from './explosion.js';
+import { SmokeParticle } from './smokeParticle.js';
 
 export class Missile extends Projectile {
-    constructor(game, x, y, damage, owner, initialVelocity = {x: 0, y: -50}) {
+    constructor(game, x, y, damage, owner, initialVelocity = {x: 0, y: -50}, spriteName = null) {
         const width = 12;
         const height = 24;
         
-        // Determine which sprite to use based on the owner
-        const spriteName = (owner === 'player') ? 'missile' : 'enemyMissile';
-
+        // Determine which sprite to use based on the owner if not provided
+        if (!spriteName) {
+            spriteName = (owner === 'player') ? 'MISSILE' : 'ENEMY_MISSILE';
+        }
+        
         // Call the parent constructor with the correct sprite name
         super(game, x, y, width, height, initialVelocity.x, initialVelocity.y, damage, owner, spriteName);
+        this.layer = 'projectile'; // Ensure missile is on the projectile layer
         
         // Player-specific properties for acceleration
         if (this.owner === 'player') {
@@ -21,6 +25,8 @@ export class Missile extends Projectile {
         
         // Missile-specific properties
         this.hasHitTarget = false; // Track if missile has hit something
+        this.smokeSpawnTimer = 0;
+        this.smokeSpawnRate = 50; // Spawn a new puff every 50ms
     }
 
     update(deltaTime) {
@@ -37,6 +43,16 @@ export class Missile extends Projectile {
                 const newSpeed = Math.min(this.maxSpeed, currentSpeed + this.acceleration * (deltaTime / 1000));
                 this.velocityY = -newSpeed; // Accelerate upwards
             }
+        }
+        
+        // --- Smoke Trail Spawning ---
+        this.smokeSpawnTimer -= deltaTime;
+        if (this.smokeSpawnTimer <= 0) {
+            // Spawn a particle at the "engine" end of the missile
+            const spawnX = this.x + this.width / 2;
+            const spawnY = this.y + this.height - 5;
+            this.game.entityManager.add(new SmokeParticle(this.game, spawnX, spawnY));
+            this.smokeSpawnTimer = this.smokeSpawnRate;
         }
         
         // Let the parent Entity class handle the actual position update

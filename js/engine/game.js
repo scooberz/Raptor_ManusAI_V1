@@ -84,28 +84,49 @@ class Game {
         requestAnimationFrame(this.gameLoop);
     }
 
+    /**
+     * Resize all canvas layers to match window size while enforcing a 4:3 aspect ratio.
+     */
     resize() {
-        // Set game dimensions
-        this.width = window.innerWidth;
-        this.height = window.innerHeight;
-        
-        // Resize all canvas layers
+        const windowWidth = window.innerWidth;
+        const windowHeight = window.innerHeight;
+        const targetAspectRatio = 4 / 3;
+
+        let newWidth, newHeight;
+
+        // Determine the largest possible 4:3 canvas that fits within the window
+        if (windowWidth / windowHeight > targetAspectRatio) {
+            // Window is wider than 4:3, so height is the limiting dimension
+            newHeight = windowHeight;
+            newWidth = newHeight * targetAspectRatio;
+        } else {
+            // Window is taller than 4:3, so width is the limiting dimension
+            newWidth = windowWidth;
+            newHeight = newWidth / targetAspectRatio;
+        }
+
+        // Set the internal game dimensions
+        this.width = 800; // Set a fixed internal resolution
+        this.height = 600; // 800x600 is a classic 4:3 resolution
+
+        // Resize and position all canvas layers to be centered in the window
         for (const key in this.layers) {
             const canvas = this.layers[key];
-            if (canvas) {
-                canvas.width = this.width;
-                canvas.height = this.height;
-                
-                // Update the context after resize
-                const ctx = this.contexts[key];
-                if (ctx) {
-                    ctx.globalCompositeOperation = 'source-over';
-                    ctx.imageSmoothingEnabled = true;
-                }
-            }
+            canvas.width = this.width;
+            canvas.height = this.height;
+
+            // Apply styles to center the canvas and scale it correctly
+            canvas.style.width = `${newWidth}px`;
+            canvas.style.height = `${newHeight}px`;
+            canvas.style.position = 'absolute';
+            canvas.style.left = `${(windowWidth - newWidth) / 2}px`;
+            canvas.style.top = `${(windowHeight - newHeight) / 2}px`;
         }
-        
-        console.log(`Game resized to ${this.width}x${this.height}`);
+
+        // Notify the current state of the resize if it has a resize handler
+        if (this.currentState && typeof this.currentState.resize === 'function') {
+            this.currentState.resize();
+        }
     }
 
     // --- UPGRADE: Game Loop now uses a Fixed Timestep for stable physics ---

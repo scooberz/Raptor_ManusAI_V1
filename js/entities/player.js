@@ -26,7 +26,7 @@ class Player extends Entity {
         this.currentWeapon = this.weaponOrder[this.currentWeaponIndex];
         this.weapons = {
             'CANNON': { name: 'Autocannon', fireRate: 100, lastFired: 0, level: 1 }, // Slower fire rate
-            'MISSILE': { name: 'Missiles', fireRate: 600, lastFired: 0 }
+            'MISSILE': { name: 'Missiles', fireRate: 715, lastFired: 0 } // 30% slower than before
         };
 
         // Special weapons
@@ -248,7 +248,7 @@ class Player extends Entity {
         // Fire two bullets side by side for double machine gun effect
         const bulletSpacing = 10;
         const bulletVelocityY = -1200;
-        const bulletDamage = 10;
+        const bulletDamage = 3; // Lowered for balance (was 10)
 
         // Use a more generous hitbox for collision detection
         const bulletHitboxWidth = 8;
@@ -294,16 +294,30 @@ class Player extends Entity {
      * Fire the secondary weapon (missiles)
      */
     fireMissile() {
-        const missile = new Missile(
+        // Fire two missiles side by side
+        const missileSpacing = 12;
+        const missileDamage = 60;
+        const initialVelocity = { x: 0, y: -3 }; // Lower initial speed for more inertia
+        const leftMissile = new Missile(
             this.game,
-            this.x + this.width / 2,
+            this.x + this.width / 2 - missileSpacing,
             this.y,
-            8, // damage
-            'player', // owner
-            { x: 0, y: -6 } // initialVelocity
+            missileDamage,
+            'player',
+            initialVelocity
         );
-        this.game.entityManager.add(missile);
-        this.game.collision.addToGroup(missile, 'playerProjectiles');
+        const rightMissile = new Missile(
+            this.game,
+            this.x + this.width / 2 + missileSpacing,
+            this.y,
+            missileDamage,
+            'player',
+            initialVelocity
+        );
+        this.game.entityManager.add(leftMissile);
+        this.game.collision.addToGroup(leftMissile, 'playerProjectiles');
+        this.game.entityManager.add(rightMissile);
+        this.game.collision.addToGroup(rightMissile, 'playerProjectiles');
     }
 
     /**

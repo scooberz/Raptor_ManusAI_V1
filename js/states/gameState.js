@@ -19,7 +19,6 @@ class GameState {
         this.levelComplete = false;
         this.levelCompleteTime = 0;
         this.levelCompleteDelay = 3000; // 3 seconds before next level
-        this.isPaused = false;
         this.isInitializing = false;
         this.debugMode = false; // Add debug mode flag
     }
@@ -30,20 +29,12 @@ class GameState {
     async enter() {
         console.log('Entering Game State');
         
-        // Check if we're resuming from pause
-        if (this.player && this.currentLevel) {
-            console.log('Resuming from pause - skipping re-initialization');
-            this.isPaused = false;
-            return;
-        }
-        
         // Prevent multiple rapid transitions
         if (this.isInitializing) return;
         this.isInitializing = true;
         
         // Initialize game components
         await this.initializeGame();
-        this.isPaused = false;
         
         // Reset initialization flag after a short delay
         setTimeout(() => {
@@ -108,13 +99,28 @@ class GameState {
      * @param {number} deltaTime - Time since last update in milliseconds
      */
     update(deltaTime) {
-        // Don't update if the game is over or paused
-        if (this.game.currentState !== this || this.isPaused) return;
+        // Don't update if the game is over
+        if (this.game.currentState !== this) return;
+        
+        // Update pause state if it exists
+        if (this.game.states.pause) {
+            this.game.states.pause.update(deltaTime);
+        }
+        
+        // Don't update game logic if paused
+        if (this.game.states.pause && this.game.states.pause.isPaused) return;
         
         // Toggle debug mode with '1' key - only on key press, not hold
         if (this.game.input.wasKeyJustPressed('1')) {
             this.debugMode = !this.debugMode;
             console.log(`Debug mode ${this.debugMode ? 'enabled' : 'disabled'}`);
+        }
+        
+        // Restart level with '3' key (debug)
+        if (this.game.input.restartLevelPressed) {
+            console.log('Restarting current level...');
+            this.restartLevel();
+            this.game.input.restartLevelPressed = false; // Reset the flag
         }
         
         this.gameTime += deltaTime;
@@ -150,10 +156,11 @@ class GameState {
             return;
         }
         
-        // Check for pause
+        // Check for pause - use the overlay approach
         if (this.game.input.isKeyPressed('Escape') || this.game.input.isKeyPressed('p')) {
-            this.isPaused = true;
-            this.game.changeState('pause');
+            if (this.game.states.pause) {
+                this.game.states.pause.togglePause();
+            }
         }
     }
     
@@ -226,13 +233,39 @@ class GameState {
      * Complete the current level and move to the next
      */
     completeLevel() {
-        // If Level 1 is complete, go to hangar instead of next level
-        if (this.level === 1) {
-            this.game.changeState('hangar');
-            return;
-        }
-        this.level++;
-        this.initializeGame(); // This will handle loading the next level or ending the game
+        this.game.changeState('hangar');
+    }
+    
+    /**
+     * Restart the current level (debug function)
+     */
+    async restartLevel() {
+        console.log(`Restarting level ${this.level}...`);
+        
+        // Reset level completion state
+        this.levelComplete = false;
+        this.levelCompleteTime = 0;
+        
+        // Clear all entities except the player
+        this.game.collision.clearAll();
+        this.game.entityManager.clear();
+        
+        // Re-add the player
+        this.game.entityManager.add(this.player);
+        this.game.collision.addToGroup(this.player, 'player');
+        
+        // Reset player position to starting position
+        this.player.x = this.game.width / 2 - 32;
+        this.player.y = this.game.height - 100;
+        
+        // Reset player health and shields (optional - comment out if you want to keep current health)
+        // this.player.health = this.player.maxHealth;
+        // this.player.shields = this.player.maxShields;
+        
+        // Reinitialize the current level
+        await this.initializeLevel();
+        
+        console.log(`Level ${this.level} restarted successfully`);
     }
     
     /**
@@ -241,14 +274,7 @@ class GameState {
     exit() {
         console.log('Exiting Game State');
         
-        // Check if we're transitioning to pause state
-        // If the game's current state is already pause, we're pausing
-        if (this.game.currentState && this.game.currentState.name === 'pause') {
-            console.log('Pausing - skipping cleanup');
-            return;
-        }
-        
-        // Full cleanup when actually leaving the game
+        // Full cleanup when leaving the game
         if (this.currentLevel && typeof this.currentLevel.cleanup === 'function') {
             this.currentLevel.cleanup();
         }

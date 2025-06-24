@@ -304,9 +304,10 @@ class AssetManager {
                 
                 // Projectile assets
                 'playerBullet': 'assets/images/projectiles/enemy_bullet.png',
-                'enemyBullet': 'assets/images/projectiles/ENEMY_BULLET.png',
+                'enemyBullet': 'assets/images/projectiles/enemy_bullet.png',
                 'enemyMissile': 'assets/images/projectiles/ENEMY_MISSILE.png',
-                'missile': 'assets/images/projectiles/MISSILE.png',
+                'missile': 'assets/images/projectiles/player_missile.png',
+                'MISSILE': 'assets/images/projectiles/player_missile.png',
                 
                 // Environment assets
                 'backgroundLevel1': 'assets/images/environment/background_level2.png',
@@ -328,7 +329,8 @@ class AssetManager {
                 
                 // UI assets
                 'healthBar': 'assets/images/ui/health_bar.png',
-                'shieldBar': 'assets/images/ui/shield_bar.png'
+                'shieldBar': 'assets/images/ui/shield_bar.png',
+                // smokePuff: 'assets/images/effects/SMOKE_PUFF.png',
             }
         };
         

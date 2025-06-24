@@ -6,12 +6,12 @@ class HangarState {
     constructor(game) {
         this.game = game;
         this.menuOptions = [
-            'Repair Ship',
-            'Upgrade Weapons',
-            'Shop',
-            'Proceed to Next Mission'
+            { text: 'Choose Mission', action: () => this.chooseNextMission() },
+            { text: 'Shop (Upgrades & Repairs)', action: () => this.openShop() },
+            { text: 'Save Game', action: () => this.saveGame() },
+            { text: 'Exit to Main Menu', action: () => this.exitToMenu() }
         ];
-        this.selectedOptionIndex = 0;
+        this.selectedOption = 0;
         this.playerMoney = 0;
     }
 
@@ -19,8 +19,92 @@ class HangarState {
      * Enter the hangar state
      */
     enter() {
-        // Get player's money from persistent data
         this.playerMoney = this.game.playerData.money;
+        document.getElementById('hangar-screen').style.display = 'flex';
+        this.setupHangarScreen();
+    }
+
+    setupHangarScreen() {
+        const hangarScreen = document.getElementById('hangar-screen');
+        hangarScreen.innerHTML = '';
+
+        // Main container
+        const mainContainer = document.createElement('div');
+        mainContainer.style.display = 'flex';
+        mainContainer.style.flexDirection = 'column';
+        mainContainer.style.alignItems = 'center';
+        mainContainer.style.justifyContent = 'center';
+        mainContainer.style.width = '100%';
+        mainContainer.style.height = '100%';
+        mainContainer.style.backgroundColor = 'rgba(20, 20, 20, 0.98)';
+        mainContainer.style.position = 'relative';
+
+        // Title
+        const title = document.createElement('h1');
+        title.textContent = 'HANGAR';
+        title.style.color = 'white';
+        title.style.fontSize = '48px';
+        title.style.marginBottom = '20px';
+        mainContainer.appendChild(title);
+
+        // Credits
+        const credits = document.createElement('div');
+        credits.textContent = `CREDITS: $${this.playerMoney}`;
+        credits.style.color = '#ffcc00';
+        credits.style.fontSize = '24px';
+        credits.style.marginBottom = '40px';
+        mainContainer.appendChild(credits);
+
+        // Menu options
+        this.menuOptions.forEach((option, index) => {
+            const optionElement = document.createElement('div');
+            optionElement.textContent = option.text;
+            optionElement.style.color = index === this.selectedOption ? '#ffcc00' : 'white';
+            optionElement.style.fontSize = '32px';
+            optionElement.style.margin = '12px';
+            optionElement.style.padding = '8px 24px';
+            optionElement.style.cursor = 'pointer';
+            optionElement.style.borderRadius = '6px';
+            optionElement.style.transition = 'all 0.2s';
+            optionElement.style.textShadow = index === this.selectedOption ? '0 0 15px #ffcc00' : '2px 2px 4px rgba(0,0,0,0.8)';
+
+            optionElement.addEventListener('mouseover', () => {
+                this.selectedOption = index;
+                this.updateMenuSelection();
+            });
+            optionElement.addEventListener('click', option.action);
+            mainContainer.appendChild(optionElement);
+        });
+
+        // Instructions
+        const instructions = document.createElement('div');
+        instructions.style.position = 'absolute';
+        instructions.style.bottom = '20px';
+        instructions.style.right = '20px';
+        instructions.style.color = '#aaa';
+        instructions.style.fontSize = '16px';
+        instructions.style.textAlign = 'right';
+        instructions.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+        instructions.style.padding = '10px';
+        instructions.style.borderRadius = '5px';
+        instructions.style.border = '1px solid #333';
+        instructions.style.zIndex = '3';
+        instructions.innerHTML = 'Use Arrow Keys to navigate<br>Enter to select';
+        mainContainer.appendChild(instructions);
+
+        hangarScreen.appendChild(mainContainer);
+    }
+
+    updateMenuSelection() {
+        const hangarScreen = document.getElementById('hangar-screen');
+        const options = hangarScreen.querySelectorAll('div > div');
+        // Skip title and credits (first two divs)
+        options.forEach((option, index) => {
+            if (index < 2) return;
+            const menuIndex = index - 2;
+            option.style.color = menuIndex === this.selectedOption ? '#ffcc00' : 'white';
+            option.style.textShadow = menuIndex === this.selectedOption ? '0 0 15px #ffcc00' : '2px 2px 4px rgba(0,0,0,0.8)';
+        });
     }
 
     /**
@@ -28,27 +112,16 @@ class HangarState {
      * @param {number} deltaTime - Time since last update in milliseconds
      */
     update(deltaTime) {
-        // Handle menu navigation
-        if (this.game.input.wasKeyJustPressed('ArrowUp')) {
-            this.selectedOptionIndex = (this.selectedOptionIndex - 1 + this.menuOptions.length) % this.menuOptions.length;
+        if (this.game.input.wasKeyJustPressed('ArrowUp') || this.game.input.wasKeyJustPressed('w')) {
+            this.selectedOption = (this.selectedOption - 1 + this.menuOptions.length) % this.menuOptions.length;
+            this.updateMenuSelection();
         }
-        if (this.game.input.wasKeyJustPressed('ArrowDown')) {
-            this.selectedOptionIndex = (this.selectedOptionIndex + 1) % this.menuOptions.length;
+        if (this.game.input.wasKeyJustPressed('ArrowDown') || this.game.input.wasKeyJustPressed('s')) {
+            this.selectedOption = (this.selectedOption + 1) % this.menuOptions.length;
+            this.updateMenuSelection();
         }
-
-        // Handle menu selection
-        if (this.game.input.wasKeyJustPressed('Enter')) {
-            const selectedOption = this.menuOptions[this.selectedOptionIndex];
-            
-            switch (selectedOption) {
-                case 'Proceed to Next Mission':
-                    this.game.stateMachine.changeState('Menu');
-                    break;
-                // Other options will be implemented later
-                default:
-                    console.log(`Selected: ${selectedOption}`);
-                    break;
-            }
+        if (this.game.input.wasKeyJustPressed('Enter') || this.game.input.wasKeyJustPressed(' ')) {
+            this.menuOptions[this.selectedOption].action();
         }
     }
 
@@ -57,43 +130,29 @@ class HangarState {
      * @param {Object} contexts - Object containing all canvas contexts
      */
     render(contexts) {
-        const context = contexts.ui; // Use the UI context
+        // Hangar is rendered using HTML/CSS in the hangar-screen element
+    }
 
-        // Draw dark background
-        context.fillStyle = '#111'; // Darker background
-        context.fillRect(0, 0, this.game.width, this.game.height);
+    chooseNextMission() {
+        document.getElementById('hangar-screen').style.display = 'none';
+        this.game.changeState('game');
+    }
 
-        // Draw title
-        context.fillStyle = 'white';
-        context.font = 'bold 48px Arial';
-        context.textAlign = 'center';
-        context.fillText('H A N G A R', this.game.width / 2, 80);
+    openShop() {
+        alert('Shop (Upgrades & Repairs) coming soon!');
+    }
 
-        // Draw credits
-        context.font = '24px Arial';
-        context.fillStyle = '#ffcc00';
-        context.fillText(`CREDITS: $${this.playerMoney}`, this.game.width / 2, 140);
+    saveGame() {
+        alert('Game saved! (Stub)');
+    }
 
-        // Draw menu options
-        context.font = '32px Arial';
-        const menuY = 250;
-        const menuSpacing = 60;
-
-        this.menuOptions.forEach((option, index) => {
-            // Set color based on selection
-            context.fillStyle = index === this.selectedOptionIndex ? '#ffcc00' : 'white';
-            
-            // Draw selection indicator
-            if (index === this.selectedOptionIndex) {
-                context.fillText('>', this.game.width / 2 - 200, menuY + index * menuSpacing);
-            }
-            
-            // Draw option text
-            context.fillText(option, this.game.width / 2, menuY + index * menuSpacing);
-        });
+    exitToMenu() {
+        document.getElementById('hangar-screen').style.display = 'none';
+        this.game.changeState('menu');
     }
 
     exit() {
+        document.getElementById('hangar-screen').style.display = 'none';
         console.log('Exiting Hangar State');
     }
 }

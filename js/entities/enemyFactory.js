@@ -125,7 +125,10 @@ class EnemyFactory {
         if (enemy) {
             enemy.overrides = overrides;
             // Apply simple stat overrides
-            if (overrides.health) enemy.health = overrides.health;
+            if (overrides.health) {
+                enemy.health = overrides.health;
+                if (enemy.isBoss) enemy.maxHealth = overrides.health; // Keep boss healthbar in sync
+            }
             if (overrides.fireRate) enemy.fireRate = overrides.fireRate;
             if (overrides.velocityX) enemy.velocityX = overrides.velocityX;
             if (overrides.velocityY) enemy.velocityY = overrides.velocityY;

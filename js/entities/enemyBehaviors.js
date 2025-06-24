@@ -34,6 +34,20 @@ export const movementPatterns = {
         enemy.x = enemy.patternState.initialX + Math.sin(enemy.patternState.angle) * 80; 
     },
 
+    // A customizable sine wave pattern with configurable frequency and amplitude
+    sine_wave_custom: function(enemy, deltaTime) {
+        // Initialize pattern state on the enemy if it doesn't exist
+        if (enemy.patternState === undefined) {
+            enemy.patternState = { initialX: enemy.x, angle: 0 };
+        }
+        // Get customizable parameters from overrides, with sensible defaults
+        const frequency = enemy.overrides.sine_frequency || 0.03; // Controls oscillation speed
+        const amplitude = enemy.overrides.sine_amplitude || 60;   // Controls width of oscillation
+        
+        enemy.patternState.angle += frequency;
+        enemy.x = enemy.patternState.initialX + Math.sin(enemy.patternState.angle) * amplitude;
+    },
+
     // Enemy starts from the left and swoops towards the center, then straightens out.
     swoop_from_left: function(enemy, deltaTime) {
         // Set a high constant downward speed (use override if provided)
@@ -570,8 +584,60 @@ export const movementPatterns = {
             enemy.velocityX = 0;
             enemy.velocityY = 0;
         }
+    },
+
+    // A multi-phase pattern for a final boss, moving between waypoints.
+    boss_patrol: function(enemy, deltaTime) {
+        if (!enemy.patternState) {
+            enemy.patternState = {
+                // Define 3 patrol points in the upper half of the screen
+                waypoints: [
+                    { x: enemy.game.width * 0.2, y: 120 },
+                    { x: enemy.game.width * 0.8, y: 120 },
+                    { x: enemy.game.width * 0.5, y: 180 }
+                ],
+                currentWaypointIndex: 0,
+                initialMove: true
+            };
+             // Initial movement onto the screen
+            enemy.velocityY = (enemy.speed || 60);
+        }
+
+        const state = enemy.patternState;
+        const speed = enemy.speed || 60;
+        
+        if (state.initialMove) {
+            if (enemy.y >= 80) { // Stop initial descent at y=80
+                state.initialMove = false;
+            }
+            return;
+        }
+
+        let target = state.waypoints[state.currentWaypointIndex];
+        const dx = target.x - enemy.x;
+        const dy = target.y - enemy.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+        if (distance < 5) {
+            // Arrived at waypoint, pick the next one
+            state.currentWaypointIndex = (state.currentWaypointIndex + 1) % state.waypoints.length;
+        } else {
+            // Move towards the target waypoint
+            enemy.velocityX = (dx / distance) * speed;
+            enemy.velocityY = (dy / distance) * speed;
+        }
     }
 };
+
+// Helper to determine projectile sprite for enemy
+function getEnemyProjectileSprite(enemy) {
+    // Reaper and Cyclone use ENEMY_MISSILE.png
+    if (enemy.type === 'reaper' || enemy.type === 'cyclone') {
+        return 'ENEMY_MISSILE';
+    }
+    // All others use orange ball
+    return 'enemy_bullet';
+}
 
 export const firingPatterns = {
     // Enemy does not fire
@@ -595,9 +661,8 @@ export const firingPatterns = {
                 const distance = Math.sqrt(dx * dx + dy * dy);
                 const velocityX = (dx / distance) * 200;
                 const velocityY = (dy / distance) * 200;
-
-                // Assuming a Projectile class exists and can be instantiated like this
-                enemy.game.entityManager.add(new Projectile(enemy.game, enemy.x, enemy.y, 8, 16, velocityX, velocityY, 10, 'enemy', 'enemyBullet'));
+                const spriteName = getEnemyProjectileSprite(enemy);
+                enemy.game.entityManager.add(new Projectile(enemy.game, enemy.x, enemy.y, 8, 16, velocityX, velocityY, 10, 'enemy', spriteName));
             }
             enemy.fireTimer = enemy.fireRate || 2000; // Reset timer
         }
@@ -613,7 +678,8 @@ export const firingPatterns = {
         if (enemy.fireTimer <= 0) {
             const velocityX = 0;
             const velocityY = 150; // Straight down velocity
-            enemy.game.entityManager.add(new Projectile(enemy.game, enemy.x, enemy.y, 8, 16, velocityX, velocityY, 10, 'enemy', 'enemyBullet'));
+            const spriteName = getEnemyProjectileSprite(enemy);
+            enemy.game.entityManager.add(new Projectile(enemy.game, enemy.x, enemy.y, 8, 16, velocityX, velocityY, 10, 'enemy', spriteName));
             enemy.fireTimer = enemy.fireRate || 3000; // Reset timer
         }
     },
@@ -627,6 +693,7 @@ export const firingPatterns = {
 
         if (enemy.fireTimer <= 0) {
             const projectileSpeed = 150;
+            const spriteName = getEnemyProjectileSprite(enemy);
             // Center bullet
             const centerVelocityX = 0;
             const centerVelocityY = projectileSpeed;
@@ -636,11 +703,9 @@ export const firingPatterns = {
             // Right bullet (angled right by ~15 degrees)
             const rightVelocityX = projectileSpeed * 0.26;
             const rightVelocityY = projectileSpeed * 0.96;
-
-            enemy.game.entityManager.add(new Projectile(enemy.game, enemy.x, enemy.y, 8, 16, centerVelocityX, centerVelocityY, 10, 'enemy', 'enemyBullet'));
-            enemy.game.entityManager.add(new Projectile(enemy.game, enemy.x, enemy.y, 8, 16, leftVelocityX, leftVelocityY, 10, 'enemy', 'enemyBullet'));
-            enemy.game.entityManager.add(new Projectile(enemy.game, enemy.x, enemy.y, 8, 16, rightVelocityX, rightVelocityY, 10, 'enemy', 'enemyBullet'));
-            
+            enemy.game.entityManager.add(new Projectile(enemy.game, enemy.x, enemy.y, 8, 16, centerVelocityX, centerVelocityY, 10, 'enemy', spriteName));
+            enemy.game.entityManager.add(new Projectile(enemy.game, enemy.x, enemy.y, 8, 16, leftVelocityX, leftVelocityY, 10, 'enemy', spriteName));
+            enemy.game.entityManager.add(new Projectile(enemy.game, enemy.x, enemy.y, 8, 16, rightVelocityX, rightVelocityY, 10, 'enemy', spriteName));
             enemy.fireTimer = enemy.fireRate || 4000; // Reset timer
         }
     },
@@ -693,7 +758,8 @@ export const firingPatterns = {
                     const dy = player.y - enemy.y;
                     const distance = Math.sqrt(dx * dx + dy * dy);
                     const velocity = { x: (dx / distance) * 300, y: (dy / distance) * 300 }; // Faster projectiles
-                    enemy.game.entityManager.add(new Projectile(enemy.game, enemy.x, enemy.y, 6, 12, velocity.x, velocity.y, 5, 'enemy', 'enemyBullet'));
+                    const spriteName = getEnemyProjectileSprite(enemy);
+                    enemy.game.entityManager.add(new Projectile(enemy.game, enemy.x, enemy.y, 6, 12, velocity.x, velocity.y, 5, 'enemy', spriteName));
                 }
                 state.burstShotsFired++;
                 state.interShotTimer = state.burstShotDelay; // Reset inter-shot timer
@@ -720,11 +786,12 @@ export const firingPatterns = {
 
             // Create the left-moving projectile (down and left at 45 degrees)
             const leftVelocity = { x: -projectileSpeed * 0.707, y: projectileSpeed * 0.707 };
-            enemy.game.entityManager.add(new Projectile(enemy.game, enemy.x + enemy.width / 2, enemy.y + enemy.height / 2, 8, 16, leftVelocity.x, leftVelocity.y, damage, 'enemy'));
+            const spriteName = getEnemyProjectileSprite(enemy);
+            enemy.game.entityManager.add(new Projectile(enemy.game, enemy.x + enemy.width / 2, enemy.y + enemy.height / 2, 8, 16, leftVelocity.x, leftVelocity.y, damage, 'enemy', spriteName));
             
             // Create the right-moving projectile (down and right at 45 degrees)
             const rightVelocity = { x: projectileSpeed * 0.707, y: projectileSpeed * 0.707 };
-            enemy.game.entityManager.add(new Projectile(enemy.game, enemy.x + enemy.width / 2, enemy.y + enemy.height / 2, 8, 16, rightVelocity.x, rightVelocity.y, damage, 'enemy'));
+            enemy.game.entityManager.add(new Projectile(enemy.game, enemy.x + enemy.width / 2, enemy.y + enemy.height / 2, 8, 16, rightVelocity.x, rightVelocity.y, damage, 'enemy', spriteName));
 
             enemy.fireTimer = enemy.fireRate || 3000;
         }
@@ -734,7 +801,99 @@ export const firingPatterns = {
     boss_multi_weapon_fire: function(enemy, player, deltaTime) {
         if (!enemy.fireState) {
             enemy.fireState = {
-                cannonTimer: enemy.overrides.cannonFireRate || 1000,
+                straightShotTimer: (enemy.overrides.straightFireRate || 2000) / 3,
+                aimedShotTimer: (enemy.overrides.aimedFireRate || 3200) / 3,
+                aimedBurstPause: false,
+                aimedBurstShots: 0,
+                aimedBurstDelay: 0,
+                repositionPause: false,
+                repositionTimer: 0,
+                desperationTriggered: false,
+                desperationTimer: 0
+            };
+        }
+        const state = enemy.fireState;
+        // Desperation attack trigger
+        if (!state.desperationTriggered && enemy.health / enemy.maxHealth <= 0.25) {
+            state.desperationTriggered = true;
+            state.desperationTimer = 0;
+        }
+        // Desperation attack (massive spread)
+        if (state.desperationTriggered && state.desperationTimer <= 0) {
+            // Fire a ring of projectiles
+            for (let i = 0; i < 16; i++) {
+                const angle = (Math.PI * 2 * i) / 16;
+                const velocityX = Math.cos(angle) * 250;
+                const velocityY = Math.sin(angle) * 250;
+                const proj = new Projectile(enemy.game, enemy.x + enemy.width/2, enemy.y + enemy.height/2, 8, 8, velocityX, velocityY, 15, 'enemy', 'enemyBullet');
+                enemy.game.entityManager.add(proj);
+                enemy.game.collision.addToGroup(proj, 'enemyProjectiles');
+            }
+            state.desperationTimer = 3500; // 3.5s between desperation attacks
+        }
+        if (state.desperationTriggered) {
+            state.desperationTimer -= deltaTime;
+        }
+        // Reposition pause logic
+        if (state.repositionPause) {
+            state.repositionTimer -= deltaTime;
+            if (state.repositionTimer <= 0) {
+                state.repositionPause = false;
+            } else {
+                return; // Paused, don't fire
+            }
+        }
+        // --- Firing Straight Shooters ---
+        state.straightShotTimer -= deltaTime;
+        if (state.straightShotTimer <= 0) {
+            const missileVelocity = { x: 0, y: 350 };
+            // Left pod
+            enemy.game.entityManager.add(new Projectile(enemy.game, enemy.x + 20, enemy.y + enemy.height - 20, 8, 16, missileVelocity.x, missileVelocity.y, 20, 'enemy', 'enemyMissile'));
+            // Right pod
+            enemy.game.entityManager.add(new Projectile(enemy.game, enemy.x + enemy.width - 28, enemy.y + enemy.height - 20, 8, 16, missileVelocity.x, missileVelocity.y, 20, 'enemy', 'enemyMissile'));
+            state.straightShotTimer = ((enemy.overrides.straightFireRate || 2000) / 3);
+            // After every 4 straight shots, pause to reposition
+            state.straightShotsFired = (state.straightShotsFired || 0) + 1;
+            if (state.straightShotsFired % 4 === 0) {
+                state.repositionPause = true;
+                state.repositionTimer = 1200; // 1.2s pause
+            }
+        }
+        // --- Firing Aimed Burst ---
+        state.aimedShotTimer -= deltaTime;
+        if (!state.aimedBurstPause && state.aimedShotTimer <= 0) {
+            state.aimedBurstPause = true;
+            state.aimedBurstShots = 0;
+            state.aimedBurstDelay = 0;
+        }
+        if (state.aimedBurstPause) {
+            state.aimedBurstDelay -= deltaTime;
+            if (state.aimedBurstShots < 3 && state.aimedBurstDelay <= 0) {
+                if (player) {
+                    const dx = player.x - (enemy.x + enemy.width / 2);
+                    const dy = player.y - (enemy.y + enemy.height / 2);
+                    const angle = Math.atan2(dy, dx);
+                    const velocityX = Math.cos(angle) * 300;
+                    const velocityY = Math.sin(angle) * 300;
+                    const proj = new Projectile(enemy.game, enemy.x + enemy.width/2, enemy.y + enemy.height/2, 8, 8, velocityX, velocityY, 15, 'enemy', 'enemyBullet');
+                    enemy.game.entityManager.add(proj);
+                    enemy.game.collision.addToGroup(proj, 'enemyProjectiles');
+                }
+                state.aimedBurstShots++;
+                state.aimedBurstDelay = 120; // 120ms between burst shots
+            }
+            if (state.aimedBurstShots >= 3) {
+                state.aimedBurstPause = false;
+                state.aimedShotTimer = ((enemy.overrides.aimedFireRate || 3200) / 3) + 500; // Add a small delay after burst
+            }
+        }
+    },
+
+    // --- BOSS MIXED ARMAMENT ---
+    boss_mixed_armament: function(enemy, player, deltaTime) {
+        if (!enemy.fireState) {
+            enemy.fireState = {
+                cannonTimer: enemy.overrides.cannonFireRate || 1200,
                 missileTimer: enemy.overrides.missileFireRate || 4000
             };
         }
@@ -742,27 +901,28 @@ export const firingPatterns = {
         state.cannonTimer -= deltaTime;
         state.missileTimer -= deltaTime;
 
-        // --- Firing Cannons (Aimed) ---
+        // Firing Cannons (spread shot aimed at player)
         if (state.cannonTimer <= 0) {
             if (player) {
-                const dx = player.x - enemy.x;
-                const dy = player.y - enemy.y;
-                const angle = Math.atan2(dy, dx);
-                const velocityX = Math.cos(angle) * 250;
-                const velocityY = Math.sin(angle) * 250;
-                enemy.game.entityManager.add(new Projectile(enemy.game, enemy.x + enemy.width/2, enemy.y + enemy.height/2, 8, 8, velocityX, velocityY, 10, 'enemy', 'enemyBullet'));
+                for (let i = -1; i <= 1; i++) {
+                    const angleToPlayer = Math.atan2(player.y - enemy.y, player.x - enemy.x);
+                    const angle = angleToPlayer + (i * 0.2); // 0.2 radians spread
+                    const velocityX = Math.cos(angle) * 300;
+                    const velocityY = Math.sin(angle) * 300;
+                    const proj = new Projectile(enemy.game, enemy.x + enemy.width/2, enemy.y + enemy.height/2, 8, 8, velocityX, velocityY, 10, 'enemy', 'enemyBullet');
+                    enemy.game.entityManager.add(proj);
+                    enemy.game.collision.addToGroup(proj, 'enemyProjectiles');
+                }
             }
-            state.cannonTimer = enemy.overrides.cannonFireRate || 1000;
+            state.cannonTimer = enemy.overrides.cannonFireRate || 1200;
         }
 
-        // --- Firing Missiles (Straight) ---
+        // Firing Missiles (straight forward)
         if (state.missileTimer <= 0) {
-            const missileDamage = 40;
             const missileVelocity = { x: 0, y: 300 };
-            // Left missile pod
-            enemy.game.entityManager.add(new Missile(enemy.game, enemy.x, enemy.y + enemy.height / 2, missileDamage, 'enemy', missileVelocity));
-            // Right missile pod
-            enemy.game.entityManager.add(new Missile(enemy.game, enemy.x + enemy.width, enemy.y + enemy.height / 2, missileDamage, 'enemy', missileVelocity));
+            const missile = new Missile(enemy.game, enemy.x + enemy.width/2, enemy.y + enemy.height, 40, 'enemy', missileVelocity);
+            enemy.game.entityManager.add(missile);
+            enemy.game.collision.addToGroup(missile, 'enemyProjectiles'); // CRUCIAL STEP
             state.missileTimer = enemy.overrides.missileFireRate || 4000;
         }
     }

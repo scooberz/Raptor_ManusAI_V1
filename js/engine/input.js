@@ -18,6 +18,7 @@ class InputHandler {
 
         // Debug-specific flags
         this.skipWavePressed = false;
+        this.restartLevelPressed = false;
 
         // Bind 'this' context once to prevent issues in event listeners
         this.handleKeyDown = this.handleKeyDown.bind(this);
@@ -62,6 +63,11 @@ class InputHandler {
             this.skipWavePressed = true;
             console.log(`INPUT_HANDLER: skipWavePressed flag SET to: ${this.skipWavePressed}`);
         }
+        
+        if (event.key === '3' || event.key === 'Numpad3') {
+            this.restartLevelPressed = true;
+            console.log(`INPUT_HANDLER: restartLevelPressed flag SET to: ${this.restartLevelPressed}`);
+        }
 
         // Prevent default browser actions for game keys to stop the window from scrolling
         if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(event.key)) {
@@ -75,14 +81,34 @@ class InputHandler {
         if (event.key === '2' || event.key === 'Numpad2') {
             this.skipWavePressed = false;
         }
+        
+        if (event.key === '3' || event.key === 'Numpad3') {
+            this.restartLevelPressed = false;
+        }
     }
 
     handleMouseMove(event) {
+        // Get the first canvas (they should all have the same scaling)
         const canvas = document.querySelector('#game-container canvas');
         if (!canvas) return;
+        
         const rect = canvas.getBoundingClientRect();
-        this.mousePosition.x = event.clientX - rect.left;
-        this.mousePosition.y = event.clientY - rect.top;
+        
+        // Get the scaled mouse position relative to the canvas
+        const scaledX = event.clientX - rect.left;
+        const scaledY = event.clientY - rect.top;
+        
+        // Convert from scaled canvas coordinates to internal game coordinates
+        // The game runs at 800x600 internally, but the canvas is scaled to fit the window
+        const scaleX = 800 / rect.width;   // Internal width / scaled width
+        const scaleY = 600 / rect.height;  // Internal height / scaled height
+        
+        this.mousePosition.x = scaledX * scaleX;
+        this.mousePosition.y = scaledY * scaleY;
+        
+        // Clamp to game boundaries
+        this.mousePosition.x = Math.max(0, Math.min(800, this.mousePosition.x));
+        this.mousePosition.y = Math.max(0, Math.min(600, this.mousePosition.y));
     }
 
     handleMouseDown(event) {

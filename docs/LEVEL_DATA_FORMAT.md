@@ -159,3 +159,27 @@ Environment objects are loaded when a wave starts and placed on the environment 
 4. **Strategic Depth**: Place valuable targets in positions that require skill to reach
 5. **Chain Reactions**: Group explosive objects for dramatic chain reaction effects
 
+### Boss Behavior Example
+To assign advanced boss behaviors in a level JSON wave:
+
+```
+{
+  "type": "boss1",
+  "spawn_x": 272,
+  "spawn_y": -150,
+  "delay": 2000,
+  "overrides": {
+    "health": 2500,
+    "speed": 90,
+    "movementPattern": "boss_patrol",
+    "firingPattern": "boss_multi_weapon_fire",
+    "straightFireRate": 2000,
+    "aimedFireRate": 3200
+  }
+}
+```
+
+- `movementPattern`: Use `boss_patrol` for dynamic waypoint patrol.
+- `firingPattern`: Use `boss_multi_weapon_fire` for rapid missiles, burst-aimed shots, reposition pauses, and desperation attack.
+- `straightFireRate`, `aimedFireRate`: Control the base fire rates (actual rates are 3x faster in this pattern).
+
