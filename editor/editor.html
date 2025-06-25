@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Raptor - Level Editor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background-color: #1a1a1a;
+            color: #00ff00;
+            padding: 20px;
+            line-height: 1.4;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .editor-panel {
+            background-color: #2a2a2a;
+            border: 2px solid #00ff00;
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .json-panel {
+            background-color: #2a2a2a;
+            border: 2px solid #00ff00;
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #00ff00;
+            text-shadow: 0 0 10px #00ff00;
+            grid-column: 1 / -1;
+        }
+
+        h2 {
+            color: #00ff00;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #00ff00;
+            padding-bottom: 5px;
+        }
+
+        h3 {
+            color: #ffff00;
+            margin-bottom: 10px;
+            margin-top: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #00ff00;
+            font-weight: bold;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 8px;
+            background-color: #1a1a1a;
+            border: 1px solid #00ff00;
+            border-radius: 4px;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #ffff00;
+            box-shadow: 0 0 5px #ffff00;
+        }
+
+        button {
+            background-color: #003300;
+            color: #00ff00;
+            border: 2px solid #00ff00;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            margin: 5px;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            background-color: #00ff00;
+            color: #000000;
+            box-shadow: 0 0 10px #00ff00;
+        }
+
+        .wave-section {
+            background-color: #333333;
+            border: 1px solid #666666;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .enemy-item, .env-object-item {
+            background-color: #444444;
+            border: 1px solid #777777;
+            border-radius: 4px;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        .override-section {
+            background-color: #555555;
+            border: 1px solid #888888;
+            border-radius: 4px;
+            padding: 10px;
+            margin-top: 10px;
+        }
+
+        .json-output {
+            width: 100%;
+            height: 600px;
+            background-color: #1a1a1a;
+            border: 1px solid #00ff00;
+            border-radius: 4px;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            padding: 10px;
+            resize: vertical;
+        }
+
+        .level-info {
+            background-color: #333333;
+            border: 1px solid #666666;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .remove-btn {
+            background-color: #660000;
+            border-color: #ff0000;
+            color: #ff0000;
+        }
+
+        .remove-btn:hover {
+            background-color: #ff0000;
+            color: #000000;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+        }
+
+        @media (max-width: 1200px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>PROJECT RAPTOR - LEVEL EDITOR</h1>
+    
+    <div class="container">
+        <div class="editor-panel">
+            <div class="level-info">
+                <h2>Level Information</h2>
+                <div class="form-group">
+                    <label for="levelName">Level Name:</label>
+                    <input type="text" id="levelName" placeholder="Enter level name..." value="New Level">
+                </div>
+            </div>
+
+            <h2>Wave Configuration</h2>
+            <button id="addWaveBtn">Add New Wave</button>
+            <div id="wavesContainer"></div>
+        </div>
+
+        <div class="json-panel">
+            <h2>Generated Level JSON</h2>
+            <textarea id="jsonOutput" class="json-output" readonly placeholder="Level JSON will appear here..."></textarea>
+        </div>
+    </div>
+
+    <script>
+        // Global state management
+        let levelData = {
+            levelName: "New Level",
+            waves: []
+        };
+
+        // Enemy types (hardcoded for now, but designed for future loading)
+        const enemyTypes = [
+            'cutter', 'cyclone', 'dart', 'gnat', 'goliath', 
+            'mine', 'reaper', 'striker', 'boss_level1'
+        ];
+
+        // Environment object types from the documentation
+        const environmentObjectTypes = [
+            'FUEL_TANK', 'RADAR_DISH', 'BUNKER', 'SILO', 'TURRET_BASE',
+            'POWER_STATION', 'WAREHOUSE', 'COMM_TOWER', 'HANGAR', 'SMALL_BUILDING'
+        ];
+
+        // Movement and firing patterns (will be loaded from enemyBehaviors.js)
+        let movementPatterns = {};
+        let firingPatterns = {};
+
+        // Initialize the editor
+        function initializeEditor() {
+            loadBehaviorPatterns();
+            setupEventListeners();
+            updateJsonOutput();
+        }
+
+        // Load behavior patterns from enemyBehaviors.js
+        function loadBehaviorPatterns() {
+            // For now, we'll hardcode the patterns based on the file analysis
+            // In a real implementation, this would dynamically load from the JS file
+            movementPatterns = {
+                'default': 'Default movement (straight down)',
+                'sine_wave_slow': 'Slow sine wave',
+                'sine_wave_fast': 'Fast sine wave',
+                'swoop_from_left': 'Swoop from left',
+                'swoop_from_right': 'Swoop from right',
+                'move_straight_down': 'Move straight down',
+                'move_to_point_and_hold': 'Move to point and hold',
+                'sweep': 'Side to side sweep',
+                'patrol_and_strafe': 'Patrol and strafe',
+                'strafe_and_descend': 'Strafe and descend',
+                'descend_and_converge': 'Descend and converge',
+                'descend_and_veer': 'Descend and veer',
+                'descend_and_strafe_right': 'Descend and strafe right',
+                'descend_and_strafe_left': 'Descend and strafe left',
+                'move_diagonal': 'Move diagonal',
+                'slow_homing': 'Slow homing',
+                'zigzag': 'Zigzag pattern',
+                'strafe_to_x_position': 'Strafe to X position',
+                'strafe_out_and_in': 'Strafe out and in',
+                'split_and_descend': 'Split and descend',
+                'descend_and_diverge': 'Descend and diverge',
+                'criss_cross': 'Criss cross',
+                'boss_movement': 'Boss movement'
+            };
+
+            firingPatterns = {
+                'none': 'No firing',
+                'single_aimed_shot': 'Single aimed shot',
+                'single_straight_shot': 'Single straight shot',
+                'three_round_spread': 'Three round spread',
+                'fire_straight_missile': 'Fire straight missile',
+                'burst_fire': 'Burst fire',
+                'wide_v_shot': 'Wide V shot',
+                'boss_multi_weapon_fire': 'Boss multi-weapon fire'
+            };
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            document.getElementById('addWaveBtn').addEventListener('click', addWave);
+            document.getElementById('levelName').addEventListener('input', updateLevelName);
+        }
+
+        // Update level name
+        function updateLevelName() {
+            levelData.levelName = document.getElementById('levelName').value;
+            updateJsonOutput();
+        }
+
+        // Add a new wave
+        function addWave() {
+            const waveId = `wave_${levelData.waves.length + 1}`;
+            const newWave = {
+                wave_id: waveId,
+                delay_after_previous_wave_ms: 3000,
+                enemies: [],
+                environment_objects: []
+            };
+            
+            levelData.waves.push(newWave);
+            renderWaves();
+            updateJsonOutput();
+        }
+
+        // Render all waves
+        function renderWaves() {
+            const container = document.getElementById('wavesContainer');
+            container.innerHTML = '';
+            
+            levelData.waves.forEach((wave, index) => {
+                const waveElement = createWaveElement(wave, index);
+                container.appendChild(waveElement);
+            });
+        }
+
+        // Create wave element
+        function createWaveElement(wave, index) {
+            const waveDiv = document.createElement('div');
+            waveDiv.className = 'wave-section';
+            waveDiv.innerHTML = `
+                <h3>Wave ${index + 1}</h3>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>Wave ID:</label>
+                        <input type="text" value="${wave.wave_id}" onchange="updateWaveProperty(${index}, 'wave_id', this.value)">
+                    </div>
+                    <div class="form-group">
+                        <label>Delay After Previous Wave (ms):</label>
+                        <input type="number" value="${wave.delay_after_previous_wave_ms}" onchange="updateWaveProperty(${index}, 'delay_after_previous_wave_ms', parseInt(this.value))">
+                    </div>
+                </div>
+                
+                <div class="button-group">
+                    <button onclick="addEnemyToWave(${index})">Add Enemy</button>
+                    <button onclick="addEnvironmentObjectToWave(${index})">Add Environment Object</button>
+                    <button class="remove-btn" onclick="removeWave(${index})">Remove Wave</button>
+                </div>
+                
+                <div id="enemies-${index}">
+                    <h4>Enemies:</h4>
+                    ${renderEnemies(wave.enemies, index)}
+                </div>
+                
+                <div id="env-objects-${index}">
+                    <h4>Environment Objects:</h4>
+                    ${renderEnvironmentObjects(wave.environment_objects, index)}
+                </div>
+            `;
+            return waveDiv;
+        }
+
+        // Render enemies for a wave
+        function renderEnemies(enemies, waveIndex) {
+            if (enemies.length === 0) {
+                return '<p>No enemies in this wave.</p>';
+            }
+            
+            return enemies.map((enemy, enemyIndex) => `
+                <div class="enemy-item">
+                    <div class="grid-3">
+                        <div class="form-group">
+                            <label>Type:</label>
+                            <select onchange="updateEnemyProperty(${waveIndex}, ${enemyIndex}, 'type', this.value)">
+                                ${enemyTypes.map(type => `<option value="${type}" ${enemy.type === type ? 'selected' : ''}>${type}</option>`).join('')}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Spawn X:</label>
+                            <input type="number" value="${enemy.spawn_x}" onchange="updateEnemyProperty(${waveIndex}, ${enemyIndex}, 'spawn_x', parseInt(this.value))">
+                        </div>
+                        <div class="form-group">
+                            <label>Spawn Y:</label>
+                            <input type="number" value="${enemy.spawn_y}" onchange="updateEnemyProperty(${waveIndex}, ${enemyIndex}, 'spawn_y', parseInt(this.value))">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Delay (ms):</label>
+                        <input type="number" value="${enemy.delay}" onchange="updateEnemyProperty(${waveIndex}, ${enemyIndex}, 'delay', parseInt(this.value))">
+                    </div>
+                    
+                    <div class="override-section">
+                        <h4>Behavior Overrides</h4>
+                        <div class="grid-2">
+                            <div class="form-group">
+                                <label>Movement Pattern:</label>
+                                <select onchange="updateEnemyOverride(${waveIndex}, ${enemyIndex}, 'movementPattern', this.value)">
+                                    <option value="">Default</option>
+                                    ${Object.keys(movementPatterns).map(pattern => `<option value="${pattern}" ${enemy.overrides?.movementPattern === pattern ? 'selected' : ''}>${movementPatterns[pattern]}</option>`).join('')}
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Firing Pattern:</label>
+                                <select onchange="updateEnemyOverride(${waveIndex}, ${enemyIndex}, 'firingPattern', this.value)">
+                                    <option value="">Default</option>
+                                    ${Object.keys(firingPatterns).map(pattern => `<option value="${pattern}" ${enemy.overrides?.firingPattern === pattern ? 'selected' : ''}>${firingPatterns[pattern]}</option>`).join('')}
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="grid-3">
+                            <div class="form-group">
+                                <label>Speed:</label>
+                                <input type="number" value="${enemy.overrides?.speed || ''}" placeholder="Default" onchange="updateEnemyOverride(${waveIndex}, ${enemyIndex}, 'speed', this.value ? parseInt(this.value) : undefined)">
+                            </div>
+                            <div class="form-group">
+                                <label>Health:</label>
+                                <input type="number" value="${enemy.overrides?.health || ''}" placeholder="Default" onchange="updateEnemyOverride(${waveIndex}, ${enemyIndex}, 'health', this.value ? parseInt(this.value) : undefined)">
+                            </div>
+                            <div class="form-group">
+                                <label>Fire Rate (ms):</label>
+                                <input type="number" value="${enemy.overrides?.fireRate || ''}" placeholder="Default" onchange="updateEnemyOverride(${waveIndex}, ${enemyIndex}, 'fireRate', this.value ? parseInt(this.value) : undefined)">
+                            </div>
+                        </div>
+                        
+                        <div id="dynamic-overrides-${waveIndex}-${enemyIndex}">
+                            ${renderDynamicOverrides(enemy, waveIndex, enemyIndex)}
+                        </div>
+                    </div>
+                    
+                    <button class="remove-btn" onclick="removeEnemy(${waveIndex}, ${enemyIndex})">Remove Enemy</button>
+                </div>
+            `).join('');
+        }
+
+        // Render environment objects for a wave
+        function renderEnvironmentObjects(envObjects, waveIndex) {
+            if (envObjects.length === 0) {
+                return '<p>No environment objects in this wave.</p>';
+            }
+            
+            return envObjects.map((obj, objIndex) => `
+                <div class="env-object-item">
+                    <div class="grid-3">
+                        <div class="form-group">
+                            <label>Type:</label>
+                            <select onchange="updateEnvironmentObjectProperty(${waveIndex}, ${objIndex}, 'type', this.value)">
+                                ${environmentObjectTypes.map(type => `<option value="${type}" ${obj.type === type ? 'selected' : ''}>${type}</option>`).join('')}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Spawn X:</label>
+                            <input type="number" value="${obj.spawn_x}" onchange="updateEnvironmentObjectProperty(${waveIndex}, ${objIndex}, 'spawn_x', parseInt(this.value))">
+                        </div>
+                        <div class="form-group">
+                            <label>Spawn Y:</label>
+                            <input type="number" value="${obj.spawn_y}" onchange="updateEnvironmentObjectProperty(${waveIndex}, ${objIndex}, 'spawn_y', parseInt(this.value))">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Delay (ms):</label>
+                        <input type="number" value="${obj.delay}" onchange="updateEnvironmentObjectProperty(${waveIndex}, ${objIndex}, 'delay', parseInt(this.value))">
+                    </div>
+                    <button class="remove-btn" onclick="removeEnvironmentObject(${waveIndex}, ${objIndex})">Remove Object</button>
+                </div>
+            `).join('');
+        }
+
+        // Update wave property
+        function updateWaveProperty(waveIndex, property, value) {
+            levelData.waves[waveIndex][property] = value;
+            updateJsonOutput();
+        }
+
+        // Update enemy property
+        function updateEnemyProperty(waveIndex, enemyIndex, property, value) {
+            levelData.waves[waveIndex].enemies[enemyIndex][property] = value;
+            updateJsonOutput();
+        }
+
+        // Update enemy override property
+        function updateEnemyOverride(waveIndex, enemyIndex, property, value) {
+            if (!levelData.waves[waveIndex].enemies[enemyIndex].overrides) {
+                levelData.waves[waveIndex].enemies[enemyIndex].overrides = {};
+            }
+            
+            if (value === undefined || value === '') {
+                delete levelData.waves[waveIndex].enemies[enemyIndex].overrides[property];
+            } else {
+                levelData.waves[waveIndex].enemies[enemyIndex].overrides[property] = value;
+            }
+            
+            // Re-render dynamic overrides if movement or firing pattern changed
+            if (property === 'movementPattern' || property === 'firingPattern') {
+                const dynamicContainer = document.getElementById(`dynamic-overrides-${waveIndex}-${enemyIndex}`);
+                if (dynamicContainer) {
+                    dynamicContainer.innerHTML = renderDynamicOverrides(levelData.waves[waveIndex].enemies[enemyIndex], waveIndex, enemyIndex);
+                }
+            }
+            
+            updateJsonOutput();
+        }
+
+        // Render dynamic override fields based on selected patterns
+        function renderDynamicOverrides(enemy, waveIndex, enemyIndex) {
+            let html = '';
+            const overrides = enemy.overrides || {};
+            const movementPattern = overrides.movementPattern;
+            const firingPattern = overrides.firingPattern;
+            
+            // Movement pattern specific overrides
+            if (movementPattern) {
+                html += '<h5>Movement Pattern Parameters:</h5>';
+                
+                switch (movementPattern) {
+                    case 'move_to_point_and_hold':
+                        html += `
+                            <div class="grid-3">
+                                <div class="form-group">
+                                    <label>Formation Point X:</label>
+                                    <input type="number" value="${overrides.formation_point?.x || ''}" placeholder="Default" 
+                                           onchange="updateFormationPoint(${waveIndex}, ${enemyIndex}, 'x', this.value)">
+                                </div>
+                                <div class="form-group">
+                                    <label>Formation Point Y:</label>
+                                    <input type="number" value="${overrides.formation_point?.y || ''}" placeholder="Default" 
+                                           onchange="updateFormationPoint(${waveIndex}, ${enemyIndex}, 'y', this.value)">
+                                </div>
+                                <div class="form-group">
+                                    <label>Hold Duration (ms):</label>
+                                    <input type="number" value="${overrides.hold_duration_ms || ''}" placeholder="Default" 
+                                           onchange="updateEnemyOverride(${waveIndex}, ${enemyIndex}, 'hold_duration_ms', this.value ? parseInt(this.value) : undefined)">
+                                </div>
+                            </div>
+                        `;
+                        break;
+                    case 'descend_and_strafe':
+                    case 'descend_and_strafe_right':
+                    case 'descend_and_strafe_left':
+                        html += `
+                            <div class="form-group">
+                                <label>Trigger Y:</label>
+                                <input type="number" value="${overrides.trigger_y || ''}" placeholder="Default" 
+                                       onchange="updateEnemyOverride(${waveIndex}, ${enemyIndex}, 'trigger_y', this.value ? parseInt(this.value) : undefined)">
+                            </div>
+                        `;
+                        break;
+                    case 'split_and_descend':
+                        html += `
+                            <div class="grid-2">
+                                <div class="form-group">
+                                    <label>Split Direction:</label>
+                                    <select onchange="updateEnemyOverride(${waveIndex}, ${enemyIndex}, 'split_direction', this.value ? parseInt(this.value) : undefined)">
+                                        <option value="">Default</option>
+                                        <option value="1" ${overrides.split_direction === 1 ? 'selected' : ''}>Right (1)</option>
+                                        <option value="-1" ${overrides.split_direction === -1 ? 'selected' : ''}>Left (-1)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Split Y:</label>
+                                    <input type="number" value="${overrides.split_y || ''}" placeholder="Default" 
+                                           onchange="updateEnemyOverride(${waveIndex}, ${enemyIndex}, 'split_y', this.value ? parseInt(this.value) : undefined)">
+                                </div>
+                            </div>
+                        `;
+                        break;
+                    case 'strafe_to_x_position':
+                        html += `
+                            <div class="grid-2">
+                                <div class="form-group">
+                                    <label>Target X:</label>
+                                    <input type="number" value="${overrides.target_x || ''}" placeholder="Default" 
+                                           onchange="updateEnemyOverride(${waveIndex}, ${enemyIndex}, 'target_x', this.value ? parseInt(this.value) : undefined)">
+                                </div>
+                                <div class="form-group">
+                                    <label>Strafe Speed:</label>
+                                    <input type="number" value="${overrides.strafe_speed || ''}" placeholder="Default" 
+                                           onchange="updateEnemyOverride(${waveIndex}, ${enemyIndex}, 'strafe_speed', this.value ? parseInt(this.value) : undefined)">
+                                </div>
+                            </div>
+                        `;
+                        break;
+                    case 'slow_homing':
+                        html += `
+                            <div class="form-group">
+                                <label>Turn Speed:</label>
+                                <input type="number" step="0.1" value="${overrides.turn_speed || ''}" placeholder="Default" 
+                                       onchange="updateEnemyOverride(${waveIndex}, ${enemyIndex}, 'turn_speed', this.value ? parseFloat(this.value) : undefined)">
+                            </div>
+                        `;
+                        break;
+                    case 'zigzag':
+                        html += `
+                            <div class="form-group">
+                                <label>Horizontal Speed:</label>
+                                <input type="number" value="${overrides.horizontal_speed || ''}" placeholder="Default" 
+                                       onchange="updateEnemyOverride(${waveIndex}, ${enemyIndex}, 'horizontal_speed', this.value ? parseInt(this.value) : undefined)">
+                            </div>
+                        `;
+                        break;
+                    case 'descend_and_converge':
+                        html += `
+                            <div class="grid-2">
+                                <div class="form-group">
+                                    <label>Descend Duration (ms):</label>
+                                    <input type="number" value="${overrides.descend_duration_ms || ''}" placeholder="Default" 
+                                           onchange="updateEnemyOverride(${waveIndex}, ${enemyIndex}, 'descend_duration_ms', this.value ? parseInt(this.value) : undefined)">
+                                </div>
+                                <div class="form-group">
+                                    <label>Converge Speed:</label>
+                                    <input type="number" value="${overrides.converge_speed || ''}" placeholder="Default" 
+                                           onchange="updateEnemyOverride(${waveIndex}, ${enemyIndex}, 'converge_speed', this.value ? parseInt(this.value) : undefined)">
+                                </div>
+                            </div>
+                        `;
+                        break;
+                    case 'descend_and_veer':
+                        html += `
+                            <div class="grid-2">
+                                <div class="form-group">
+                                    <label>Veer Y:</label>
+                                    <input type="number" value="${overrides.veer_y || ''}" placeholder="Default" 
+                                           onchange="updateEnemyOverride(${waveIndex}, ${enemyIndex}, 'veer_y', this.value ? parseInt(this.value) : undefined)">
+                                </div>
+                                <div class="form-group">
+                                    <label>Converge Speed:</label>
+                                    <input type="number" value="${overrides.converge_speed || ''}" placeholder="Default" 
+                                           onchange="updateEnemyOverride(${waveIndex}, ${enemyIndex}, 'converge_speed', this.value ? parseInt(this.value) : undefined)">
+                                </div>
+                            </div>
+                        `;
+                        break;
+                    case 'patrol_and_strafe':
+                        html += `
+                            <div class="grid-2">
+                                <div class="form-group">
+                                    <label>Patrol Y:</label>
+                                    <input type="number" value="${overrides.patrol_y || ''}" placeholder="Default" 
+                                           onchange="updateEnemyOverride(${waveIndex}, ${enemyIndex}, 'patrol_y', this.value ? parseInt(this.value) : undefined)">
+                                </div>
+                                <div class="form-group">
+                                    <label>Patrol Duration (ms):</label>
+                                    <input type="number" value="${overrides.patrol_duration_ms || ''}" placeholder="Default" 
+                                           onchange="updateEnemyOverride(${waveIndex}, ${enemyIndex}, 'patrol_duration_ms', this.value ? parseInt(this.value) : undefined)">
+                                </div>
+                            </div>
+                        `;
+                        break;
+                }
+            }
+            
+            // Firing pattern specific overrides
+            if (firingPattern) {
+                html += '<h5>Firing Pattern Parameters:</h5>';
+                
+                switch (firingPattern) {
+                    case 'boss_multi_weapon_fire':
+                        html += `
+                            <div class="grid-2">
+                                <div class="form-group">
+                                    <label>Cannon Fire Rate (ms):</label>
+                                    <input type="number" value="${overrides.cannonFireRate || ''}" placeholder="Default" 
+                                           onchange="updateEnemyOverride(${waveIndex}, ${enemyIndex}, 'cannonFireRate', this.value ? parseInt(this.value) : undefined)">
+                                </div>
+                                <div class="form-group">
+                                    <label>Missile Fire Rate (ms):</label>
+                                    <input type="number" value="${overrides.missileFireRate || ''}" placeholder="Default" 
+                                           onchange="updateEnemyOverride(${waveIndex}, ${enemyIndex}, 'missileFireRate', this.value ? parseInt(this.value) : undefined)">
+                                </div>
+                            </div>
+                        `;
+                        break;
+                }
+            }
+            
+            return html;
+        }
+
+        // Update formation point (special case for complex objects)
+        function updateFormationPoint(waveIndex, enemyIndex, axis, value) {
+            if (!levelData.waves[waveIndex].enemies[enemyIndex].overrides) {
+                levelData.waves[waveIndex].enemies[enemyIndex].overrides = {};
+            }
+            
+            if (!levelData.waves[waveIndex].enemies[enemyIndex].overrides.formation_point) {
+                levelData.waves[waveIndex].enemies[enemyIndex].overrides.formation_point = {};
+            }
+            
+            if (value === '' || value === undefined) {
+                delete levelData.waves[waveIndex].enemies[enemyIndex].overrides.formation_point[axis];
+                // If both x and y are empty, remove the formation_point object
+                if (Object.keys(levelData.waves[waveIndex].enemies[enemyIndex].overrides.formation_point).length === 0) {
+                    delete levelData.waves[waveIndex].enemies[enemyIndex].overrides.formation_point;
+                }
+            } else {
+                levelData.waves[waveIndex].enemies[enemyIndex].overrides.formation_point[axis] = parseInt(value);
+            }
+            
+            updateJsonOutput();
+        }
+
+        // Update environment object property
+        function updateEnvironmentObjectProperty(waveIndex, objIndex, property, value) {
+            levelData.waves[waveIndex].environment_objects[objIndex][property] = value;
+            updateJsonOutput();
+        }
+
+        // Add enemy to wave
+        function addEnemyToWave(waveIndex) {
+            const newEnemy = {
+                type: 'striker',
+                spawn_x: 300,
+                spawn_y: -50,
+                delay: 1000,
+                overrides: {}
+            };
+            
+            levelData.waves[waveIndex].enemies.push(newEnemy);
+            renderWaves();
+            updateJsonOutput();
+        }
+
+        // Add environment object to wave
+        function addEnvironmentObjectToWave(waveIndex) {
+            const newEnvObject = {
+                type: 'FUEL_TANK',
+                spawn_x: 150,
+                spawn_y: 400,
+                delay: 0
+            };
+            
+            levelData.waves[waveIndex].environment_objects.push(newEnvObject);
+            renderWaves();
+            updateJsonOutput();
+        }
+
+        // Remove wave
+        function removeWave(waveIndex) {
+            levelData.waves.splice(waveIndex, 1);
+            renderWaves();
+            updateJsonOutput();
+        }
+
+        // Remove enemy
+        function removeEnemy(waveIndex, enemyIndex) {
+            levelData.waves[waveIndex].enemies.splice(enemyIndex, 1);
+            renderWaves();
+            updateJsonOutput();
+        }
+
+        // Remove environment object
+        function removeEnvironmentObject(waveIndex, objIndex) {
+            levelData.waves[waveIndex].environment_objects.splice(objIndex, 1);
+            renderWaves();
+            updateJsonOutput();
+        }
+
+        // Update JSON output
+        function updateJsonOutput() {
+            // Clean up the data before outputting
+            const cleanedData = JSON.parse(JSON.stringify(levelData));
+            
+            // Remove empty override objects
+            cleanedData.waves.forEach(wave => {
+                wave.enemies.forEach(enemy => {
+                    if (enemy.overrides && Object.keys(enemy.overrides).length === 0) {
+                        delete enemy.overrides;
+                    }
+                });
+            });
+            
+            const jsonOutput = document.getElementById('jsonOutput');
+            jsonOutput.value = JSON.stringify(cleanedData, null, 4);
+        }
+
+        // Initialize the editor when the page loads
+        document.addEventListener('DOMContentLoaded', initializeEditor);
+    </script>
+</body>
+</html>
+

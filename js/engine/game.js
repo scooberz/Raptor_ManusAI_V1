@@ -18,6 +18,8 @@ import { GameOverState } from '../states/gameover.js';
 import { HangarState } from '../states/hangar.js';
 import { SupplyState } from '../states/supply.js';
 import { IntroCutsceneState } from '../states/introCutscene.js';
+import { CharacterSelectState } from '../states/characterSelect.js';
+import { ShopState } from '../states/shop.js';
 
 class Game {
     constructor() {
@@ -66,7 +68,9 @@ class Game {
             gameover: new GameOverState(this),
             hangar: new HangarState(this),
             supply: new SupplyState(this),
-            introCutscene: new IntroCutsceneState(this)
+            introCutscene: new IntroCutsceneState(this),
+            characterSelect: new CharacterSelectState(this),
+            shop: new ShopState(this)
         };
         this.currentState = null;
 

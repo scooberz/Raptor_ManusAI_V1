@@ -330,6 +330,10 @@ class AssetManager {
                 // UI assets
                 'healthBar': 'assets/images/ui/health_bar.png',
                 'shieldBar': 'assets/images/ui/shield_bar.png',
+                'hangarBackground': 'assets/images/ui/hangar_background.png',
+                'menuBackground': 'assets/images/ui/menu_background.png',
+                'shopBackground': 'assets/images/ui/shop_background.png',
+                'characterSelectBackground': 'assets/images/ui/character_select_background.png',
                 // smokePuff: 'assets/images/effects/SMOKE_PUFF.png',
             }
         };

@@ -5,7 +5,7 @@
 class MenuState {
     constructor(game) {
         this.game = game;
-        this.logo = null;
+        this.background = null;
         this.menuOptions = [
             { text: 'Start New Game', action: () => this.startNewGame() },
             { text: 'Load Game', action: () => this.loadGame() },
@@ -28,8 +28,8 @@ class MenuState {
         document.getElementById('loading-screen').style.display = 'none';
         document.getElementById('game-over-screen').style.display = 'none';
         
-        // Get logo from assets
-        this.logo = this.game.assets.getImage('logo');
+        // Get background from assets
+        this.background = this.game.assets.getImage('menuBackground');
         
         // Set up callback to update menu when assets finish loading
         this.game.assets.setGameplayAssetsLoadedCallback(() => {
@@ -50,7 +50,7 @@ class MenuState {
         const menuScreen = document.getElementById('menu-screen');
         menuScreen.innerHTML = '';
         
-        // Create main container with black background
+        // Create main container
         const mainContainer = document.createElement('div');
         mainContainer.style.display = 'flex';
         mainContainer.style.flexDirection = 'column';
@@ -58,25 +58,35 @@ class MenuState {
         mainContainer.style.justifyContent = 'center';
         mainContainer.style.width = '100%';
         mainContainer.style.height = '100%';
-        mainContainer.style.backgroundColor = 'black';
         mainContainer.style.position = 'relative';
+        mainContainer.style.overflow = 'hidden';
         
-        // Add logo if available - make it larger and centered
-        if (this.logo) {
-            const logoImg = document.createElement('img');
-            logoImg.src = this.logo.src;
-            logoImg.style.maxWidth = '90%';
-            logoImg.style.maxHeight = '70vh';
-            logoImg.style.objectFit = 'contain';
-            logoImg.style.position = 'absolute';
-            logoImg.style.top = '50%';
-            logoImg.style.left = '50%';
-            logoImg.style.transform = 'translate(-50%, -50%)';
-            logoImg.style.zIndex = '1';
-            mainContainer.appendChild(logoImg);
+        // Add background image if available
+        if (this.background) {
+            const bgImg = document.createElement('img');
+            bgImg.src = this.background.src;
+            bgImg.style.width = '100%';
+            bgImg.style.height = '100%';
+            bgImg.style.objectFit = 'cover';
+            bgImg.style.position = 'absolute';
+            bgImg.style.top = '0';
+            bgImg.style.left = '0';
+            bgImg.style.zIndex = '1';
+            mainContainer.appendChild(bgImg);
         }
         
-        // Create menu container - positioned on top of logo
+        // Create overlay for better text readability
+        const overlay = document.createElement('div');
+        overlay.style.position = 'absolute';
+        overlay.style.top = '0';
+        overlay.style.left = '0';
+        overlay.style.width = '100%';
+        overlay.style.height = '100%';
+        overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.4)';
+        overlay.style.zIndex = '2';
+        mainContainer.appendChild(overlay);
+        
+        // Create menu container - positioned on top of background
         const menuContainer = document.createElement('div');
         menuContainer.style.display = 'flex';
         menuContainer.style.flexDirection = 'column';
@@ -86,9 +96,9 @@ class MenuState {
         menuContainer.style.bottom = '20%';
         menuContainer.style.left = '50%';
         menuContainer.style.transform = 'translateX(-50%)';
-        menuContainer.style.zIndex = '2';
+        menuContainer.style.zIndex = '3';
         
-        // Add menu options with simplified styling
+        // Add menu options with improved styling
         this.menuOptions.forEach((option, index) => {
             const optionElement = document.createElement('div');
             
@@ -105,9 +115,12 @@ class MenuState {
             
             optionElement.style.fontSize = '28px';
             optionElement.style.margin = '8px';
-            optionElement.style.padding = '5px 15px';
+            optionElement.style.padding = '8px 20px';
             optionElement.style.transition = 'all 0.2s ease';
             optionElement.style.textShadow = index === this.selectedOption ? '0 0 15px #ffcc00' : '2px 2px 4px rgba(0,0,0,0.8)';
+            optionElement.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+            optionElement.style.border = '1px solid rgba(255, 255, 255, 0.3)';
+            optionElement.style.borderRadius = '6px';
             
             // Add hover effect
             optionElement.addEventListener('mouseover', () => {
@@ -134,7 +147,7 @@ class MenuState {
         instructions.style.padding = '10px';
         instructions.style.borderRadius = '5px';
         instructions.style.border = '1px solid #333';
-        instructions.style.zIndex = '3';
+        instructions.style.zIndex = '4';
         instructions.innerHTML = 'Use Arrow Keys to navigate<br>Enter to select';
         mainContainer.appendChild(instructions);
         
@@ -151,7 +164,7 @@ class MenuState {
             loadingIndicator.style.padding = '8px 12px';
             loadingIndicator.style.borderRadius = '5px';
             loadingIndicator.style.border = '1px solid #333';
-            loadingIndicator.style.zIndex = '3';
+            loadingIndicator.style.zIndex = '4';
             loadingIndicator.textContent = 'Loading game assets...';
             mainContainer.appendChild(loadingIndicator);
         }
@@ -183,7 +196,7 @@ class MenuState {
         // Check if gameplay assets are loaded
         if (this.game.assets.gameplayAssetsLoaded) {
             console.log('Starting new game - all assets loaded');
-            this.game.changeState('hangar');
+            this.game.changeState('characterSelect');
         } else {
             console.log('Cannot start game - gameplay assets still loading');
             // Optionally show a message to the user

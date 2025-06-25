@@ -7,7 +7,6 @@ import { Boss1 } from '../entities/boss1.js';
 class HUD {
     constructor(game) {
         this.game = game;
-        this.healthBar = null;
         this.shieldBar = null;
     }
     
@@ -15,7 +14,6 @@ class HUD {
      * Load HUD assets
      */
     loadAssets() {
-        this.healthBar = this.game.assets.getImage('healthBar');
         this.shieldBar = this.game.assets.getImage('shieldBar');
     }
     
@@ -51,44 +49,45 @@ class HUD {
      * @param {CanvasRenderingContext2D} context - The canvas context to render to
      */
     renderHealthBar(context) {
+        if (!this.game.player) return;
+
         const player = this.game.player;
-        const healthBarWidth = 200;
-        const healthBarHeight = 20;
-        const healthBarX = 10; // Top left
-        const healthBarY = 10;
-        
-        // Health bar background
-        context.fillStyle = '#333';
-        context.fillRect(healthBarX, healthBarY, healthBarWidth, healthBarHeight);
-        
-        // Health bar fill
+        const totalTicks = 50; // The total number of ticks when at full health
+        const tickHeight = 8; // The height of a single tick
+        const tickWidth = 7; // Thinner ticks
+        const tickSpacing = 3; // Slightly reduced spacing
+        const x = this.game.width - tickWidth; // Flush to the right edge
+        const startY = this.game.height - 15; // Start drawing from the bottom
+
         const healthPercentage = player.health / player.maxHealth;
-        context.fillStyle = healthPercentage > 0.5 ? '#0f0' : healthPercentage > 0.25 ? '#ff0' : '#f00';
-        context.fillRect(healthBarX, healthBarY, healthBarWidth * healthPercentage, healthBarHeight);
+        const ticksToShow = Math.ceil(totalTicks * healthPercentage);
+
+        context.save();
+        context.strokeStyle = '#FFA500'; // Orange outline color
+        context.fillStyle = 'rgba(255, 165, 0, 0.7)'; // Semi-transparent orange fill
+
+        // Loop and draw the visible health ticks from bottom to top
+        for (let i = 0; i < ticksToShow; i++) {
+            const y = startY - (i * (tickHeight + tickSpacing));
+            context.fillRect(x, y, tickWidth, tickHeight);
+            context.strokeRect(x, y, tickWidth, tickHeight);
+        }
         
-        // Health text
-        context.fillStyle = '#fff';
-        context.font = '14px Arial';
-        context.textAlign = 'center';
-        context.fillText(`Health: ${player.health}/${player.maxHealth}`, healthBarX + healthBarWidth / 2, healthBarY + 15);
+        context.restore();
     }
     
     /**
-     * Render score and money
+     * Render money counter
      * @param {CanvasRenderingContext2D} context - The canvas context to render to
      */
     renderStats(context) {
         const player = this.game.player;
         
-        // Score and Money - top right
-        context.fillStyle = '#fff';
-        context.font = '20px Arial';
-        context.textAlign = 'right';
-        context.fillText(`Score: ${this.game.score || 0}`, this.game.width - 10, 25);
-        
-        // Money - top right below score
+        // Money - centered at top of screen
         context.fillStyle = '#ffcc00';
-        context.fillText(`$${player.money || 0}`, this.game.width - 10, 50);
+        context.font = '24px Arial';
+        context.textAlign = 'center';
+        context.fillText(`$${player.money || 0}`, this.game.width / 2, 30);
     }
     
     /**
