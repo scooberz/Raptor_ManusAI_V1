@@ -99,16 +99,19 @@ class InputHandler {
         const scaledY = event.clientY - rect.top;
         
         // Convert from scaled canvas coordinates to internal game coordinates
-        // The game runs at 800x600 internally, but the canvas is scaled to fit the window
-        const scaleX = 800 / rect.width;   // Internal width / scaled width
-        const scaleY = 600 / rect.height;  // Internal height / scaled height
+        // Use the actual game dimensions instead of hardcoded values
+        const gameWidth = canvas.width;   // Internal game width
+        const gameHeight = canvas.height; // Internal game height
+        
+        const scaleX = gameWidth / rect.width;   // Internal width / scaled width
+        const scaleY = gameHeight / rect.height; // Internal height / scaled height
         
         this.mousePosition.x = scaledX * scaleX;
         this.mousePosition.y = scaledY * scaleY;
         
         // Clamp to game boundaries
-        this.mousePosition.x = Math.max(0, Math.min(800, this.mousePosition.x));
-        this.mousePosition.y = Math.max(0, Math.min(600, this.mousePosition.y));
+        this.mousePosition.x = Math.max(0, Math.min(gameWidth, this.mousePosition.x));
+        this.mousePosition.y = Math.max(0, Math.min(gameHeight, this.mousePosition.y));
     }
 
     handleMouseDown(event) {

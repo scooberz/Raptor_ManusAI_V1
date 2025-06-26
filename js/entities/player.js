@@ -16,6 +16,7 @@ class Player extends Entity {
         this.speed = 575; // Increased from 500 by 15%
         this.health = 100;
         this.maxHealth = 100;
+        this.shield = 0; // Shield for shop system
         this.money = 0;
         this.score = 0;
         this.collisionDamage = 20;
@@ -25,9 +26,12 @@ class Player extends Entity {
         this.currentWeaponIndex = 0;
         this.currentWeapon = this.weaponOrder[this.currentWeaponIndex];
         this.weapons = {
-            'CANNON': { name: 'Autocannon', fireRate: 100, lastFired: 0, level: 1 }, // Slower fire rate
+            'CANNON': { name: 'Autocannon', fireRate: 110, lastFired: 0, level: 1 }, // Slower fire rate
             'MISSILE': { name: 'Missiles', fireRate: 715, lastFired: 0 } // 30% slower than before
         };
+
+        // Unlocked weapons for shop system
+        this.unlockedWeapons = ['MISSILE']; // Start with basic missiles unlocked
 
         // Special weapons
         this.megabombs = 3;

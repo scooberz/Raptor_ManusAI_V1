@@ -11,22 +11,21 @@ import { EntityManager } from './entity.js';
 import { SaveManager } from './saveManager.js';
 import { BootState } from '../states/boot.js';
 import { LoadingState } from '../states/loading.js';
+import { IntroCutsceneState } from '../states/introCutscene.js';
 import { MenuState } from '../states/menu.js';
 import { GameState } from '../states/gameState.js';
 import { PauseState } from '../states/pause.js';
 import { GameOverState } from '../states/gameover.js';
 import { HangarState } from '../states/hangar.js';
 import { SupplyState } from '../states/supply.js';
-import { IntroCutsceneState } from '../states/introCutscene.js';
+import ShopState from '../states/shop.js';
 import { CharacterSelectState } from '../states/characterSelect.js';
-import { ShopState } from '../states/shop.js';
 
 class Game {
     constructor() {
         // Find all the canvas layers from the HTML
         this.layers = {
             background: document.getElementById('background-layer'),
-            environment: document.getElementById('environment-layer'), // NEW: Added environment layer
             enemy: document.getElementById('enemy-layer'),
             projectile: document.getElementById('projectile-layer'),
             player: document.getElementById('player-layer'),
@@ -39,6 +38,7 @@ class Game {
         for (const key in this.layers) {
             const canvas = this.layers[key];
             const ctx = canvas.getContext('2d', { alpha: true });
+            
             ctx.globalCompositeOperation = 'source-over';
             ctx.imageSmoothingEnabled = true;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -52,8 +52,11 @@ class Game {
 
         // --- Core Engine Components ---
         this.input = new InputHandler();
-        this.assets = new AssetManager();
-        this.audio = new AudioManager();
+        // --- NEW: The AssetManager now correctly receives the game instance ---
+        this.assets = new AssetManager(this);
+        // --- NEW: The AudioManager is now initialized with assets ---
+        this.audio = new AudioManager(this.assets);
+        
         this.collision = new CollisionSystem(this);
         this.entityManager = new EntityManager(this);
         this.saveManager = new SaveManager(this);
@@ -62,109 +65,111 @@ class Game {
         this.states = {
             boot: new BootState(this),
             loading: new LoadingState(this),
+            introCutscene: new IntroCutsceneState(this),
             menu: new MenuState(this),
             game: new GameState(this),
             pause: new PauseState(this),
             gameover: new GameOverState(this),
             hangar: new HangarState(this),
             supply: new SupplyState(this),
-            introCutscene: new IntroCutsceneState(this),
-            characterSelect: new CharacterSelectState(this),
-            shop: new ShopState(this)
+            shop: new ShopState(this),
+            characterSelect: new CharacterSelectState(this)
         };
         this.currentState = null;
-
-        // --- UPGRADE: Game Loop Properties for Fixed Timestep ---
-        this.lastTime = 0;
-        this.accumulator = 0;
-        this.timeStep = 1000 / 60; // 60 updates per second
 
         // --- Start the Game ---
         (async () => {
             await this.changeState('boot');
         })();
-
+        
+        // Start the main game loop
+        this.lastTime = 0;
+        this.accumulator = 0;
+        this.timeStep = 1000 / 60; // 60 FPS
         this.gameLoop = this.gameLoop.bind(this);
         requestAnimationFrame(this.gameLoop);
     }
 
     /**
-     * Resize all canvas layers to match window size while enforcing a 4:3 aspect ratio.
+     * Resize all canvas layers to match window size
      */
     resize() {
         const windowWidth = window.innerWidth;
         const windowHeight = window.innerHeight;
-        const targetAspectRatio = 4 / 3;
+        const minWidth = 800;
+        const minHeight = 600;
+        const targetAspectRatio = 16 / 9;
+        let gameWidth, gameHeight;
 
-        let newWidth, newHeight;
-
-        // Determine the largest possible 4:3 canvas that fits within the window
         if (windowWidth / windowHeight > targetAspectRatio) {
-            // Window is wider than 4:3, so height is the limiting dimension
-            newHeight = windowHeight;
-            newWidth = newHeight * targetAspectRatio;
+            gameHeight = Math.max(minHeight, windowHeight);
+            gameWidth = gameHeight * targetAspectRatio;
         } else {
-            // Window is taller than 4:3, so width is the limiting dimension
-            newWidth = windowWidth;
-            newHeight = newWidth / targetAspectRatio;
+            gameWidth = Math.max(minWidth, windowWidth);
+            gameHeight = gameWidth / targetAspectRatio;
         }
-
-        // Set the internal game dimensions
-        this.width = 800; // Set a fixed internal resolution
-        this.height = 600; // 800x600 is a classic 4:3 resolution
-
-        // Resize and position all canvas layers to be centered in the window
+        
+        this.width = gameWidth;
+        this.height = gameHeight;
+        
+        const scaleX = windowWidth / gameWidth;
+        const scaleY = windowHeight / gameHeight;
+        const scale = Math.min(scaleX, scaleY);
+        
         for (const key in this.layers) {
             const canvas = this.layers[key];
-            canvas.width = this.width;
-            canvas.height = this.height;
-
-            // Apply styles to center the canvas and scale it correctly
-            canvas.style.width = `${newWidth}px`;
-            canvas.style.height = `${newHeight}px`;
+            canvas.width = gameWidth;
+            canvas.height = gameHeight;
+            
+            const scaledWidth = gameWidth * scale;
+            const scaledHeight = gameHeight * scale;
+            
+            canvas.style.width = `${scaledWidth}px`;
+            canvas.style.height = `${scaledHeight}px`;
             canvas.style.position = 'absolute';
-            canvas.style.left = `${(windowWidth - newWidth) / 2}px`;
-            canvas.style.top = `${(windowHeight - newHeight) / 2}px`;
+            canvas.style.left = `${(windowWidth - scaledWidth) / 2}px`;
+            canvas.style.top = `${(windowHeight - scaledHeight) / 2}px`;
+            
+            const ctx = this.contexts[key];
+            ctx.imageSmoothingEnabled = false;
         }
-
-        // Notify the current state of the resize if it has a resize handler
+        
         if (this.currentState && typeof this.currentState.resize === 'function') {
             this.currentState.resize();
         }
     }
 
-    // --- UPGRADE: Game Loop now uses a Fixed Timestep for stable physics ---
+    /**
+     * The main game loop, called for every frame
+     * @param {number} timestamp - The current time provided by the browser
+     */
     gameLoop(timestamp) {
         const deltaTime = timestamp - this.lastTime;
         this.lastTime = timestamp;
         this.accumulator += deltaTime;
 
-        // Update the game logic in fixed steps. This prevents physics from changing
-        // based on the frame rate, which is more stable.
         while (this.accumulator >= this.timeStep) {
             if (this.currentState) {
                 this.currentState.update(this.timeStep);
             }
-            this.input.update(); // Input should also update on the fixed step
+            this.input.update();
             this.accumulator -= this.timeStep;
         }
 
-        // Render as fast as possible, independent of the logic update rate.
-        if (this.currentState && this.width && this.height) {
-            // Clear all canvas layers
+        if (this.currentState) {
             for (const key in this.contexts) {
-                const ctx = this.contexts[key];
-                if (ctx) {
-                    ctx.clearRect(0, 0, this.width, this.height);
-                }
+                this.contexts[key].clearRect(0, 0, this.width, this.height);
             }
             this.currentState.render(this.contexts);
         }
 
         requestAnimationFrame(this.gameLoop);
     }
-    
-    // --- This is our current, correct, async-aware changeState method ---
+
+    /**
+     * Change the current game state
+     * @param {string} stateName - The name of the state to switch to
+     */
     async changeState(stateName) {
         if (this.currentState && typeof this.currentState.exit === 'function') {
             this.currentState.exit();
@@ -175,7 +180,6 @@ class Game {
             this.currentState = newState;
             if (typeof this.currentState.enter === 'function') {
                 const result = this.currentState.enter();
-                // This correctly handles states with an async enter() method
                 if (result && typeof result.then === 'function') {
                     await result;
                 }

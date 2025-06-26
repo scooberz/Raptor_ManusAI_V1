@@ -46,8 +46,8 @@ class PauseState {
         console.log('Pausing game with overlay');
         this.isPaused = true;
         
-        // Pause game audio
-        this.game.audio.pauseMusic();
+        // Stop game audio (AudioManager doesn't have pause/resume, only stop)
+        this.game.audio.stopMusic();
         
         // Create the pause overlay
         this.createPauseOverlay();
@@ -65,8 +65,8 @@ class PauseState {
         // Remove the pause overlay
         this.removePauseOverlay();
         
-        // Resume game audio
-        this.game.audio.resumeMusic();
+        // Note: AudioManager doesn't have resumeMusic method
+        // Music will need to be restarted manually if needed
     }
     
     /**

@@ -37,7 +37,7 @@ class MenuState {
         });
         
         // Play menu music
-        this.game.audio.playMusic('menuMusic');
+        // this.game.audio.playMusic('menuMusic'); // Commented out - no audio assets defined yet
         
         // Set up menu screen
         this.setupMenuScreen();
@@ -514,7 +514,7 @@ class MenuState {
         document.getElementById('menu-screen').style.display = 'none';
         
         // Stop menu music
-        this.game.audio.stopMusic();
+        // this.game.audio.stopMusic(); // Commented out - no audio assets defined yet
     }
 }
 

@@ -8,33 +8,33 @@
             "wave_id": "wave_01_striker_assault",
             "delay_after_previous_wave_ms": 2000,
             "enemies": [
-                { "type": "striker", "spawn_x": 275, "spawn_y": -50, "delay": 500, "overrides": { "movementPattern": "descend_and_converge", "firingPattern": "single_straight_shot", "fireRate": 4000, "speed": 80 } },
-                { "type": "striker", "spawn_x": 325, "spawn_y": -50, "delay": 500, "overrides": { "movementPattern": "descend_and_converge", "firingPattern": "single_straight_shot", "fireRate": 4000, "speed": 80 } },
-                { "type": "striker", "spawn_x": 25, "spawn_y": -80, "delay": 2500, "overrides": { "movementPattern": "descend_and_converge", "firingPattern": "single_straight_shot", "fireRate": 4000, "speed": 80 } },
-                { "type": "striker", "spawn_x": 125, "spawn_y": -80, "delay": 2500, "overrides": { "movementPattern": "descend_and_converge", "firingPattern": "single_straight_shot", "fireRate": 4000, "speed": 80 } },
-                { "type": "striker", "spawn_x": 475, "spawn_y": -80, "delay": 4500, "overrides": { "movementPattern": "descend_and_converge", "firingPattern": "single_straight_shot", "fireRate": 4000, "speed": 80 } },
-                { "type": "striker", "spawn_x": 575, "spawn_y": -80, "delay": 4500, "overrides": { "movementPattern": "descend_and_converge", "firingPattern": "single_straight_shot", "fireRate": 4000, "speed": 80 } },
-                { "type": "striker", "spawn_x": 50, "spawn_y": -50, "delay": 7000, "overrides": { "movementPattern": "descend_and_converge", "firingPattern": "single_straight_shot", "fireRate": 3500, "speed": 90 } },
-                { "type": "striker", "spawn_x": 150, "spawn_y": -50, "delay": 7500, "overrides": { "movementPattern": "descend_and_converge", "firingPattern": "single_straight_shot", "fireRate": 3500, "speed": 90 } },
-                { "type": "striker", "spawn_x": 250, "spawn_y": -50, "delay": 8000, "overrides": { "movementPattern": "descend_and_converge", "firingPattern": "single_straight_shot", "fireRate": 3500, "speed": 90 } },
-                { "type": "striker", "spawn_x": 550, "spawn_y": -50, "delay": 9500, "overrides": { "movementPattern": "descend_and_converge", "firingPattern": "single_straight_shot", "fireRate": 3500, "speed": 90 } },
-                { "type": "striker", "spawn_x": 650, "spawn_y": -50, "delay": 10000, "overrides": { "movementPattern": "descend_and_converge", "firingPattern": "single_straight_shot", "fireRate": 3500, "speed": 90 } },
-                { "type": "striker", "spawn_x": 750, "spawn_y": -50, "delay": 10500, "overrides": { "movementPattern": "descend_and_converge", "firingPattern": "single_straight_shot", "fireRate": 3500, "speed": 90 } }
+                { "type": "striker", "spawn_x": 275, "spawn_y": -50, "delay": 500, "overrides": { "movementPattern": "descend_and_converge", "firingPattern": "single_straight_shot", "fireRate": 800, "speed": 80 } },
+                { "type": "striker", "spawn_x": 325, "spawn_y": -50, "delay": 500, "overrides": { "movementPattern": "descend_and_converge", "firingPattern": "single_straight_shot", "fireRate": 1200, "speed": 80 } },
+                { "type": "striker", "spawn_x": 25, "spawn_y": -80, "delay": 2500, "overrides": { "movementPattern": "descend_and_converge", "firingPattern": "single_straight_shot", "fireRate": 600, "speed": 80 } },
+                { "type": "striker", "spawn_x": 125, "spawn_y": -80, "delay": 2500, "overrides": { "movementPattern": "descend_and_converge", "firingPattern": "single_straight_shot", "fireRate": 1000, "speed": 80 } },
+                { "type": "striker", "spawn_x": 475, "spawn_y": -80, "delay": 4500, "overrides": { "movementPattern": "descend_and_converge", "firingPattern": "single_straight_shot", "fireRate": 900, "speed": 80 } },
+                { "type": "striker", "spawn_x": 575, "spawn_y": -80, "delay": 4500, "overrides": { "movementPattern": "descend_and_converge", "firingPattern": "single_straight_shot", "fireRate": 700, "speed": 80 } },
+                { "type": "striker", "spawn_x": 50, "spawn_y": -50, "delay": 7000, "overrides": { "movementPattern": "descend_and_converge", "firingPattern": "single_straight_shot", "fireRate": 1100, "speed": 90 } },
+                { "type": "striker", "spawn_x": 150, "spawn_y": -50, "delay": 7500, "overrides": { "movementPattern": "descend_and_converge", "firingPattern": "single_straight_shot", "fireRate": 800, "speed": 90 } },
+                { "type": "striker", "spawn_x": 250, "spawn_y": -50, "delay": 8000, "overrides": { "movementPattern": "descend_and_converge", "firingPattern": "single_straight_shot", "fireRate": 1300, "speed": 90 } },
+                { "type": "striker", "spawn_x": 550, "spawn_y": -50, "delay": 9500, "overrides": { "movementPattern": "descend_and_converge", "firingPattern": "single_straight_shot", "fireRate": 950, "speed": 90 } },
+                { "type": "striker", "spawn_x": 650, "spawn_y": -50, "delay": 10000, "overrides": { "movementPattern": "descend_and_converge", "firingPattern": "single_straight_shot", "fireRate": 650, "speed": 90 } },
+                { "type": "striker", "spawn_x": 750, "spawn_y": -50, "delay": 10500, "overrides": { "movementPattern": "descend_and_converge", "firingPattern": "single_straight_shot", "fireRate": 1050, "speed": 90 } }
             ]
         },
         {
             "wave_id": "wave_02_cyclone_and_gnats",
             "delay_after_previous_wave_ms": 3000,
             "enemies": [
-                { "type": "cyclone", "spawn_x": 50, "spawn_y": -60, "delay": 0, "overrides": { "health": 90, "speed": 180, "movementPattern": "descend_and_veer", "firingPattern": "fire_straight_missile", "fireRate": 1800 } },
-                { "type": "cyclone", "spawn_x": 550, "spawn_y": -60, "delay": 0, "overrides": { "health": 90, "speed": 180, "movementPattern": "descend_and_veer", "firingPattern": "fire_straight_missile", "fireRate": 1800 } },
-                { "type": "gnat", "spawn_x": 100, "spawn_y": -50, "delay": 4000, "overrides": { "movementPattern": "sine_wave_custom", "speed": 110, "sine_frequency": 0.025, "sine_amplitude": 70, "firingPattern": "single_straight_shot", "loot": { "type": "money", "value": 50 } } },
-                { "type": "gnat", "spawn_x": 500, "spawn_y": -50, "delay": 6000, "overrides": { "movementPattern": "sine_wave_custom", "speed": 110, "sine_frequency": 0.025, "sine_amplitude": 70, "firingPattern": "single_straight_shot", "loot": { "type": "money", "value": 50 } } },
-                { "type": "gnat", "spawn_x": 200, "spawn_y": -50, "delay": 8000, "overrides": { "movementPattern": "sine_wave_custom", "speed": 110, "sine_frequency": 0.025, "sine_amplitude": 70, "firingPattern": "single_straight_shot", "loot": { "type": "money", "value": 50 } } },
-                { "type": "gnat", "spawn_x": 400, "spawn_y": -50, "delay": 10000, "overrides": { "movementPattern": "sine_wave_custom", "speed": 110, "sine_frequency": 0.025, "sine_amplitude": 70, "firingPattern": "single_straight_shot", "loot": { "type": "money", "value": 50 } } },
-                { "type": "gnat", "spawn_x": 150, "spawn_y": -50, "delay": 12000, "overrides": { "movementPattern": "sine_wave_custom", "speed": 110, "sine_frequency": 0.025, "sine_amplitude": 70, "firingPattern": "single_straight_shot", "loot": { "type": "money", "value": 50 } } },
-                { "type": "gnat", "spawn_x": 450, "spawn_y": -50, "delay": 14000, "overrides": { "movementPattern": "sine_wave_custom", "speed": 110, "sine_frequency": 0.025, "sine_amplitude": 70, "firingPattern": "single_straight_shot", "loot": { "type": "money", "value": 50 } } },
-                { "type": "gnat", "spawn_x": 250, "spawn_y": -50, "delay": 16000, "overrides": { "movementPattern": "sine_wave_custom", "speed": 110, "sine_frequency": 0.025, "sine_amplitude": 70, "firingPattern": "single_straight_shot", "loot": { "type": "money", "value": 50 } } }
+                { "type": "cyclone", "spawn_x": 50, "spawn_y": -60, "delay": 0, "overrides": { "health": 90, "speed": 180, "movementPattern": "descend_and_veer", "firingPattern": "fire_straight_missile", "fireRate": 1200 } },
+                { "type": "cyclone", "spawn_x": 550, "spawn_y": -60, "delay": 0, "overrides": { "health": 90, "speed": 180, "movementPattern": "descend_and_veer", "firingPattern": "fire_straight_missile", "fireRate": 1500 } },
+                { "type": "gnat", "spawn_x": 100, "spawn_y": -50, "delay": 4000, "overrides": { "movementPattern": "sine_wave_custom", "speed": 110, "sine_frequency": 0.025, "sine_amplitude": 70, "firingPattern": "single_straight_shot", "fireRate": 800, "loot": { "type": "money", "value": 50 } } },
+                { "type": "gnat", "spawn_x": 500, "spawn_y": -50, "delay": 6000, "overrides": { "movementPattern": "sine_wave_custom", "speed": 110, "sine_frequency": 0.025, "sine_amplitude": 70, "firingPattern": "single_straight_shot", "fireRate": 1100, "loot": { "type": "money", "value": 50 } } },
+                { "type": "gnat", "spawn_x": 200, "spawn_y": -50, "delay": 8000, "overrides": { "movementPattern": "sine_wave_custom", "speed": 110, "sine_frequency": 0.025, "sine_amplitude": 70, "firingPattern": "single_straight_shot", "fireRate": 900, "loot": { "type": "money", "value": 50 } } },
+                { "type": "gnat", "spawn_x": 400, "spawn_y": -50, "delay": 10000, "overrides": { "movementPattern": "sine_wave_custom", "speed": 110, "sine_frequency": 0.025, "sine_amplitude": 70, "firingPattern": "single_straight_shot", "fireRate": 700, "loot": { "type": "money", "value": 50 } } },
+                { "type": "gnat", "spawn_x": 150, "spawn_y": -50, "delay": 12000, "overrides": { "movementPattern": "sine_wave_custom", "speed": 110, "sine_frequency": 0.025, "sine_amplitude": 70, "firingPattern": "single_straight_shot", "fireRate": 1000, "loot": { "type": "money", "value": 50 } } },
+                { "type": "gnat", "spawn_x": 450, "spawn_y": -50, "delay": 14000, "overrides": { "movementPattern": "sine_wave_custom", "speed": 110, "sine_frequency": 0.025, "sine_amplitude": 70, "firingPattern": "single_straight_shot", "fireRate": 850, "loot": { "type": "money", "value": 50 } } },
+                { "type": "gnat", "spawn_x": 250, "spawn_y": -50, "delay": 16000, "overrides": { "movementPattern": "sine_wave_custom", "speed": 110, "sine_frequency": 0.025, "sine_amplitude": 70, "firingPattern": "single_straight_shot", "fireRate": 950, "loot": { "type": "money", "value": 50 } } }
             ]
         },
         {
@@ -43,27 +43,27 @@
             "enemies": [
                 {
                     "type": "reaper", "spawn_x": 50, "spawn_y": -50, "delay": 0,
-                    "overrides": { "movementPattern": "descend_and_strafe_right", "trigger_y": 300, "speed": 120, "firingPattern": "fire_straight_missile", "fireRate": 3000 }
+                    "overrides": { "movementPattern": "descend_and_strafe_right", "trigger_y": 300, "speed": 120, "firingPattern": "fire_straight_missile", "fireRate": 1800 }
                 },
                 {
                     "type": "reaper", "spawn_x": 100, "spawn_y": -50, "delay": 500,
-                    "overrides": { "movementPattern": "descend_and_strafe_right", "trigger_y": 350, "speed": 120, "firingPattern": "fire_straight_missile", "fireRate": 3000 }
+                    "overrides": { "movementPattern": "descend_and_strafe_right", "trigger_y": 350, "speed": 120, "firingPattern": "fire_straight_missile", "fireRate": 2200 }
                 },
                 {
                     "type": "cutter", "spawn_x": 50, "spawn_y": -50, "delay": 4000,
-                    "overrides": { "movementPattern": "move_diagonal", "speed": 220, "firingPattern": "burst_fire", "fireRate": 2500 }
+                    "overrides": { "movementPattern": "move_diagonal", "speed": 220, "firingPattern": "burst_fire", "fireRate": 1500 }
                 },
                 {
                     "type": "cutter", "spawn_x": 550, "spawn_y": -50, "delay": 4000,
-                    "overrides": { "movementPattern": "move_diagonal", "speed": 220, "firingPattern": "burst_fire", "fireRate": 2500 }
+                    "overrides": { "movementPattern": "move_diagonal", "speed": 220, "firingPattern": "burst_fire", "fireRate": 1800 }
                 },
                 {
                     "type": "reaper", "spawn_x": 500, "spawn_y": -50, "delay": 8000,
-                    "overrides": { "movementPattern": "descend_and_strafe_left", "trigger_y": 300, "speed": 120, "firingPattern": "fire_straight_missile", "fireRate": 3000 }
+                    "overrides": { "movementPattern": "descend_and_strafe_left", "trigger_y": 300, "speed": 120, "firingPattern": "fire_straight_missile", "fireRate": 1600 }
                 },
                 {
                     "type": "reaper", "spawn_x": 550, "spawn_y": -50, "delay": 8500,
-                    "overrides": { "movementPattern": "descend_and_strafe_left", "trigger_y": 350, "speed": 120, "firingPattern": "fire_straight_missile", "fireRate": 3000 }
+                    "overrides": { "movementPattern": "descend_and_strafe_left", "trigger_y": 350, "speed": 120, "firingPattern": "fire_straight_missile", "fireRate": 2000 }
                 }
             ]
         },
@@ -71,25 +71,25 @@
             "wave_id": "wave_04_striker_zigzag_and_darts",
             "delay_after_previous_wave_ms": 4000,
             "enemies": [
-                { "type": "striker", "spawn_x": 150, "spawn_y": -100, "delay": 0,    "overrides": { "movementPattern": "move_straight_down", "firingPattern": "single_straight_shot", "fireRate": 2500, "speed": 90 }},
-                { "type": "striker", "spawn_x": 200, "spawn_y": -50,  "delay": 500,  "overrides": { "movementPattern": "move_straight_down", "firingPattern": "single_straight_shot", "fireRate": 2500, "speed": 90 }},
-                { "type": "striker", "spawn_x": 150, "spawn_y": -150, "delay": 1000, "overrides": { "movementPattern": "move_straight_down", "firingPattern": "single_straight_shot", "fireRate": 2500, "speed": 90 }},
-                { "type": "striker", "spawn_x": 200, "spawn_y": -100, "delay": 1500, "overrides": { "movementPattern": "move_straight_down", "firingPattern": "single_straight_shot", "fireRate": 2500, "speed": 90 }},
-                { "type": "striker", "spawn_x": 450, "spawn_y": -100, "delay": 3000, "overrides": { "movementPattern": "move_straight_down", "firingPattern": "single_straight_shot", "fireRate": 2000, "speed": 90 }},
-                { "type": "striker", "spawn_x": 500, "spawn_y": -50,  "delay": 3500, "overrides": { "movementPattern": "move_straight_down", "firingPattern": "single_straight_shot", "fireRate": 2000, "speed": 90 }},
-                { "type": "striker", "spawn_x": 450, "spawn_y": -150, "delay": 4000, "overrides": { "movementPattern": "move_straight_down", "firingPattern": "single_straight_shot", "fireRate": 2000, "speed": 90 }},
-                { "type": "dart", "spawn_x": -30, "spawn_y": 50, "delay": 6000, "overrides": { "movementPattern": "swoop_from_left", "firingPattern": "none" }},
-                { "type": "dart", "spawn_x": -30, "spawn_y": 30, "delay": 6150, "overrides": { "movementPattern": "swoop_from_left", "firingPattern": "none" }},
-                { "type": "dart", "spawn_x": -30, "spawn_y": 10, "delay": 6300, "overrides": { "movementPattern": "swoop_from_left", "firingPattern": "none" }},
-                { "type": "dart", "spawn_x": 630, "spawn_y": 50, "delay": 8000, "overrides": { "movementPattern": "swoop_from_right", "firingPattern": "none" }},
-                { "type": "dart", "spawn_x": 630, "spawn_y": 30, "delay": 8150, "overrides": { "movementPattern": "swoop_from_right", "firingPattern": "none" }},
-                { "type": "dart", "spawn_x": 630, "spawn_y": 10, "delay": 8300, "overrides": { "movementPattern": "swoop_from_right", "firingPattern": "none" }},
-                { "type": "dart", "spawn_x": -30, "spawn_y": 50, "delay": 10000, "overrides": { "movementPattern": "swoop_from_left", "firingPattern": "none" }},
-                { "type": "dart", "spawn_x": -30, "spawn_y": 30, "delay": 10150, "overrides": { "movementPattern": "swoop_from_left", "firingPattern": "none" }},
-                { "type": "dart", "spawn_x": -30, "spawn_y": 10, "delay": 10300, "overrides": { "movementPattern": "swoop_from_left", "firingPattern": "none" }},
-                { "type": "dart", "spawn_x": 630, "spawn_y": 50, "delay": 12000, "overrides": { "movementPattern": "swoop_from_right", "firingPattern": "none" }},
-                { "type": "dart", "spawn_x": 630, "spawn_y": 30, "delay": 12150, "overrides": { "movementPattern": "swoop_from_right", "firingPattern": "none" }},
-                { "type": "dart", "spawn_x": 630, "spawn_y": 10, "delay": 12300, "overrides": { "movementPattern": "swoop_from_right", "firingPattern": "none" }}
+                { "type": "striker", "spawn_x": 150, "spawn_y": -100, "delay": 0,    "overrides": { "movementPattern": "move_straight_down", "firingPattern": "single_straight_shot", "fireRate": 1200, "speed": 90 }},
+                { "type": "striker", "spawn_x": 200, "spawn_y": -50,  "delay": 500,  "overrides": { "movementPattern": "move_straight_down", "firingPattern": "single_straight_shot", "fireRate": 900, "speed": 90 }},
+                { "type": "striker", "spawn_x": 150, "spawn_y": -150, "delay": 1000, "overrides": { "movementPattern": "move_straight_down", "firingPattern": "single_straight_shot", "fireRate": 1100, "speed": 90 }},
+                { "type": "striker", "spawn_x": 200, "spawn_y": -100, "delay": 1500, "overrides": { "movementPattern": "move_straight_down", "firingPattern": "single_straight_shot", "fireRate": 800, "speed": 90 }},
+                { "type": "striker", "spawn_x": 450, "spawn_y": -100, "delay": 3000, "overrides": { "movementPattern": "move_straight_down", "firingPattern": "single_straight_shot", "fireRate": 1000, "speed": 90 }},
+                { "type": "striker", "spawn_x": 500, "spawn_y": -50,  "delay": 3500, "overrides": { "movementPattern": "move_straight_down", "firingPattern": "single_straight_shot", "fireRate": 750, "speed": 90 }},
+                { "type": "striker", "spawn_x": 450, "spawn_y": -150, "delay": 4000, "overrides": { "movementPattern": "move_straight_down", "firingPattern": "single_straight_shot", "fireRate": 950, "speed": 90 }},
+                { "type": "dart", "spawn_x": -30, "spawn_y": 50, "delay": 6000, "overrides": { "movementPattern": "swoop_and_dash", "firingPattern": "none" }},
+                { "type": "dart", "spawn_x": -30, "spawn_y": 30, "delay": 6150, "overrides": { "movementPattern": "swoop_and_dash", "firingPattern": "none" }},
+                { "type": "dart", "spawn_x": -30, "spawn_y": 10, "delay": 6300, "overrides": { "movementPattern": "swoop_and_dash", "firingPattern": "none" }},
+                { "type": "dart", "spawn_x": 630, "spawn_y": 50, "delay": 8000, "overrides": { "movementPattern": "swoop_and_dash", "firingPattern": "none" }},
+                { "type": "dart", "spawn_x": 630, "spawn_y": 30, "delay": 8150, "overrides": { "movementPattern": "swoop_and_dash", "firingPattern": "none" }},
+                { "type": "dart", "spawn_x": 630, "spawn_y": 10, "delay": 8300, "overrides": { "movementPattern": "swoop_and_dash", "firingPattern": "none" }},
+                { "type": "dart", "spawn_x": -30, "spawn_y": 50, "delay": 10000, "overrides": { "movementPattern": "swoop_and_dash", "firingPattern": "none" }},
+                { "type": "dart", "spawn_x": -30, "spawn_y": 30, "delay": 10150, "overrides": { "movementPattern": "swoop_and_dash", "firingPattern": "none" }},
+                { "type": "dart", "spawn_x": -30, "spawn_y": 10, "delay": 10300, "overrides": { "movementPattern": "swoop_and_dash", "firingPattern": "none" }},
+                { "type": "dart", "spawn_x": 630, "spawn_y": 50, "delay": 12000, "overrides": { "movementPattern": "swoop_and_dash", "firingPattern": "none" }},
+                { "type": "dart", "spawn_x": 630, "spawn_y": 30, "delay": 12150, "overrides": { "movementPattern": "swoop_and_dash", "firingPattern": "none" }},
+                { "type": "dart", "spawn_x": 630, "spawn_y": 10, "delay": 12300, "overrides": { "movementPattern": "swoop_and_dash", "firingPattern": "none" }}
             ]
         },
         {

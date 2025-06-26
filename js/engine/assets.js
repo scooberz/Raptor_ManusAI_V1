@@ -5,7 +5,7 @@
 class AssetManager {
     constructor() {
         this.images = {};
-        this.audio = {};
+        this.audio = {}; // This will now be managed by AudioManager
         this.data = {};
         this.totalAssets = 0;
         this.loadedAssets = 0;
@@ -13,6 +13,7 @@ class AssetManager {
         this.onComplete = null;
         this.gameplayAssetsLoaded = false; // Track gameplay assets loading status
         this.onGameplayAssetsLoaded = null; // Callback when gameplay assets finish loading
+        this.assetList = {}; // New property to store the full asset list
     }
     
     /**
@@ -27,7 +28,7 @@ class AssetManager {
         
         return new Promise((resolve, reject) => {
             const image = new Image();
-            image.crossOrigin = 'anonymous';  // Enable CORS for image processing
+            image.crossOrigin = 'anonymous';  // Enable CORS for image processing
             
             image.onload = () => {
                 console.log(`Image loaded: ${key}, size: ${image.width}x${image.height}`);
@@ -51,21 +52,15 @@ class AssetManager {
                     const r = data[i];
                     const g = data[i + 1];
                     const b = data[i + 2];
-                    const a = data[i + 3];
                     
-                    // Check if pixel is part of the background
-                    // This includes white, light gray, and very light colors
                     const isBackground = (
-                        // White or near-white
                         (r > 240 && g > 240 && b > 240) ||
-                        // Light gray
                         (Math.abs(r - g) < 5 && Math.abs(g - b) < 5 && r > 200) ||
-                        // Very light colors
                         (r > 230 && g > 230 && b > 230)
                     );
                     
                     if (isBackground) {
-                        data[i + 3] = 0;  // Set alpha to 0
+                        data[i + 3] = 0;  // Set alpha to 0
                         transparentPixels++;
                     }
                 }
@@ -94,32 +89,7 @@ class AssetManager {
             image.src = src;
         });
     }
-    
-    /**
-     * Load an audio asset
-     * @param {string} key - The key to store the audio under
-     * @param {string} src - The source URL of the audio
-     * @returns {Promise} A promise that resolves when the audio is loaded
-     */
-    loadAudio(key, src) {
-        this.totalAssets++;
-        
-        return new Promise((resolve, reject) => {
-            const audio = new Audio();
-            audio.oncanplaythrough = () => {
-                this.audio[key] = audio;
-                this.loadedAssets++;
-                this.notifyProgress();
-                resolve(audio);
-            };
-            audio.onerror = () => {
-                console.error(`Failed to load audio: ${src}`);
-                reject(new Error(`Failed to load audio: ${src}`));
-            };
-            audio.src = src;
-        });
-    }
-    
+
     /**
      * Load a JSON data asset
      * @param {string} key - The key to store the data under
@@ -153,7 +123,8 @@ class AssetManager {
      * @param {Object} assets - Object containing assets to load
      * @returns {Promise} A promise that resolves when all assets are loaded
      */
-    loadAssets(assets) {
+    async loadAssets(assets) {
+        this.assetList = assets; // Store the full asset list
         const promises = [];
         
         if (assets.images) {
@@ -166,23 +137,17 @@ class AssetManager {
         const enemySprites = {
             'enemyStriker': 'assets/images/enemies/striker.png',
             'enemyCyclone': 'assets/images/enemies/cyclone.png',
-            'enemyGnat':    'assets/images/enemies/gnat.png',
-            'enemyReaper':  'assets/images/enemies/reaper.png',
-            'enemyDart':    'assets/images/enemies/dart.png',
+            'enemyGnat':    'assets/images/enemies/gnat.png',
+            'enemyReaper':  'assets/images/enemies/reaper.png',
+            'enemyDart':    'assets/images/enemies/dart.png',
             'enemyGoliath': 'assets/images/enemies/goliath.png',
-            'enemyCutter':  'assets/images/enemies/cutter.png',
-            'enemyMine':    'assets/images/enemies/mine.png'
+            'enemyCutter':  'assets/images/enemies/cutter.png',
+            'enemyMine':    'assets/images/enemies/mine.png'
         };
 
         Object.entries(enemySprites).forEach(([key, src]) => {
             promises.push(this.loadImage(key, src));
         });
-        
-        if (assets.audio) {
-            Object.entries(assets.audio).forEach(([key, src]) => {
-                promises.push(this.loadAudio(key, src));
-            });
-        }
         
         if (assets.data) {
             Object.entries(assets.data).forEach(([key, src]) => {
@@ -199,15 +164,6 @@ class AssetManager {
      */
     getImage(key) {
         return this.images[key];
-    }
-    
-    /**
-     * Get an audio asset
-     * @param {string} key - The key of the audio to get
-     * @returns {Audio} The audio asset
-     */
-    getAudio(key) {
-        return this.audio[key];
     }
     
     /**
@@ -304,9 +260,8 @@ class AssetManager {
                 
                 // Projectile assets
                 'playerBullet': 'assets/images/projectiles/enemy_bullet.png',
-                'enemyBullet': 'assets/images/projectiles/enemy_bullet.png',
-                'enemyMissile': 'assets/images/projectiles/ENEMY_MISSILE.png',
-                'missile': 'assets/images/projectiles/player_missile.png',
+                'enemyBullet': 'assets/images/projectiles/enemy_projectile.png',
+                'enemyMissile': 'assets/images/projectiles/enemyMissile.png',
                 'MISSILE': 'assets/images/projectiles/player_missile.png',
                 
                 // Environment assets
@@ -330,11 +285,7 @@ class AssetManager {
                 // UI assets
                 'healthBar': 'assets/images/ui/health_bar.png',
                 'shieldBar': 'assets/images/ui/shield_bar.png',
-                'hangarBackground': 'assets/images/ui/hangar_background.png',
-                'menuBackground': 'assets/images/ui/menu_background.png',
-                'shopBackground': 'assets/images/ui/shop_background.png',
-                'characterSelectBackground': 'assets/images/ui/character_select_background.png',
-                // smokePuff: 'assets/images/effects/SMOKE_PUFF.png',
+                'shopBackground': 'assets/images/ui/shop_background.png'
             }
         };
         
@@ -355,4 +306,3 @@ class AssetManager {
 }
 
 export { AssetManager };
-

@@ -109,7 +109,12 @@ class LoadingState {
                 'cutscenePanel2': 'assets/images/ui/Raptor intro cutscene 2.png',
                 
                 // UI assets (only essential for menu)
-                'logo': 'assets/images/ui/game_logo.png'
+                'logo': 'assets/images/ui/game_logo.png',
+                
+                // Background images for different screens
+                'menuBackground': 'assets/images/ui/menu_background.png',
+                'characterSelectBackground': 'assets/images/ui/character_select_background.png',
+                'hangarBackground': 'assets/images/ui/hangar_background.png'
             }
         };
 

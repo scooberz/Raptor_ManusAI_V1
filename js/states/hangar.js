@@ -184,7 +184,7 @@ class HangarState {
 
     chooseNextMission() {
         document.getElementById('hangar-screen').style.display = 'none';
-        this.game.changeState('characterSelect');
+        this.game.changeState('game');
     }
 
     openShop() {
