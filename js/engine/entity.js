@@ -12,6 +12,7 @@ class Entity {
         this.velocityX = 0;
         this.velocityY = 0;
         this.active = true;
+        this.isReady = false;
         this.layer = null; // Should be set by subclasses
         this.id = Math.random(); // A simple unique identifier
         
@@ -48,6 +49,8 @@ class Entity {
      * @param {CanvasRenderingContext2D} context - The canvas context to render to
      */
     render(context) {
+        if (!this.isReady) return;
+
         if (this.sprite) {
             // Use the 5-argument version of drawImage for non-spritesheet images
             context.drawImage(
@@ -130,12 +133,34 @@ class EntityManager {
      * @param {Object} contexts - The canvas rendering contexts
      */
     render(contexts) {
-        // Render entities based on their layer property
-        this.entities.forEach(entity => {
-            if (entity.active && entity.layer && contexts[entity.layer]) {
-                entity.render(contexts[entity.layer]);
+        // --- SYSTEM-LEVEL FIX FOR TRANSPARENCY ---
+        // Set the correct composition mode for all entities before drawing.
+        // This ensures all PNGs with alpha channels render correctly.
+        if (contexts.player) { // Check if the context exists
+             contexts.player.globalCompositeOperation = 'source-over';
+        }
+        if (contexts.enemy) {
+             contexts.enemy.globalCompositeOperation = 'source-over';
+        }
+        if (contexts.projectile) {
+             contexts.projectile.globalCompositeOperation = 'source-over';
+        }
+        if (contexts.explosion) {
+             contexts.explosion.globalCompositeOperation = 'source-over';
+        }
+        // Add more for other layers as needed (e.g., contexts.explosion)
+        // -----------------------------------------
+
+        // Now, proceed with the existing rendering loop
+        for (const entity of this.entities) {
+            if (entity.active && typeof entity.render === 'function') {
+                const layer = entity.layer || 'player'; // Default to player layer
+                const context = contexts[layer];
+                if (context) {
+                    entity.render(context);
             }
-        });
+            }
+        }
     }
     
     /**

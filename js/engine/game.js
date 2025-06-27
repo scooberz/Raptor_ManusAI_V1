@@ -9,8 +9,11 @@ import { AudioManager } from './audio.js';
 import { CollisionSystem } from './collision.js';
 import { EntityManager } from './entity.js';
 import { SaveManager } from './saveManager.js';
+import { ObjectPool } from './ObjectPool.js';
+import { Projectile } from '../entities/projectile.js';
+import { Missile } from '../entities/missile.js';
 import { BootState } from '../states/boot.js';
-import { LoadingState } from '../states/loading.js';
+import { LoadingState } from '../states/LoadingState.js';
 import { IntroCutsceneState } from '../states/introCutscene.js';
 import { MenuState } from '../states/menu.js';
 import { GameState } from '../states/gameState.js';
@@ -23,6 +26,16 @@ import { CharacterSelectState } from '../states/characterSelect.js';
 
 class Game {
     constructor() {
+        // --- TIMING & FPS LOCK ---
+        this.lastTime = 0;
+        this.accumulator = 0;
+        this.timeStep = 1000 / 60; // This locks our logic to 60 FPS
+        this.currentFPS = 0;
+        this.debugMode = false; // Enable debug logging for the game loop
+
+        // --- BIND THE GAME LOOP'S CONTEXT ---
+        this.gameLoop = this.gameLoop.bind(this);
+
         // Find all the canvas layers from the HTML
         this.layers = {
             background: document.getElementById('background-layer'),
@@ -60,6 +73,8 @@ class Game {
         this.collision = new CollisionSystem(this);
         this.entityManager = new EntityManager(this);
         this.saveManager = new SaveManager(this);
+        this.projectilePool = new ObjectPool(() => new Projectile(this), 50); // Creates a pool of 50 projectiles
+        this.missilePool = new ObjectPool(() => new Missile(this), 20); // Creates a pool of 20 missiles
 
         // --- State Management ---
         this.states = {
@@ -83,10 +98,6 @@ class Game {
         })();
         
         // Start the main game loop
-        this.lastTime = 0;
-        this.accumulator = 0;
-        this.timeStep = 1000 / 60; // 60 FPS
-        this.gameLoop = this.gameLoop.bind(this);
         requestAnimationFrame(this.gameLoop);
     }
 
@@ -140,29 +151,60 @@ class Game {
     }
 
     /**
+     * Update the game logic with a fixed timestep
+     * @param {number} deltaTime - Fixed time step in milliseconds
+     */
+    update(deltaTime) {
+        if (this.currentState) {
+            this.currentState.update(deltaTime);
+        }
+        this.input.update();
+    }
+
+    /**
+     * Render the game as fast as possible
+     */
+    render() {
+        // --- SYSTEMIC STATE RESET ---
+        for (const key in this.contexts) {
+            const ctx = this.contexts[key];
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.clearRect(0, 0, this.width, this.height);
+        }
+        // Now that all layers are clean and reset, proceed with rendering the current state.
+        if (this.currentState) {
+            this.currentState.render(this.contexts);
+        }
+    }
+
+    /**
      * The main game loop, called for every frame
      * @param {number} timestamp - The current time provided by the browser
      */
     gameLoop(timestamp) {
+        // Fallback for the first frame to prevent a large deltaTime
+        if (!this.lastTime) {
+            this.lastTime = timestamp;
+        }
+
         const deltaTime = timestamp - this.lastTime;
         this.lastTime = timestamp;
+
+        // For the debug overlay
+        this.currentFPS = Math.round(1000 / deltaTime);
+
         this.accumulator += deltaTime;
 
+        // Run the fixed-step update loop for game logic
         while (this.accumulator >= this.timeStep) {
-            if (this.currentState) {
-                this.currentState.update(this.timeStep);
-            }
-            this.input.update();
+            this.update(this.timeStep);
             this.accumulator -= this.timeStep;
         }
 
-        if (this.currentState) {
-            for (const key in this.contexts) {
-                this.contexts[key].clearRect(0, 0, this.width, this.height);
-            }
-            this.currentState.render(this.contexts);
-        }
+        // Render graphics as fast as possible
+        this.render();
 
+        // Request the next frame
         requestAnimationFrame(this.gameLoop);
     }
 

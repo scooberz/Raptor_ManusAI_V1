@@ -61,7 +61,7 @@
     
     <!-- States -->
     <script type="module" src="js/states/boot.js"></script>
-    <script type="module" src="js/states/loading.js"></script>
+    <script type="module" src="js/states/LoadingState.js"></script>
     <script type="module" src="js/states/menu.js"></script>
     <script type="module" src="js/states/gameState.js"></script>
     <script type="module" src="js/states/pause.js"></script>
@@ -75,7 +75,13 @@
     <!-- Data -->
     <script type="module" src="assets/data/environmentData.js"></script>
     
-    <!-- Main -->
+    <!-- Robust cache-busting loader for main.js -->
+    <script type="module">
+        // This robust loader ensures the freshest version of main.js is always loaded.
+        const path = './js/main.js';
+        const timestamp = new Date().getTime();
+        import(`${path}?v=${timestamp}`);
+    </script>
     <script type="module" src="js/main.js"></script>
 </body>
 </html>

@@ -35,6 +35,18 @@ class Enemy extends Entity {
     }
 
     /**
+     * Load enemy sprites and set ready state
+     */
+    loadSprites() {
+        // Check if the sprite was successfully loaded
+        if (this.sprite) {
+            this.isReady = true;
+        } else {
+            console.error(`Failed to load sprite for enemy type "${this.type}". Enemy will not be rendered.`);
+        }
+    }
+
+    /**
      * Reduces enemy health when it takes damage. Called by the collision system.
      * @param {number} damage - The amount of damage to inflict.
      */

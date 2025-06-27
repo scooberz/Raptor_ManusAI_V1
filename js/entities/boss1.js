@@ -30,7 +30,8 @@ class Boss1 extends Enemy {
         this.maxHealth = this.health; // Ensure maxHealth matches the real health.
 
         // Load sprite
-        this.sprite = this.game.assets.getImage('boss1');
+        this.sprite = this.game.assets.getImage('bossLevel1');
+        this.loadSprites();
 
         // Movement parameters
         this.movementSpeed = 50;

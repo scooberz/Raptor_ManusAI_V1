@@ -82,46 +82,137 @@ class HangarState {
         contentContainer.style.height = '100%';
         contentContainer.style.zIndex = '3';
 
-        // Title
-        const title = document.createElement('h1');
-        title.textContent = 'HANGAR';
-        title.style.color = 'white';
-        title.style.fontSize = '48px';
-        title.style.marginBottom = '20px';
-        title.style.textShadow = '2px 2px 4px rgba(0,0,0,0.8)';
-        contentContainer.appendChild(title);
+        // Choose Mission button - left lower third
+        const chooseMissionBtn = document.createElement('div');
+        chooseMissionBtn.textContent = 'Choose Mission';
+        chooseMissionBtn.style.color = 'white';
+        chooseMissionBtn.style.fontSize = '32px';
+        chooseMissionBtn.style.padding = '15px 30px';
+        chooseMissionBtn.style.cursor = 'pointer';
+        chooseMissionBtn.style.borderRadius = '8px';
+        chooseMissionBtn.style.transition = 'all 0.2s';
+        chooseMissionBtn.style.textShadow = '2px 2px 4px rgba(0,0,0,0.8)';
+        chooseMissionBtn.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+        chooseMissionBtn.style.border = '2px solid rgba(255, 255, 255, 0.3)';
+        chooseMissionBtn.style.position = 'absolute';
+        chooseMissionBtn.style.bottom = '33%';
+        chooseMissionBtn.style.left = '20%';
+        chooseMissionBtn.style.transform = 'translateX(-50%)';
+        chooseMissionBtn.style.zIndex = '3';
 
-        // Credits
-        const credits = document.createElement('div');
-        credits.textContent = `CREDITS: $${this.playerMoney}`;
-        credits.style.color = '#ffcc00';
-        credits.style.fontSize = '24px';
-        credits.style.marginBottom = '40px';
-        credits.style.textShadow = '2px 2px 4px rgba(0,0,0,0.8)';
-        contentContainer.appendChild(credits);
-
-        // Menu options
-        this.menuOptions.forEach((option, index) => {
-            const optionElement = document.createElement('div');
-            optionElement.textContent = option.text;
-            optionElement.style.color = index === this.selectedOption ? '#ffcc00' : 'white';
-            optionElement.style.fontSize = '32px';
-            optionElement.style.margin = '12px';
-            optionElement.style.padding = '8px 24px';
-            optionElement.style.cursor = 'pointer';
-            optionElement.style.borderRadius = '6px';
-            optionElement.style.transition = 'all 0.2s';
-            optionElement.style.textShadow = index === this.selectedOption ? '0 0 15px #ffcc00' : '2px 2px 4px rgba(0,0,0,0.8)';
-            optionElement.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
-            optionElement.style.border = '1px solid rgba(255, 255, 255, 0.3)';
-
-            optionElement.addEventListener('mouseover', () => {
-                this.selectedOption = index;
-                this.updateMenuSelection();
-            });
-            optionElement.addEventListener('click', option.action);
-            contentContainer.appendChild(optionElement);
+        chooseMissionBtn.addEventListener('mouseover', () => {
+            chooseMissionBtn.style.color = '#ffcc00';
+            chooseMissionBtn.style.textShadow = '0 0 15px #ffcc00';
+            chooseMissionBtn.style.borderColor = '#ffcc00';
         });
+        
+        chooseMissionBtn.addEventListener('mouseout', () => {
+            chooseMissionBtn.style.color = 'white';
+            chooseMissionBtn.style.textShadow = '2px 2px 4px rgba(0,0,0,0.8)';
+            chooseMissionBtn.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+        });
+        
+        chooseMissionBtn.addEventListener('click', () => this.chooseNextMission());
+        contentContainer.appendChild(chooseMissionBtn);
+
+        // Shop button - right lower third
+        const shopBtn = document.createElement('div');
+        shopBtn.textContent = 'Shop';
+        shopBtn.style.color = 'white';
+        shopBtn.style.fontSize = '32px';
+        shopBtn.style.padding = '15px 30px';
+        shopBtn.style.cursor = 'pointer';
+        shopBtn.style.borderRadius = '8px';
+        shopBtn.style.transition = 'all 0.2s';
+        shopBtn.style.textShadow = '2px 2px 4px rgba(0,0,0,0.8)';
+        shopBtn.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+        shopBtn.style.border = '2px solid rgba(255, 255, 255, 0.3)';
+        shopBtn.style.position = 'absolute';
+        shopBtn.style.bottom = '33%';
+        shopBtn.style.right = '20%';
+        shopBtn.style.transform = 'translateX(50%)';
+        shopBtn.style.zIndex = '3';
+
+        shopBtn.addEventListener('mouseover', () => {
+            shopBtn.style.color = '#ffcc00';
+            shopBtn.style.textShadow = '0 0 15px #ffcc00';
+            shopBtn.style.borderColor = '#ffcc00';
+        });
+        
+        shopBtn.addEventListener('mouseout', () => {
+            shopBtn.style.color = 'white';
+            shopBtn.style.textShadow = '2px 2px 4px rgba(0,0,0,0.8)';
+            shopBtn.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+        });
+        
+        shopBtn.addEventListener('click', () => this.openShop());
+        contentContainer.appendChild(shopBtn);
+
+        // Save Game button - right upper third
+        const saveGameBtn = document.createElement('div');
+        saveGameBtn.textContent = 'Save Game';
+        saveGameBtn.style.color = 'white';
+        saveGameBtn.style.fontSize = '32px';
+        saveGameBtn.style.padding = '15px 30px';
+        saveGameBtn.style.cursor = 'pointer';
+        saveGameBtn.style.borderRadius = '8px';
+        saveGameBtn.style.transition = 'all 0.2s';
+        saveGameBtn.style.textShadow = '2px 2px 4px rgba(0,0,0,0.8)';
+        saveGameBtn.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+        saveGameBtn.style.border = '2px solid rgba(255, 255, 255, 0.3)';
+        saveGameBtn.style.position = 'absolute';
+        saveGameBtn.style.top = '33%';
+        saveGameBtn.style.right = '20%';
+        saveGameBtn.style.transform = 'translateX(50%)';
+        saveGameBtn.style.zIndex = '3';
+
+        saveGameBtn.addEventListener('mouseover', () => {
+            saveGameBtn.style.color = '#ffcc00';
+            saveGameBtn.style.textShadow = '0 0 15px #ffcc00';
+            saveGameBtn.style.borderColor = '#ffcc00';
+        });
+        
+        saveGameBtn.addEventListener('mouseout', () => {
+            saveGameBtn.style.color = 'white';
+            saveGameBtn.style.textShadow = '2px 2px 4px rgba(0,0,0,0.8)';
+            saveGameBtn.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+        });
+        
+        saveGameBtn.addEventListener('click', () => this.saveGame());
+        contentContainer.appendChild(saveGameBtn);
+
+        // Exit to Main Menu button - moved down slightly
+        const exitBtn = document.createElement('div');
+        exitBtn.textContent = 'Exit to Main Menu';
+        exitBtn.style.color = 'white';
+        exitBtn.style.fontSize = '32px';
+        exitBtn.style.padding = '15px 30px';
+        exitBtn.style.cursor = 'pointer';
+        exitBtn.style.borderRadius = '8px';
+        exitBtn.style.transition = 'all 0.2s';
+        exitBtn.style.textShadow = '2px 2px 4px rgba(0,0,0,0.8)';
+        exitBtn.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+        exitBtn.style.border = '2px solid rgba(255, 255, 255, 0.3)';
+        exitBtn.style.position = 'absolute';
+        exitBtn.style.bottom = '15%';
+        exitBtn.style.left = '50%';
+        exitBtn.style.transform = 'translateX(-50%)';
+        exitBtn.style.zIndex = '3';
+
+        exitBtn.addEventListener('mouseover', () => {
+            exitBtn.style.color = '#ffcc00';
+            exitBtn.style.textShadow = '0 0 15px #ffcc00';
+            exitBtn.style.borderColor = '#ffcc00';
+        });
+        
+        exitBtn.addEventListener('mouseout', () => {
+            exitBtn.style.color = 'white';
+            exitBtn.style.textShadow = '2px 2px 4px rgba(0,0,0,0.8)';
+            exitBtn.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+        });
+        
+        exitBtn.addEventListener('click', () => this.exitToMenu());
+        contentContainer.appendChild(exitBtn);
 
         // Instructions
         const instructions = document.createElement('div');
@@ -136,24 +227,12 @@ class HangarState {
         instructions.style.borderRadius = '5px';
         instructions.style.border = '1px solid #333';
         instructions.style.zIndex = '4';
-        instructions.innerHTML = 'Use Arrow Keys to navigate<br>Enter to select';
+        instructions.innerHTML = 'Click buttons to navigate';
         mainContainer.appendChild(instructions);
 
-        // Assemble the layout
+        // Add contentContainer to mainContainer
         mainContainer.appendChild(contentContainer);
         hangarScreen.appendChild(mainContainer);
-    }
-
-    updateMenuSelection() {
-        const hangarScreen = document.getElementById('hangar-screen');
-        const options = hangarScreen.querySelectorAll('div > div > div');
-        // Skip title and credits (first two divs)
-        options.forEach((option, index) => {
-            if (index < 2) return;
-            const menuIndex = index - 2;
-            option.style.color = menuIndex === this.selectedOption ? '#ffcc00' : 'white';
-            option.style.textShadow = menuIndex === this.selectedOption ? '0 0 15px #ffcc00' : '2px 2px 4px rgba(0,0,0,0.8)';
-        });
     }
 
     /**
@@ -161,16 +240,18 @@ class HangarState {
      * @param {number} deltaTime - Time since last update in milliseconds
      */
     update(deltaTime) {
-        if (this.game.input.wasKeyJustPressed('ArrowUp') || this.game.input.wasKeyJustPressed('w')) {
-            this.selectedOption = (this.selectedOption - 1 + this.menuOptions.length) % this.menuOptions.length;
-            this.updateMenuSelection();
+        // Keyboard shortcuts for direct navigation
+        if (this.game.input.wasKeyJustPressed('1') || this.game.input.wasKeyJustPressed('m')) {
+            this.chooseNextMission();
         }
-        if (this.game.input.wasKeyJustPressed('ArrowDown') || this.game.input.wasKeyJustPressed('s')) {
-            this.selectedOption = (this.selectedOption + 1) % this.menuOptions.length;
-            this.updateMenuSelection();
+        if (this.game.input.wasKeyJustPressed('2') || this.game.input.wasKeyJustPressed('s')) {
+            this.openShop();
         }
-        if (this.game.input.wasKeyJustPressed('Enter') || this.game.input.wasKeyJustPressed(' ')) {
-            this.menuOptions[this.selectedOption].action();
+        if (this.game.input.wasKeyJustPressed('3')) {
+            this.saveGame();
+        }
+        if (this.game.input.wasKeyJustPressed('4') || this.game.input.wasKeyJustPressed('e')) {
+            this.exitToMenu();
         }
     }
 

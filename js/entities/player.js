@@ -12,9 +12,9 @@ class Player extends Entity {
         super(game, x, y, 64, 64);
         this.layer = 'player'; // Define the rendering layer
 
-        // Player stats
+        // Player stats - will be synced with playerData if available
         this.speed = 575; // Increased from 500 by 15%
-        this.health = 100;
+        this.health = 75; // Default starting health
         this.maxHealth = 100;
         this.shield = 0; // Shield for shop system
         this.money = 0;
@@ -62,6 +62,23 @@ class Player extends Entity {
 
         // Missile auto-fire toggle
         this.missileAutoFire = false;
+
+        // Sync with playerData if available
+        this.syncWithPlayerData();
+    }
+
+    /**
+     * Sync player stats with playerData
+     */
+    syncWithPlayerData() {
+        if (this.game.playerData) {
+            this.health = this.game.playerData.health || 75;
+            this.money = this.game.playerData.money || 0;
+            this.score = this.game.playerData.score || 0;
+            this.shield = this.game.playerData.shield || 0;
+            this.unlockedWeapons = this.game.playerData.unlockedWeapons || ['MISSILE'];
+            console.log(`Player synced with playerData: health=${this.health}, money=${this.money}`);
+        }
     }
 
     /**
@@ -74,6 +91,13 @@ class Player extends Entity {
             right: this.game.assets.getImage('playerShipRight'),
             thrust: this.game.assets.getImage('playerShipThrust')
         };
+
+        // Check if all required sprites were successfully loaded.
+        if (this.sprites.base && this.sprites.left && this.sprites.right) {
+            this.isReady = true; // <-- Set the flag to true only if assets are loaded
+        } else {
+            console.error("Failed to load one or more player sprites. Player will not be rendered.");
+        }
     }
 
     /**
@@ -211,14 +235,15 @@ class Player extends Entity {
     }
 
     /**
-     * Render the player
-     * @param {CanvasRenderingContext2D} context - The canvas context to render to
-     */
+   * Render the player
+   * @param {CanvasRenderingContext2D} context - The canvas context to render to
+   */
     render(context) {
-        if (!this.visible) return;
+        if (!this.visible || !this.isReady) return;
 
         // Draw the appropriate sprite based on movement direction
         if (this.currentDirection === -1 && this.sprites.left) {
+            context.globalCompositeOperation = 'source-over';
             context.drawImage(
                 this.sprites.left,
                 this.x,
@@ -227,6 +252,7 @@ class Player extends Entity {
                 this.height
             );
         } else if (this.currentDirection === 1 && this.sprites.right) {
+            context.globalCompositeOperation = 'source-over';
             context.drawImage(
                 this.sprites.right,
                 this.x,
@@ -235,6 +261,7 @@ class Player extends Entity {
                 this.height
             );
         } else if (this.sprites.base) {
+            context.globalCompositeOperation = 'source-over';
             context.drawImage(
                 this.sprites.base,
                 this.x,
@@ -249,79 +276,55 @@ class Player extends Entity {
      * Fire the primary weapon (machine gun)
      */
     fireCannon() {
-        // Fire two bullets side by side for double machine gun effect
+        // Keep all your existing constants for balance
         const bulletSpacing = 10;
         const bulletVelocityY = -1200;
-        const bulletDamage = 3; // Lowered for balance (was 10)
+        const bulletDamage = 3;
 
-        // Use a more generous hitbox for collision detection
-        const bulletHitboxWidth = 8;
-        const bulletHitboxHeight = 16;
+        // Fire Left Bullet
+        const leftBullet = this.game.projectilePool.get();
+        if (leftBullet) {
+            // Activate the bullet from the pool with its properties.
+            // Pass `null` for the sprite to make it draw the tiny rectangle (white pixel bullet).
+            leftBullet.activate(this.x + this.width / 2 - bulletSpacing, this.y, 0, bulletVelocityY, bulletDamage, 'player', null);
+            this.game.entityManager.add(leftBullet);
+            this.game.collision.addToGroup(leftBullet, 'playerProjectiles');
+        }
 
-        // Left bullet
-        const leftBullet = new Projectile(
-            this.game,
-            this.x + this.width / 2 - bulletSpacing,
-            this.y,
-            bulletHitboxWidth,  // Use generous hitbox
-            bulletHitboxHeight, // Use generous hitbox
-            0,
-            bulletVelocityY,
-            bulletDamage,
-            'player',
-            'playerBullet' // The render() method still draws this as a 2x4 pixel rect
-        );
-        this.game.entityManager.add(leftBullet);
-        this.game.collision.addToGroup(leftBullet, 'playerProjectiles');
-
-        // Right bullet
-        const rightBullet = new Projectile(
-            this.game,
-            this.x + this.width / 2 + bulletSpacing,
-            this.y,
-            bulletHitboxWidth,  // Use generous hitbox
-            bulletHitboxHeight, // Use generous hitbox
-            0,
-            bulletVelocityY,
-            bulletDamage,
-            'player',
-            'playerBullet'
-        );
-        this.game.entityManager.add(rightBullet);
-        this.game.collision.addToGroup(rightBullet, 'playerProjectiles');
-
-        // We no longer need to play the sound here, as the Projectile class can handle it
-        // Or we can add it back if we prefer central control. For now, this is cleaner.
+        // Fire Right Bullet
+        const rightBullet = this.game.projectilePool.get();
+        if (rightBullet) {
+            // Pass `null` for the sprite as well.
+            rightBullet.activate(this.x + this.width / 2 + bulletSpacing, this.y, 0, bulletVelocityY, bulletDamage, 'player', null);
+            this.game.entityManager.add(rightBullet);
+            this.game.collision.addToGroup(rightBullet, 'playerProjectiles');
+        }
     }
 
     /**
      * Fire the secondary weapon (missiles)
      */
     fireMissile() {
-        // Fire two missiles side by side
         const missileSpacing = 12;
         const missileDamage = 60;
-        const initialVelocity = { x: 0, y: -3 }; // Lower initial speed for more inertia
-        const leftMissile = new Missile(
-            this.game,
-            this.x + this.width / 2 - missileSpacing,
-            this.y,
-            missileDamage,
-            'player',
-            initialVelocity
-        );
-        const rightMissile = new Missile(
-            this.game,
-            this.x + this.width / 2 + missileSpacing,
-            this.y,
-            missileDamage,
-            'player',
-            initialVelocity
-        );
-        this.game.entityManager.add(leftMissile);
-        this.game.collision.addToGroup(leftMissile, 'playerProjectiles');
-        this.game.entityManager.add(rightMissile);
-        this.game.collision.addToGroup(rightMissile, 'playerProjectiles');
+        const initialVelocity = { x: 0, y: -50 };
+        const missileSprite = this.game.assets.getImage('MISSILE'); // Use the correct key
+
+        // Fire Left Missile from the pool
+        const leftMissile = this.game.missilePool.get();
+        if (leftMissile) {
+            leftMissile.activate(this.x + this.width / 2 - missileSpacing, this.y, missileDamage, 'player', initialVelocity, missileSprite);
+            this.game.entityManager.add(leftMissile);
+            this.game.collision.addToGroup(leftMissile, 'playerProjectiles');
+        }
+
+        // Fire Right Missile from the pool
+        const rightMissile = this.game.missilePool.get();
+        if (rightMissile) {
+            rightMissile.activate(this.x + this.width / 2 + missileSpacing, this.y, missileDamage, 'player', initialVelocity, missileSprite);
+            this.game.entityManager.add(rightMissile);
+            this.game.collision.addToGroup(rightMissile, 'playerProjectiles');
+        }
     }
 
     /**
@@ -374,6 +377,11 @@ class Player extends Entity {
         // Apply damage directly to health
         this.health -= amount;
 
+        // Sync with playerData
+        if (this.game.playerData) {
+            this.game.playerData.health = this.health;
+        }
+
         if (this.health <= 0) {
             this.health = 0;
             this.destroy();
@@ -406,6 +414,10 @@ class Player extends Entity {
      */
     addHealth(amount) {
         this.health = Math.min(this.health + amount, this.maxHealth);
+        // Sync with playerData
+        if (this.game.playerData) {
+            this.game.playerData.health = this.health;
+        }
     }
 
     /**
@@ -414,7 +426,10 @@ class Player extends Entity {
      */
     addMoney(amount) {
         this.money += amount;
-        this.game.playerData.money = this.money;
+        // Sync with playerData
+        if (this.game.playerData) {
+            this.game.playerData.money = this.money;
+        }
     }
 
     /**

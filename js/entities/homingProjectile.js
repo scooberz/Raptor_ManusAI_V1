@@ -35,7 +35,7 @@ class HomingProjectile extends Projectile {
         
         // Override sprite with homing missile sprite
         this.sprite = this.source === 'player' ? 
-            this.game.assets.getImage('playerMissile') : 
+            this.game.assets.getImage('MISSILE') : 
             this.game.assets.getImage('enemyMissile');
             
         // If no specific missile sprite is available, use a different color

@@ -4,7 +4,7 @@
  */
 import { EnemyFactory } from '../entities/enemyFactory.js';
 import { EnvironmentFactory } from '../entities/environmentFactory.js';
-import { ScrollingBackground } from '../environment/scrolling-background.js';
+import { BackgroundManager } from '../environment/BackgroundManager.js';
 
 class Level1 {
     constructor(game) {
@@ -40,7 +40,8 @@ class Level1 {
 
             // Create scrolling background if it doesn't exist
             if (!this.background) {
-                this.background = new ScrollingBackground(this.game, 50);
+                const bgImage = this.game.assets.getImage('backgroundLevel1'); // Or your correct key
+                this.background = new BackgroundManager(this.game, bgImage, 50);
             } else {
                 this.background.reset();
             }
@@ -254,11 +255,6 @@ class Level1 {
      */
     cleanup() {
         console.log('Cleaning up Level1');
-        
-        // Stop background scrolling
-        if (this.background) {
-            this.background.stop();
-        }
         
         // Clear level data
         this.levelData = null;

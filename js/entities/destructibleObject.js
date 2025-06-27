@@ -40,20 +40,22 @@ class DestructibleObject extends Entity {
         this.damageThreshold = this.maxHealth * 0.5; // Show damage at 50% health
         
         // Load sprite
-        this.loadSprite();
+        this.loadSprites();
     }
     
     /**
      * Load the appropriate sprite for this environment object
      */
-    loadSprite() {
+    loadSprites() {
         // Try to load the specific sprite, fallback to placeholder
         const spriteName = this.environmentData.spriteAsset;
         this.sprite = this.game.assets.getImage(spriteName);
         
-        // If sprite doesn't exist, we'll render a placeholder
-        if (!this.sprite) {
-            console.warn(`Sprite not found for environment object: ${spriteName}`);
+        // Check if sprite was successfully loaded
+        if (this.sprite) {
+            this.isReady = true;
+        } else {
+            console.error(`Failed to load sprite for environment object: ${spriteName}. Object will not be rendered.`);
         }
     }
     

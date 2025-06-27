@@ -23,7 +23,7 @@ class MenuState {
     enter() {
         console.log('Entering Menu State');
         
-        // Show menu screen
+        // Show menu screen, hide others
         document.getElementById('menu-screen').style.display = 'flex';
         document.getElementById('loading-screen').style.display = 'none';
         document.getElementById('game-over-screen').style.display = 'none';
@@ -31,10 +31,7 @@ class MenuState {
         // Get background from assets
         this.background = this.game.assets.getImage('menuBackground');
         
-        // Set up callback to update menu when assets finish loading
-        this.game.assets.setGameplayAssetsLoadedCallback(() => {
-            this.updateMenuForLoadedAssets();
-        });
+        // Assets are now loaded upfront in LoadingState, so no need for callbacks
         
         // Play menu music
         // this.game.audio.playMusic('menuMusic'); // Commented out - no audio assets defined yet
@@ -102,30 +99,28 @@ class MenuState {
         this.menuOptions.forEach((option, index) => {
             const optionElement = document.createElement('div');
             
-            // Check if this is the Start New Game option and assets are still loading
-            if (option.text === 'Start New Game' && !this.game.assets.gameplayAssetsLoaded) {
-                optionElement.textContent = 'Start New Game (Loading...)';
-                optionElement.style.color = '#888'; // Grayed out
-                optionElement.style.cursor = 'not-allowed';
-            } else {
-                optionElement.textContent = option.text;
-                optionElement.style.color = index === this.selectedOption ? '#ffcc00' : 'white';
-                optionElement.style.cursor = 'pointer';
-            }
+            optionElement.textContent = option.text;
+            optionElement.style.color = 'white';
+            optionElement.style.cursor = 'pointer';
             
             optionElement.style.fontSize = '28px';
             optionElement.style.margin = '8px';
             optionElement.style.padding = '8px 20px';
             optionElement.style.transition = 'all 0.2s ease';
-            optionElement.style.textShadow = index === this.selectedOption ? '0 0 15px #ffcc00' : '2px 2px 4px rgba(0,0,0,0.8)';
+            optionElement.style.textShadow = '2px 2px 4px rgba(0,0,0,0.8)';
             optionElement.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
             optionElement.style.border = '1px solid rgba(255, 255, 255, 0.3)';
             optionElement.style.borderRadius = '6px';
             
             // Add hover effect
             optionElement.addEventListener('mouseover', () => {
-                this.selectedOption = index;
-                this.updateMenuSelection();
+                optionElement.style.color = '#ffcc00';
+                optionElement.style.textShadow = '0 0 15px #ffcc00';
+            });
+            
+            optionElement.addEventListener('mouseout', () => {
+                optionElement.style.color = 'white';
+                optionElement.style.textShadow = '2px 2px 4px rgba(0,0,0,0.8)';
             });
             
             // Add click handler
@@ -151,72 +146,26 @@ class MenuState {
         instructions.innerHTML = 'Use Arrow Keys to navigate<br>Enter to select';
         mainContainer.appendChild(instructions);
         
-        // Add loading indicator for background assets - only show if assets are still loading
-        if (!this.game.assets.gameplayAssetsLoaded) {
-            const loadingIndicator = document.createElement('div');
-            loadingIndicator.id = 'background-loading-indicator';
-            loadingIndicator.style.position = 'absolute';
-            loadingIndicator.style.bottom = '20px';
-            loadingIndicator.style.left = '20px';
-            loadingIndicator.style.color = '#666';
-            loadingIndicator.style.fontSize = '14px';
-            loadingIndicator.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
-            loadingIndicator.style.padding = '8px 12px';
-            loadingIndicator.style.borderRadius = '5px';
-            loadingIndicator.style.border = '1px solid #333';
-            loadingIndicator.style.zIndex = '4';
-            loadingIndicator.textContent = 'Loading game assets...';
-            mainContainer.appendChild(loadingIndicator);
-        }
-        
         // Assemble the layout
         mainContainer.appendChild(menuContainer);
         menuScreen.appendChild(mainContainer);
     }
     
     /**
-     * Update menu selection highlighting
-     */
-    updateMenuSelection() {
-        const menuScreen = document.getElementById('menu-screen');
-        const options = menuScreen.querySelectorAll('div > div > div');
-        
-        options.forEach((option, index) => {
-            if (option.textContent.includes('(')) return; // Skip loading text
-            
-            option.style.color = index === this.selectedOption ? '#ffcc00' : 'white';
-            option.style.textShadow = index === this.selectedOption ? '0 0 15px #ffcc00' : '2px 2px 4px rgba(0,0,0,0.8)';
-        });
-    }
-    
-    /**
      * Start a new game
      */
     startNewGame() {
-        // Check if gameplay assets are loaded
-        if (this.game.assets.gameplayAssetsLoaded) {
-            console.log('Starting new game - all assets loaded');
-            this.game.changeState('characterSelect');
-        } else {
-            console.log('Cannot start game - gameplay assets still loading');
-            // Optionally show a message to the user
-            this.showLoadingMessage();
-        }
+        console.log('Starting new game - all assets loaded');
+        this.game.changeState('characterSelect');
     }
     
     /**
      * Load a saved game
      */
     loadGame() {
-        // Check if gameplay assets are loaded
-        if (this.game.assets.gameplayAssetsLoaded) {
-            console.log('Loading saved game');
-            // TODO: Implement save/load functionality
-            this.showLoadGameScreen();
-        } else {
-            console.log('Cannot load game - gameplay assets still loading');
-            this.showLoadingMessage();
-        }
+        console.log('Loading saved game');
+        // TODO: Implement save/load functionality
+        this.showLoadGameScreen();
     }
     
     /**
@@ -245,14 +194,115 @@ class MenuState {
         title.style.marginBottom = '20px';
         loadContainer.appendChild(title);
         
-        // Add message
-        const message = document.createElement('div');
-        message.style.color = 'white';
-        message.style.fontSize = '18px';
-        message.style.textAlign = 'center';
-        message.style.marginBottom = '30px';
-        message.innerHTML = 'Save/Load functionality is coming soon!<br><br>For now, use "Start New Game" to begin playing.';
-        loadContainer.appendChild(message);
+        // Check for saved game data
+        const savedData = localStorage.getItem('raptor_manus_save');
+        let playerData = null;
+        let hasValidSave = false;
+        
+        if (savedData) {
+            try {
+                playerData = JSON.parse(savedData);
+                // Validate that we have the required fields
+                if (playerData && playerData.name && playerData.callsign) {
+                    hasValidSave = true;
+                }
+            } catch (error) {
+                console.error('Error parsing saved data:', error);
+                hasValidSave = false;
+            }
+        }
+        
+        if (hasValidSave && playerData) {
+            // Add saved pilot info
+            const pilotInfo = document.createElement('div');
+            pilotInfo.style.color = 'white';
+            pilotInfo.style.fontSize = '18px';
+            pilotInfo.style.textAlign = 'center';
+            pilotInfo.style.marginBottom = '20px';
+            pilotInfo.innerHTML = `
+                <strong>Saved Pilot:</strong><br>
+                ${playerData.name} (${playerData.callsign})<br>
+                Level: ${playerData.level || 1} | Credits: $${playerData.money || 0}<br>
+                Score: ${playerData.score || 0}
+            `;
+            loadContainer.appendChild(pilotInfo);
+            
+            // Add load button
+            const loadButton = document.createElement('button');
+            loadButton.textContent = 'Load Saved Game';
+            loadButton.style.padding = '15px 30px';
+            loadButton.style.backgroundColor = '#4CAF50';
+            loadButton.style.color = 'white';
+            loadButton.style.border = 'none';
+            loadButton.style.borderRadius = '5px';
+            loadButton.style.cursor = 'pointer';
+            loadButton.style.fontSize = '18px';
+            loadButton.style.marginBottom = '20px';
+            loadButton.addEventListener('click', () => {
+                this.game.playerData = playerData;
+                this.game.changeState('hangar');
+            });
+            loadContainer.appendChild(loadButton);
+            
+            // Add delete button
+            const deleteButton = document.createElement('button');
+            deleteButton.textContent = 'Delete Save';
+            deleteButton.style.padding = '10px 20px';
+            deleteButton.style.backgroundColor = '#f44336';
+            deleteButton.style.color = 'white';
+            deleteButton.style.border = 'none';
+            deleteButton.style.borderRadius = '5px';
+            deleteButton.style.cursor = 'pointer';
+            deleteButton.style.fontSize = '16px';
+            deleteButton.style.marginBottom = '20px';
+            deleteButton.addEventListener('click', () => {
+                if (confirm('Are you sure you want to delete your saved game?')) {
+                    localStorage.removeItem('raptor_manus_save');
+                    this.showLoadGameScreen(); // Refresh the screen
+                }
+            });
+            loadContainer.appendChild(deleteButton);
+            
+        } else {
+            // Add message for no save
+            const message = document.createElement('div');
+            message.style.color = 'white';
+            message.style.fontSize = '18px';
+            message.style.textAlign = 'center';
+            message.style.marginBottom = '30px';
+            message.innerHTML = '<strong>No Pilots Saved</strong><br><br>Use "Start New Game" to create a new pilot.';
+            loadContainer.appendChild(message);
+            
+            // Add disabled load button with tooltip
+            const loadButton = document.createElement('button');
+            loadButton.textContent = 'Load Saved Game';
+            loadButton.style.padding = '15px 30px';
+            loadButton.style.backgroundColor = '#666';
+            loadButton.style.color = '#999';
+            loadButton.style.border = 'none';
+            loadButton.style.borderRadius = '5px';
+            loadButton.style.cursor = 'not-allowed';
+            loadButton.style.fontSize = '18px';
+            loadButton.style.marginBottom = '20px';
+            loadButton.title = 'No saved pilot found';
+            loadButton.disabled = true;
+            loadContainer.appendChild(loadButton);
+            
+            // Add disabled delete button with tooltip
+            const deleteButton = document.createElement('button');
+            deleteButton.textContent = 'Delete Save';
+            deleteButton.style.padding = '10px 20px';
+            deleteButton.style.backgroundColor = '#666';
+            deleteButton.style.color = '#999';
+            deleteButton.style.border = 'none';
+            deleteButton.style.borderRadius = '5px';
+            deleteButton.style.cursor = 'not-allowed';
+            deleteButton.style.fontSize = '16px';
+            deleteButton.style.marginBottom = '20px';
+            deleteButton.title = 'No saved pilot to delete';
+            deleteButton.disabled = true;
+            loadContainer.appendChild(deleteButton);
+        }
         
         // Add back button
         const backButton = document.createElement('button');
@@ -465,14 +515,17 @@ class MenuState {
         
         // Update the Start Game option to be clickable
         const menuScreen = document.getElementById('menu-screen');
-        const options = menuScreen.querySelectorAll('div > div');
-        options.forEach((option, index) => {
-            if (option.textContent.includes('Start New Game')) {
-                option.textContent = 'Start New Game';
-                option.style.color = index === this.selectedOption ? '#ffcc00' : 'white';
-                option.style.cursor = 'pointer';
-            }
-        });
+        const menuContainer = menuScreen.querySelector('div > div > div');
+        if (menuContainer) {
+            const options = menuContainer.querySelectorAll('div');
+            options.forEach((option, index) => {
+                if (option.textContent.includes('Start New Game')) {
+                    option.textContent = 'Start New Game';
+                    option.style.color = 'white';
+                    option.style.cursor = 'pointer';
+                }
+            });
+        }
     }
     
     /**
@@ -484,17 +537,40 @@ class MenuState {
         
         if (this.game.input.wasKeyJustPressed('ArrowUp') || this.game.input.wasKeyJustPressed('w')) {
             this.selectedOption = (this.selectedOption - 1 + this.menuOptions.length) % this.menuOptions.length;
-            this.updateMenuSelection();
+            this.highlightSelectedOption();
         }
         
         if (this.game.input.wasKeyJustPressed('ArrowDown') || this.game.input.wasKeyJustPressed('s')) {
             this.selectedOption = (this.selectedOption + 1) % this.menuOptions.length;
-            this.updateMenuSelection();
+            this.highlightSelectedOption();
         }
         
         if (this.game.input.wasKeyJustPressed('Enter') || this.game.input.wasKeyJustPressed(' ')) {
             this.menuOptions[this.selectedOption].action();
         }
+    }
+    
+    /**
+     * Highlight the currently selected option for keyboard navigation
+     */
+    highlightSelectedOption() {
+        const menuScreen = document.getElementById('menu-screen');
+        const menuContainer = menuScreen.querySelector('div > div > div');
+        if (!menuContainer) return;
+        
+        const options = menuContainer.querySelectorAll('div');
+        
+        options.forEach((option, index) => {
+            if (option.textContent.includes('(')) return; // Skip loading text
+            
+            if (index === this.selectedOption) {
+                option.style.color = '#ffcc00';
+                option.style.textShadow = '0 0 15px #ffcc00';
+            } else {
+                option.style.color = 'white';
+                option.style.textShadow = '2px 2px 4px rgba(0,0,0,0.8)';
+            }
+        });
     }
     
     /**

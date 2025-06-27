@@ -98,6 +98,10 @@ export const movementPatterns = {
      * accelerates downwards, "dashing" past the player.
      */
     swoop_and_dash: function(enemy, deltaTime) {
+        // Ensure behaviorState exists
+        if (!enemy.behaviorState) {
+            enemy.behaviorState = {};
+        }
         // --- Initial Swoop Phase ---
         // This part is the same as the original swoop.
         // It runs as long as the enemy is in its initial arcing movement.

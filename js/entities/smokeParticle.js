@@ -4,7 +4,6 @@ export class SmokeParticle extends Entity {
     constructor(game, x, y) {
         super(game, x, y, 8, 8); // Start with a small size
         this.layer = 'explosion'; // Render on the same layer as explosions
-        this.sprite = this.game.assets.getImage('smokePuff');
 
         // Lifetime properties
         this.lifetime = 500 + Math.random() * 300; // Live for 500-800ms
@@ -25,15 +24,17 @@ export class SmokeParticle extends Entity {
     }
 
     render(context) {
-        if (!this.sprite) return;
-
         const lifePercent = this.currentLife / this.lifetime;
 
         // Interpolate size and alpha over the particle's life
         const currentSize = this.initialSize + (this.finalSize - this.initialSize) * (1 - lifePercent);
         context.globalAlpha = this.initialAlpha * lifePercent;
 
-        context.drawImage(this.sprite, this.x - currentSize / 2, this.y - currentSize / 2, currentSize, currentSize);
+        // Draw a simple smoke circle
+        context.fillStyle = 'rgba(100, 100, 100, 0.8)';
+        context.beginPath();
+        context.arc(this.x, this.y, currentSize / 2, 0, Math.PI * 2);
+        context.fill();
 
         // Reset global alpha
         context.globalAlpha = 1.0;

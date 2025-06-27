@@ -29,6 +29,7 @@ body, html {
     image-rendering: crisp-edges;
     -ms-interpolation-mode: nearest-neighbor;
     transform-origin: 0 0;
+    background-color: transparent;
 }
 
 #background-layer {

@@ -5,7 +5,7 @@
 import { EnemyFactory } from '../entities/enemyFactory.js';
 import { Projectile } from '../entities/projectile.js';
 import { HomingProjectile } from '../entities/homingProjectile.js';
-import { ScrollingBackground } from '../environment/scrolling-background.js';
+import { BackgroundManager } from '../environment/BackgroundManager.js';
 import { Collectible } from '../entities/collectible.js';
 import { Enemy } from '../entities/enemy.js';
 
@@ -34,7 +34,8 @@ class Level2 {
         this.loadLevelData();
         
         // Create scrolling background
-        this.background = new ScrollingBackground(this.game, 60, 2); // Slightly faster scrolling
+        const bgImage = this.game.assets.getImage('backgroundLevel2'); // Use the correct key
+        this.background = new BackgroundManager(this.game, bgImage, 60); // Slightly faster scrolling
         
         // Create enemy factory
         this.enemyFactory = new EnemyFactory(this.game);
@@ -972,9 +973,11 @@ class Level2 {
     /**
      * Render the level
      */
-    render() {
+    render(contexts) {
         // Render background
-        this.background.render(this.game.layers.background);
+        if (this.background) {
+            this.background.render(contexts.background);
+        }
     }
     
     /**

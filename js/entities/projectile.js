@@ -4,60 +4,72 @@
  */
 import { Entity } from '../engine/entity.js';
 
-class Projectile extends Entity {
-    constructor(game, x, y, width, height, velocityX, velocityY, damage, owner, spriteName) {
-        super(game, x, y, width, height);
+export class Projectile extends Entity {
+    constructor(game) {
+        // The constructor is now very simple, only setting default values.
+        super(game, 0, 0, 8, 16); // Using placeholder dimensions
+        this.active = false; // All projectiles start as inactive in the pool
         this.layer = 'projectile';
-
-        this.velocityX = velocityX;
-        this.velocityY = velocityY;
-        this.damage = damage;
-        this.owner = owner; // 'player' or 'enemy'
-        this.spriteName = spriteName;
-        this.sprite = this.game.assets.getImage(this.spriteName);
     }
 
     /**
-     * Update projectile state
-     * @param {number} deltaTime - Time since last update in milliseconds
+     * "Wakes up" a projectile from the pool and sets its properties for a new shot.
      */
-    update(deltaTime) {
-        super.update(deltaTime);
+    activate(x, y, velocityX, velocityY, damage, owner, sprite) {
+        this.x = x;
+        this.y = y;
+        this.velocityX = velocityX;
+        this.velocityY = velocityY;
+        this.damage = damage;
+        this.owner = owner;
+        this.sprite = sprite; // This can be an image object or null
+        this.active = true;
+    }
 
-        // Check if projectile is off screen
-        if (this.isOffScreen()) {
+    update(deltaTime) {
+        if (!this.active) return; // Do nothing if inactive
+
+        // Standard movement
+        this.y += this.velocityY * (deltaTime / 1000);
+        this.x += this.velocityX * (deltaTime / 1000);
+
+        // If projectile is off-screen, destroy it (release it back to the pool)
+        if (this.y < -this.height || this.y > this.game.height) {
             this.destroy();
         }
     }
 
     /**
-     * Render the projectile
-     * @param {CanvasRenderingContext2D} context - The canvas context to render to
+     * Instead of permanently destroying the object, release it back to the pool.
      */
-    render(context) {
-        // Special case: If this is the player's standard bullet, draw a simple rectangle.
-        if (this.owner === 'player' && this.spriteName === 'playerBullet') {
-            context.fillStyle = '#90ee90'; // A bright, classic green
-            context.fillRect(this.x, this.y, 2, 4); // Draw a 2x4 pixel "bullet"
-        }
-        // For all other projectiles (enemy bullets, missiles, etc.), draw their assigned sprite.
-        else if (this.sprite) {
-            context.drawImage(this.sprite, this.x, this.y, this.width, this.height);
-        }
+    destroy() {
+        this.game.projectilePool.release(this);
     }
 
-    /**
-     * Check if projectile is off screen
-     * @returns {boolean} True if off screen, false otherwise
-     */
-    isOffScreen() {
-        return (
-            this.x < -this.width ||
-            this.x > this.game.width + this.width ||
-            this.y < -this.height ||
-            this.y > this.game.height + this.height
-        );
+    render(context) {
+        if (!this.active) return;
+
+        // Ensure proper transparency
+        context.globalCompositeOperation = 'source-over';
+
+        // This logic allows for either a sprite or a programmatically drawn rectangle
+        if (this.sprite) {
+            // --- FIX IS HERE ---
+            // We now provide a destination width and height to scale the sprite down.
+            const renderWidth = this.width / 2;
+            const renderHeight = this.height / 2;
+            // -------------------
+
+            context.drawImage(
+                this.sprite,
+                this.x,
+                this.y,
+                renderWidth,  // Use the new, smaller width
+                renderHeight  // Use the new, smaller height
+            );
+        } else {
+            context.fillStyle = 'white';
+            context.fillRect(this.x, this.y, 2, 4); // The tiny rectangle for the machine gun
+        }
     }
 }
-
-export { Projectile };

@@ -15,6 +15,10 @@ export class IntroCutsceneState {
     }
 
     async enter() {
+        const loadingScreen = document.getElementById('loading-screen');
+        if (loadingScreen) {
+            loadingScreen.style.display = 'none';
+        }
         console.log("Entering IntroCutsceneState");
         
         // If cutscene has already played once, go directly to menu
@@ -24,10 +28,7 @@ export class IntroCutsceneState {
             return;
         }
         
-        // Only load gameplay assets if not already loaded
-        if (!this.game.assets.gameplayAssetsLoaded) {
-            this.game.assets.loadGameplayAssets();
-        }
+        // Assets are now loaded upfront in LoadingState, so no need to load gameplay assets here
         
         try {
             const response = await fetch('assets/data/introCutscene.json');
@@ -50,6 +51,12 @@ export class IntroCutsceneState {
         // CRITICAL: Remove listeners to prevent them from firing in other states
         window.removeEventListener('keydown', this.skipListener);
         window.removeEventListener('mousedown', this.skipListener);
+        
+        // Hide the loading screen div when the cutscene ends
+        const loadingScreen = document.getElementById('loading-screen');
+        if (loadingScreen) {
+            loadingScreen.style.display = 'none';
+        }
     }
 
     skip() {

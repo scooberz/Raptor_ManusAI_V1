@@ -1,86 +1,39 @@
 import { Projectile } from './projectile.js';
-import { Entity } from '../engine/entity.js';
-import { Explosion } from './explosion.js';
-import { SmokeParticle } from './smokeParticle.js';
 
 export class Missile extends Projectile {
-    constructor(game, x, y, damage, owner, initialVelocity = {x: 0, y: -50}, spriteName = null) {
-        const width = 12;
-        const height = 24;
-        
-        // Determine which sprite to use based on the owner if not provided
-        if (!spriteName) {
-            spriteName = (owner === 'player') ? 'MISSILE' : 'ENEMY_MISSILE';
-        }
-        
-        // Call the parent constructor with the correct sprite name
-        super(game, x, y, width, height, initialVelocity.x, initialVelocity.y, damage, owner, spriteName);
-        this.layer = 'projectile'; // Ensure missile is on the projectile layer
-        
-        // Player-specific properties for acceleration
-        if (this.owner === 'player') {
-            this.acceleration = 700; // Pixels per second per second
-            this.maxSpeed = 500;
-        }
-        
+    constructor(game) {
+        super(game); // Calls the simple constructor from the base Projectile
+        this.width = 12;
+        this.height = 24;
+    }
+
+    // The activate method is now responsible for all setup
+    activate(x, y, damage, owner, initialVelocity, sprite) {
+        // Call the base activate method to set common properties
+        super.activate(x, y, initialVelocity.x, initialVelocity.y, damage, owner, sprite);
+
         // Missile-specific properties
-        this.hasHitTarget = false; // Track if missile has hit something
-        this.smokeSpawnTimer = 0;
-        this.smokeSpawnRate = 50; // Spawn a new puff every 50ms
+        this.acceleration = 1.2;
+        this.maxSpeed = 600;
     }
 
     update(deltaTime) {
-        // Don't update if missile has hit a target
-        if (this.hasHitTarget) {
-            return;
-        }
-        
-        // --- Acceleration Logic for PLAYER missiles ONLY ---
+        if (!this.active) return;
+
+        // Apply acceleration for player missiles
         if (this.owner === 'player') {
-            const currentSpeed = Math.sqrt(this.velocityX ** 2 + this.velocityY ** 2);
-            if (currentSpeed < this.maxSpeed) {
-                // We assume the missile always fires straight up initially (angle = -PI/2)
-                const newSpeed = Math.min(this.maxSpeed, currentSpeed + this.acceleration * (deltaTime / 1000));
-                this.velocityY = -newSpeed; // Accelerate upwards
+            this.velocityY *= this.acceleration;
+            if (Math.abs(this.velocityY) > this.maxSpeed) {
+                this.velocityY = -this.maxSpeed;
             }
         }
-        
-        // --- Smoke Trail Spawning ---
-        this.smokeSpawnTimer -= deltaTime;
-        if (this.smokeSpawnTimer <= 0) {
-            // Spawn a particle at the "engine" end of the missile
-            const spawnX = this.x + this.width / 2;
-            const spawnY = this.y + this.height - 5;
-            this.game.entityManager.add(new SmokeParticle(this.game, spawnX, spawnY));
-            this.smokeSpawnTimer = this.smokeSpawnRate;
-        }
-        
-        // Let the parent Entity class handle the actual position update
+
+        // Call the base update method for movement and off-screen check
         super.update(deltaTime);
     }
-    
-    /**
-     * Handle collision with a target
-     * @param {Entity} target - The entity that was hit
-     */
-    onHitTarget(target) {
-        if (this.hasHitTarget) return; // Prevent multiple hits
-        
-        this.hasHitTarget = true;
-        
-        // Create small explosion effect at impact point
-        if (this.game.entityManager) {
-            const explosion = new Explosion(
-                this.game,
-                this.x + this.width / 2 - 16,
-                this.y + this.height / 2 - 16,
-                32,
-                32
-            );
-            this.game.entityManager.add(explosion);
-        }
-        
-        // Destroy the missile
-        this.destroy();
+
+    destroy() {
+        // Overrides the base destroy to release back to the correct pool
+        this.game.missilePool.release(this);
     }
 } 
