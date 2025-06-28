@@ -24,77 +24,7 @@
         <div id="shop-screen" class="screen"></div>
     </div>
     
-    <!-- Test script to verify JavaScript is working -->
-    <script>
-        console.log('HTML loaded, JavaScript is working');
-        window.addEventListener('error', function(e) {
-            console.error('Global error caught:', e.error);
-        });
-    </script>
-    
-    <!-- Engine -->
-    <script type="module" src="js/engine/game.js"></script>
-    <script type="module" src="js/engine/input.js"></script>
-    <script type="module" src="js/engine/assets.js"></script>
-    <script type="module" src="js/engine/audio.js"></script>
-    <script type="module" src="js/engine/collision.js"></script>
-    <script type="module" src="js/engine/entity.js"></script>
-    <script type="module" src="js/engine/saveManager.js"></script>
-    
-    <!-- Environment -->
-    <script type="module" src="js/environment/scrolling-background.js"></script>
-    
-    <!-- Entities -->
-    <script type="module" src="js/entities/enemyBehaviors.js"></script>
-    <script type="module" src="js/entities/player.js"></script>
-    <script type="module" src="js/entities/enemy.js"></script>
-    <script type="module" src="js/entities/enemyFactory.js"></script>
-    <script type="module" src="js/entities/environmentFactory.js"></script>
-    <script type="module" src="js/entities/projectile.js"></script>
-    <script type="module" src="js/entities/missile.js"></script>
-    <script type="module" src="js/entities/homingProjectile.js"></script>
-    <script type="module" src="js/entities/collectible.js"></script>
-    <script type="module" src="js/entities/explosion.js"></script>
-    <script type="module" src="js/entities/environment.js"></script>
-    <script type="module" src="js/entities/destructibleObject.js"></script>
-    <script type="module" src="js/entities/boss1.js"></script>
-    <script type="module" src="js/entities/smokeParticle.js"></script>
-    
-    <!-- UI -->
-    <script type="module" src="js/ui/hud.js"></script>
-    
-    <!-- Levels -->
-    <script type="module" src="js/levels/level1.js"></script>
-    <script type="module" src="js/levels/level2.js"></script>
-    
-    <!-- States -->
-    <script type="module" src="js/states/boot.js"></script>
-    <script type="module" src="js/states/LoadingState.js"></script>
-    <script type="module" src="js/states/menu.js"></script>
-    <script type="module" src="js/states/gameState.js"></script>
-    <script type="module" src="js/states/pause.js"></script>
-    <script type="module" src="js/states/gameover.js"></script>
-    <script type="module" src="js/states/hangar.js"></script>
-    <script type="module" src="js/states/supply.js"></script>
-    <script type="module" src="js/states/introCutscene.js"></script>
-    <script type="module" src="js/states/characterSelect.js"></script>
-    <script type="module" src="js/states/shop.js"></script>
-    
-    <!-- Data -->
-    <script type="module" src="assets/data/environmentData.js"></script>
-    
-    <!-- Robust cache-busting loader for main.js -->
-    <script type="module">
-        // This robust loader ensures the freshest version of main.js is always loaded.
-        const path = './js/main.js';
-        const timestamp = new Date().getTime();
-        console.log('Attempting to load main.js...');
-        try {
-            await import(`${path}?v=${timestamp}`);
-            console.log('main.js loaded successfully');
-        } catch (error) {
-            console.error('Failed to load main.js:', error);
-        }
-    </script>
+    <script type="module" src="js/main.js"></script>
+
 </body>
 </html>
