@@ -15,7 +15,7 @@ This document outlines the visual style for our reimagining of Raptor: Call of t
 - **Vibrant Color Palette**: Use bold, saturated colors that pop against darker backgrounds
 
 ### Color Palette
-
+test
 ![Color Palette](https://example.com/color-palette.png)
 
 #### Primary Colors
