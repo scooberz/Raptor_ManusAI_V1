@@ -31,10 +31,13 @@ export class IntroCutsceneState {
         // Assets are now loaded upfront in LoadingState, so no need to load gameplay assets here
         
         try {
+            console.log("Loading intro cutscene script...");
             const response = await fetch('assets/data/introCutscene.json');
             this.script = await response.json();
+            console.log("Cutscene script loaded:", this.script);
             this.currentEventIndex = -1;
             this.nextEvent(); // Start the first event
+            console.log("First event started, currentEventIndex:", this.currentEventIndex);
             
             // Add listeners to skip
             window.addEventListener('keydown', this.skipListener);
@@ -67,21 +70,26 @@ export class IntroCutsceneState {
 
     nextEvent() {
         this.currentEventIndex++;
+        console.log("nextEvent called, new index:", this.currentEventIndex);
         const currentEvent = this.script.events[this.currentEventIndex];
 
         if (!currentEvent || currentEvent.type === 'end_scene') {
+            console.log("End of cutscene reached, transitioning to menu");
             this.hasPlayedOnce = true; // Mark cutscene as played
             this.game.changeState('menu');
             return;
         }
 
+        console.log("Current event:", currentEvent);
         this.eventTimer = currentEvent.duration;
         
         if (currentEvent.type === 'show_image') {
             this.lastImage = this.game.assets.getImage(currentEvent.asset);
+            console.log("Loading image for asset:", currentEvent.asset, "Image found:", !!this.lastImage);
             this.lastText = null;
         } else if (currentEvent.type === 'show_image_with_text') {
             this.lastImage = this.game.assets.getImage(currentEvent.asset);
+            console.log("Loading image for asset:", currentEvent.asset, "Image found:", !!this.lastImage);
             this.lastText = currentEvent.text;
         } else if (currentEvent.type === 'show_text') {
             this.lastText = currentEvent.text;
@@ -93,12 +101,16 @@ export class IntroCutsceneState {
 
         this.eventTimer -= deltaTime;
         if (this.eventTimer <= 0) {
+            console.log("Event timer expired, advancing to next event");
             this.nextEvent();
         }
     }
 
     render(contexts) {
-        if (!this.script || !this.script.events[this.currentEventIndex]) return;
+        if (!this.script || !this.script.events[this.currentEventIndex]) {
+            console.log("Render: No script or no current event");
+            return;
+        }
         
         const ctx = contexts.ui; // Render everything on the top UI layer
         const currentEvent = this.script.events[this.currentEventIndex];

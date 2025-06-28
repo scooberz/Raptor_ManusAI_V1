@@ -24,6 +24,14 @@
         <div id="shop-screen" class="screen"></div>
     </div>
     
+    <!-- Test script to verify JavaScript is working -->
+    <script>
+        console.log('HTML loaded, JavaScript is working');
+        window.addEventListener('error', function(e) {
+            console.error('Global error caught:', e.error);
+        });
+    </script>
+    
     <!-- Engine -->
     <script type="module" src="js/engine/game.js"></script>
     <script type="module" src="js/engine/input.js"></script>
@@ -80,8 +88,13 @@
         // This robust loader ensures the freshest version of main.js is always loaded.
         const path = './js/main.js';
         const timestamp = new Date().getTime();
-        import(`${path}?v=${timestamp}`);
+        console.log('Attempting to load main.js...');
+        try {
+            await import(`${path}?v=${timestamp}`);
+            console.log('main.js loaded successfully');
+        } catch (error) {
+            console.error('Failed to load main.js:', error);
+        }
     </script>
-    <script type="module" src="js/main.js"></script>
 </body>
 </html>

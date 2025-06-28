@@ -61,7 +61,7 @@ class Player extends Entity {
         this.visible = true;
 
         // Missile auto-fire toggle
-        this.missileAutoFire = false;
+        this.missileAutoFire = true;
 
         // Sync with playerData if available
         this.syncWithPlayerData();

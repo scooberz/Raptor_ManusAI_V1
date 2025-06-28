@@ -23,21 +23,33 @@ class MenuState {
     enter() {
         console.log('Entering Menu State');
         
-        // Show menu screen, hide others
-        document.getElementById('menu-screen').style.display = 'flex';
-        document.getElementById('loading-screen').style.display = 'none';
-        document.getElementById('game-over-screen').style.display = 'none';
-        
-        // Get background from assets
-        this.background = this.game.assets.getImage('menuBackground');
-        
-        // Assets are now loaded upfront in LoadingState, so no need for callbacks
-        
-        // Play menu music
-        // this.game.audio.playMusic('menuMusic'); // Commented out - no audio assets defined yet
-        
-        // Set up menu screen
-        this.setupMenuScreen();
+        try {
+            // Show menu screen, hide others
+            const menuScreen = document.getElementById('menu-screen');
+            const loadingScreen = document.getElementById('loading-screen');
+            const gameOverScreen = document.getElementById('game-over-screen');
+            
+            if (menuScreen) menuScreen.style.display = 'flex';
+            if (loadingScreen) loadingScreen.style.display = 'none';
+            if (gameOverScreen) gameOverScreen.style.display = 'none';
+            
+            console.log('Menu screen elements updated');
+            
+            // Get background from assets
+            this.background = this.game.assets.getImage('menuBackground');
+            console.log('Menu background loaded:', !!this.background);
+            
+            // Assets are now loaded upfront in LoadingState, so no need for callbacks
+            
+            // Play menu music
+            // this.game.audio.playMusic('menuMusic'); // Commented out - no audio assets defined yet
+            
+            // Set up menu screen
+            this.setupMenuScreen();
+            console.log('Menu screen setup complete');
+        } catch (error) {
+            console.error('Error in MenuState.enter():', error);
+        }
     }
     
     /**

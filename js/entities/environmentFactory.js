@@ -25,6 +25,9 @@ class EnvironmentFactory {
             // Register with game systems
             this.game.entityManager.add(envObject);
             this.game.collision.addToGroup(envObject, 'environment');
+            if (this.game.state && this.game.state.level && this.game.state.level.logicalGrid) {
+                this.game.state.level.logicalGrid.registerObject(envObject);
+            }
             
             console.log(`ENVIRONMENT FACTORY: Successfully created ${type}`);
             return envObject;

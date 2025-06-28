@@ -5,12 +5,13 @@
 import { EnemyFactory } from '../entities/enemyFactory.js';
 import { EnvironmentFactory } from '../entities/environmentFactory.js';
 import { BackgroundManager } from '../environment/BackgroundManager.js';
+import { Tilemap } from '../environment/tilemap.js';
 
 class Level1 {
     constructor(game) {
         this.game = game;
-        this.levelData = null; // Will be populated by the async loader
         this.background = null;
+        this.logicalGrid = null; // Renamed from tilemap
         this.enemyFactory = null;
         this.waveIndex = 0;
         this.levelTime = 0;
@@ -38,13 +39,12 @@ class Level1 {
             this.levelData = await response.json();
             console.log(`Successfully loaded level data: ${this.levelData.levelName}`);
 
-            // Create scrolling background if it doesn't exist
-            if (!this.background) {
-                const bgImage = this.game.assets.getImage('backgroundLevel1'); // Or your correct key
-                this.background = new BackgroundManager(this.game, bgImage, 50);
-            } else {
-                this.background.reset();
-            }
+            // 1. Create scrolling background
+            const bgImage = this.game.assets.getImage('backgroundLevel1');
+            this.background = new BackgroundManager(this.game, bgImage, 50); // Use your desired scroll speed
+
+            // 2. Create the logical grid (the old tilemap)
+            this.logicalGrid = new Tilemap(this.game, this.levelData.tilemap, 50); // Must use same scroll speed!
 
             // Create enemy factory
             this.enemyFactory = new EnemyFactory(this.game);
@@ -79,32 +79,24 @@ class Level1 {
      * @param {number} deltaTime - Time since last update in milliseconds
      */
     update(deltaTime) {
-        if (!this.levelData) return; // Don't run if data failed to load
-
-        // Check for wave-skipper debug feature
+        if (!this.levelData) return;
         if (this.game.input.skipWavePressed) {
             this.forceNextWave();
-            this.game.input.skipWavePressed = false; // Reset the flag
+            this.game.input.skipWavePressed = false;
         }
-
         this.levelTime += deltaTime;
         this.background.update(deltaTime);
-
-        // Handle the boss warning sequence
+        this.logicalGrid.update(deltaTime);
         if (this.showBossWarning) {
             this.bossWarningTimer += deltaTime;
             this.bossHealthBarFill = Math.min(1, this.bossWarningTimer / this.bossWarningDuration);
-
             if (this.bossWarningTimer >= this.bossWarningDuration) {
                 this.showBossWarning = false;
                 this.spawnBoss();
             }
         } else if (!this.bossSpawned) {
-            // If no boss warning, update the regular enemy waves
             this.updateWave(deltaTime);
         }
-
-        // --- Check for Level Completion ---
         if (this.bossDefeated && !this.transitioning) {
             this.transitioning = true;
             this.levelComplete = true;
@@ -123,37 +115,25 @@ class Level1 {
         if (this.waveIndex >= this.levelData.waves.length) {
             return;
         }
-
         const currentWave = this.levelData.waves[this.waveIndex];
-        // Ensure enemies and other arrays exist to prevent errors
         currentWave.enemies = currentWave.enemies || [];
         currentWave.environment_objects = currentWave.environment_objects || [];
-
         const waveTime = this.levelTime - this.waveStartTime;
-
-        // Process enemy spawns for current wave
         currentWave.enemies.forEach(enemyData => {
             if (enemyData.delay <= waveTime && !enemyData.spawned) {
                 this.spawnEnemy(enemyData);
                 enemyData.spawned = true;
             }
         });
-
-        // --- NEW: Spawn Environment Objects ---
         currentWave.environment_objects.forEach(envData => {
             if (envData.delay <= waveTime && !envData.spawned) {
                 this.spawnEnvironmentObject(envData);
                 envData.spawned = true;
             }
         });
-        // --- END NEW ---
-
-        // Check if wave is complete
         const allEnemiesSpawned = currentWave.enemies.every(e => e.spawned);
         const allEnemiesCleared = this.game.collision.collisionGroups.enemies.length === 0;
-
-        if (allEnemiesSpawned && allEnemiesCleared && waveTime > 1000) { // Added 1s grace period
-            // Check if this wave triggers the boss
+        if (allEnemiesSpawned && allEnemiesCleared && waveTime > 1000) {
             const nextWave = this.levelData.waves[this.waveIndex + 1];
             if (nextWave && nextWave.isBossWave) {
                 this.triggerBossWarning();
@@ -189,17 +169,13 @@ class Level1 {
 
     forceNextWave() {
         if (!this.levelData) return;
-
         console.log("DEBUG: Forcing next wave.");
-        
-        // Get enemies from collision system and destroy them
         const enemies = this.game.collision.collisionGroups.enemies;
         enemies.forEach(enemy => {
             if (enemy.active) {
                 enemy.destroy();
             }
         });
-
         this.advanceToNextWave();
     }
 
@@ -220,9 +196,7 @@ class Level1 {
     }
 
     render(contexts) {
-        if (this.background) {
-            this.background.render(contexts.background);
-        }
+        this.background.render(contexts.background);
         if (this.showBossWarning) {
             const ctx = contexts.ui;
             ctx.save();
@@ -255,14 +229,11 @@ class Level1 {
      */
     cleanup() {
         console.log('Cleaning up Level1');
-        
-        // Clear level data
         this.levelData = null;
         this.background = null;
+        this.logicalGrid = null;
         this.enemyFactory = null;
         this.environmentFactory = null;
-        
-        // Reset state
         this.waveIndex = 0;
         this.levelTime = 0;
         this.waveStartTime = 0;

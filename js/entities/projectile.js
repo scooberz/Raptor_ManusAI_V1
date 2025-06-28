@@ -55,17 +55,17 @@ export class Projectile extends Entity {
         // This logic allows for either a sprite or a programmatically drawn rectangle
         if (this.sprite) {
             // --- FIX IS HERE ---
-            // We now provide a destination width and height to scale the sprite down.
-            const renderWidth = this.width / 2;
-            const renderHeight = this.height / 2;
+            // We now provide a destination width and height to scale the sprite.
+            const renderWidth = this.width;
+            const renderHeight = this.height;
             // -------------------
 
             context.drawImage(
                 this.sprite,
                 this.x,
                 this.y,
-                renderWidth,  // Use the new, smaller width
-                renderHeight  // Use the new, smaller height
+                renderWidth,  // Use the full width
+                renderHeight  // Use the full height
             );
         } else {
             context.fillStyle = 'white';

@@ -27,58 +27,40 @@ class EnemyFactory {
 
         switch (type) {
             case 'fighter':
-                enemy = new Enemy(this.game, spawn_x, spawn_y, 'fighter', overrides.health, overrides.scoreValue);
-                enemy.sprite = this.game.assets.getImage('enemyFighter');
-                enemy.loadSprites();
+                enemy = new Enemy(this.game, spawn_x, spawn_y, 'fighter', 'enemyFighter', overrides.health, overrides.scoreValue);
                 break;
 
             case 'turret':
-                enemy = new Enemy(this.game, spawn_x, spawn_y, 'turret', overrides.health, overrides.scoreValue);
-                enemy.sprite = this.game.assets.getImage('enemyTurret');
-                enemy.loadSprites();
+                enemy = new Enemy(this.game, spawn_x, spawn_y, 'turret', 'enemyTurret', overrides.health, overrides.scoreValue);
                 break;
 
             case 'bomber':
-                enemy = new Enemy(this.game, spawn_x, spawn_y, 'bomber', overrides.health, overrides.scoreValue);
-                enemy.sprite = this.game.assets.getImage('enemyFighter');
-                enemy.loadSprites();
+                enemy = new Enemy(this.game, spawn_x, spawn_y, 'bomber', 'enemyBomber', overrides.health, overrides.scoreValue);
                 break;
 
             case 'boss1':
                 // We create the Boss1 instance. Its stats will be applied by the "Overrides" section.
-                enemy = new Boss1(this.game, spawn_x, spawn_y);
-                enemy.sprite = this.game.assets.getImage('bossLevel1');
-                enemy.loadSprites();
+                enemy = new Boss1(this.game, spawn_x, spawn_y, 'bossLevel1');
                 break;
 
             case 'striker':
-                enemy = new Enemy(this.game, spawn_x, spawn_y, 'striker', overrides.health, overrides.scoreValue);
-                enemy.sprite = this.game.assets.getImage('enemyStriker');
-                enemy.loadSprites();
+                enemy = new Enemy(this.game, spawn_x, spawn_y, 'striker', 'enemyStriker', overrides.health, overrides.scoreValue);
                 break;
 
             case 'cyclone':
-                enemy = new Enemy(this.game, spawn_x, spawn_y, 'cyclone', overrides.health, overrides.scoreValue);
-                enemy.sprite = this.game.assets.getImage('enemyCyclone');
-                enemy.loadSprites();
+                enemy = new Enemy(this.game, spawn_x, spawn_y, 'cyclone', 'enemyCyclone', overrides.health, overrides.scoreValue);
                 break;
 
             case 'gnat':
-                enemy = new Enemy(this.game, spawn_x, spawn_y, 'gnat', overrides.health, overrides.scoreValue);
-                enemy.sprite = this.game.assets.getImage('enemyGnat');
-                enemy.loadSprites();
+                enemy = new Enemy(this.game, spawn_x, spawn_y, 'gnat', 'enemyGnat', overrides.health, overrides.scoreValue);
                 break;
 
             case 'reaper':
-                enemy = new Enemy(this.game, spawn_x, spawn_y, 'reaper', overrides.health, overrides.scoreValue);
-                enemy.sprite = this.game.assets.getImage('enemyReaper');
-                enemy.loadSprites();
+                enemy = new Enemy(this.game, spawn_x, spawn_y, 'reaper', 'enemyReaper', overrides.health, overrides.scoreValue);
                 break;
 
             case 'dart':
-                enemy = new Enemy(this.game, spawn_x, spawn_y, 'dart', overrides.health, overrides.scoreValue);
-                enemy.sprite = this.game.assets.getImage('enemyDart');
-                enemy.loadSprites();
+                enemy = new Enemy(this.game, spawn_x, spawn_y, 'dart', 'enemyDart', overrides.health, overrides.scoreValue);
                 
                 // Set default swooping behavior for all dart enemies
                 if (!overrides.movementPattern) {
@@ -91,39 +73,27 @@ class EnemyFactory {
                 break;
 
             case 'goliath':
-                enemy = new Enemy(this.game, spawn_x, spawn_y, 'goliath', overrides.health, overrides.scoreValue);
-                enemy.sprite = this.game.assets.getImage('enemyGoliath');
-                enemy.loadSprites();
+                enemy = new Enemy(this.game, spawn_x, spawn_y, 'goliath', 'enemyGoliath', overrides.health, overrides.scoreValue);
                 break;
 
             case 'cutter':
-                enemy = new Enemy(this.game, spawn_x, spawn_y, 'cutter', overrides.health, overrides.scoreValue);
-                enemy.sprite = this.game.assets.getImage('enemyCutter');
-                enemy.loadSprites();
+                enemy = new Enemy(this.game, spawn_x, spawn_y, 'cutter', 'enemyCutter', overrides.health, overrides.scoreValue);
                 break;
 
             case 'mine':
-                enemy = new Enemy(this.game, spawn_x, spawn_y, 'mine', overrides.health, overrides.scoreValue);
-                enemy.sprite = this.game.assets.getImage('enemyMine');
-                enemy.loadSprites();
+                enemy = new Enemy(this.game, spawn_x, spawn_y, 'mine', 'enemyMine', overrides.health, overrides.scoreValue);
                 break;
 
             case 'FUEL_TANK':
-                enemy = new DestructibleObject(this.game, spawn_x, spawn_y, 'FUEL_TANK');
-                enemy.sprite = this.game.assets.getImage('fuelTank');
-                enemy.loadSprites();
+                enemy = new DestructibleObject(this.game, spawn_x, spawn_y, 'FUEL_TANK', 'fuelTank');
                 break;
 
             case 'BUNKER':
-                enemy = new DestructibleObject(this.game, spawn_x, spawn_y, 'BUNKER');
-                enemy.sprite = this.game.assets.getImage('bunker');
-                enemy.loadSprites();
+                enemy = new DestructibleObject(this.game, spawn_x, spawn_y, 'BUNKER', 'bunker');
                 break;
 
             case 'RADAR_DISH':
-                enemy = new DestructibleObject(this.game, spawn_x, spawn_y, 'RADAR_DISH');
-                enemy.sprite = this.game.assets.getImage('radarDish');
-                enemy.loadSprites();
+                enemy = new DestructibleObject(this.game, spawn_x, spawn_y, 'RADAR_DISH', 'radarDish');
                 break;
 
             default:

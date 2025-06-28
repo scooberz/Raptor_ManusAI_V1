@@ -1,75 +1,51 @@
-# Raptor: Call of the Shadows Reimagining - Game Architecture
+# Raptor Reimagined: Game Architecture
 
-## Technology Stack
+## 1. Technology Stack
+- **Core:** HTML5, CSS3, JavaScript (ES6 Modules)
+- **Rendering:** HTML5 Canvas API (2D Context)
+- **Audio:** Web Audio API
+- **Development Tools:** Node.js, Git
 
-For our reimagining of Raptor: Call of the Shadows, we use:
+## 2. Core Architectural Pillars
 
-### Core Technologies
-- **HTML5**: Game structure
-- **CSS3**: Styling and effects
-- **JavaScript (ES6+)**: Game logic and interactivity
+### State Machine
+The game's flow is managed by a robust state machine in `js/engine/game.js`. This separates all major sections of the game (e.g., LoadingState, MenuState, GameState, HangarState, ShopState) into distinct, manageable classes. This allows for clean setup (`enter` method) and teardown (`exit` method) of game states.
 
-### Game Development Framework
-- **HTML5 Canvas API**: Rendering
-- **No external game engines**: Lightweight, runs well on low-spec hardware
+### Data-Driven Design
+A core principle of this project is the separation of data from logic. Game content, such as level design and enemy properties, is defined in external `.json` files (e.g., `level1.json`). This allows for rapid iteration and balancing without changing the engine's code. The format is specified in `LEVEL_DATA_FORMAT.md`.
 
-### Audio
-- **Web Audio API**: Sound effects and music
+### Behavior Library
+All enemy movement and firing patterns are defined as reusable functions in a "Behavior Library" (`js/entities/enemyBehaviors.js`). The level data simply references the names of these behaviors, allowing designers to create complex enemy encounters by mixing and matching pre-defined patterns.
 
-### Development Tools
-- **Git**: Version control
-- **npm**: Package management
-- **ESLint**: Code quality
+### Layered Canvas Rendering
+The game utilizes multiple stacked `<canvas>` elements to separate rendering concerns and improve performance. This allows static backgrounds to be drawn separately from dynamic entities like the player, enemies, and projectiles. The primary layers are: background, environment, enemy, projectile, player, explosion, and ui.
 
-### Deployment
-- **GitHub Pages**: Hosting (if needed)
+### Asynchronous Asset Loading
+All game assets (images, audio, data) are loaded once at startup by a dedicated LoadingState. The AssetManager handles the asynchronous loading of these assets, ensuring that the game only proceeds once all necessary content is in memory.
 
-## Core Architecture
+## 3. Project Directory Structure
 
-### Modular, Data-Driven Design
-- **Entity-Component System (ECS)**: All game objects (player, enemies, projectiles, etc.) are entities with modular components for behavior, rendering, and state.
-- **Behavior Library**: All enemy movement and firing patterns are reusable, composable functions (see `enemyBehaviors.js`). These are assigned via level JSON data, making enemy design highly flexible and data-driven.
-- **Level & Enemy Data in JSON**: Levels, enemy waves, and behaviors are defined in external JSON files. This enables rapid iteration, easy expansion, and future support for a visual level editor.
-- **State Machine**: Clean separation of game states (boot, menu, hangar, gameplay, pause, game over, etc.) for maintainability and scalability.
-- **Asset & Audio Management**: Centralized asset loader and a planned robust AudioManager for sound/music with volume controls.
-- **Tilemap & Environment System (Planned)**: Future levels will use a tilemap-based system for more complex, interactive environments.
-
-### Example: Data-Driven Enemy
-```json
-{
-  "type": "striker",
-  "movementPattern": "move_to_point_and_hold",
-  "firingPattern": "single_aimed_shot",
-  "spawn": { "x": 100, "y": -50 },
-  "overrides": { "hold_duration_ms": 3000 }
-}
+```
+raptor-game/
+├── assets/
+│   ├── data/         # JSON files for levels, etc.
+│   ├── images/
+│   ├── audio/
+├── docs/             # All markdown documentation
+├── js/
+│   ├── engine/       # Core systems (Game, AssetManager, Collision, etc.)
+│   ├── entities/     # Game objects (Player, Enemy, Projectile, etc.)
+│   ├── environment/  # Background and environment managers
+│   ├── states/       # All game states (Menu, Game, Shop, etc.)
+│   ├── ui/           # Heads-Up Display and other UI elements
+│   └── main.js       # Main entry point for the application
+├── index.html
+├── style.css
 ```
 
-### Layered Rendering
-- Multiple canvas layers for backgrounds, entities, projectiles, UI, etc. for performance and visual clarity.
+## 4. Future Architectural Goals
 
-### Save System
-- LocalStorage-based save manager for progress, settings, and high scores.
-
-## Development Roadmap
-
-1. **Setup Project Structure** *(Complete)*
-2. **Implement Core Engine** *(Complete)*
-3. **Create Entity System** *(Complete)*
-4. **Implement Game States** *(Complete)*
-5. **Develop Level 1** *(Complete)*
-6. **Develop Level 2** *(Complete)*
-7. **Polish and Optimize** *(In Progress)*
-8. **Testing and Deployment** *(In Progress)*
-9. **Future Architectural Goals & Features**
-   - Refactor to a Generic, Reusable Level Class
-   - Implement a Robust AudioManager with volume controls
-   - Implement a full Tilemap-based Environment System
-   - Design and build the Hangar/Shop System
-   - Design and build the Data-Pad Level Editor
-   - Design and build a Power-up/Collectibles System
-
-## Summary
-
-The project is now a modular, data-driven shooter with a flexible behavior library, JSON-based level/enemy design, and a clear roadmap for future extensibility and tooling.
+- **Raptor Forge:** A visual, in-game level editor built as a new game state.
+- **Tilemap System:** A more advanced system for creating complex, destructible background environments.
+- **Hangar & Shop:** A persistent system for the player to buy and sell weapon upgrades and items between missions, using the `SaveManager`.
 

@@ -87,6 +87,9 @@ class BootState {
      */
     exit() {
         console.log('Exiting Boot State');
+        
+        // Clear the onComplete callback to prevent it from being triggered later
+        this.game.assets.setCompleteCallback(null);
     }
 }
 

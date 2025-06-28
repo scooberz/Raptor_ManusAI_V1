@@ -4,10 +4,11 @@
  */
 import { Entity } from '../engine/entity.js';
 import { Explosion } from './explosion.js';
+import { ImpactEffect } from './impactEffect.js';
 import { getEnvironmentData } from '../../assets/data/environmentData.js';
 
 class DestructibleObject extends Entity {
-    constructor(game, x, y, environmentType) {
+    constructor(game, x, y, environmentType, spriteKey) {
         // Get environment data
         const envData = getEnvironmentData(environmentType);
         if (!envData) {
@@ -27,6 +28,15 @@ class DestructibleObject extends Entity {
         this.scoreValue = envData.scoreValue;
         this.explosionSize = envData.explosionSize;
         
+        // Load sprite and set ready state
+        this.sprite = this.game.assets.getImage(spriteKey);
+        if (this.sprite) {
+            this.isReady = true;
+        } else {
+            console.error(`Failed to load sprite with key "${spriteKey}" for environment object: ${environmentType}.`);
+            this.isReady = false;
+        }
+        
         // Static object - no movement
         this.velocityX = 0;
         this.velocityY = 0;
@@ -38,25 +48,6 @@ class DestructibleObject extends Entity {
         // Visual properties
         this.damaged = false;
         this.damageThreshold = this.maxHealth * 0.5; // Show damage at 50% health
-        
-        // Load sprite
-        this.loadSprites();
-    }
-    
-    /**
-     * Load the appropriate sprite for this environment object
-     */
-    loadSprites() {
-        // Try to load the specific sprite, fallback to placeholder
-        const spriteName = this.environmentData.spriteAsset;
-        this.sprite = this.game.assets.getImage(spriteName);
-        
-        // Check if sprite was successfully loaded
-        if (this.sprite) {
-            this.isReady = true;
-        } else {
-            console.error(`Failed to load sprite for environment object: ${spriteName}. Object will not be rendered.`);
-        }
     }
     
     /**
@@ -86,17 +77,19 @@ class DestructibleObject extends Entity {
     /**
      * Take damage from projectiles or other sources
      * @param {number} damage - Amount of damage to take
-     * @param {Entity} source - The entity that caused the damage (optional)
+     * @param {Entity} sourceProjectile - The projectile that caused the damage (optional)
      */
-    takeDamage(damage, source = null) {
+    takeDamage(damage, sourceProjectile = null) {
         if (!this.canTakeDamage || !this.active) {
             return false;
         }
         
         this.health -= damage;
         
-        // Create small impact effect
-        this.createImpactEffect();
+        // Create impact effect at projectile position
+        if (sourceProjectile && this.game.currentState && this.game.currentState.effectManager) {
+            this.game.currentState.effectManager.add(new ImpactEffect(this.game, sourceProjectile.x, sourceProjectile.y));
+        }
         
         // Check if destroyed
         if (this.health <= 0) {

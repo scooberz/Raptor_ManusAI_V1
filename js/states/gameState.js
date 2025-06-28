@@ -7,6 +7,7 @@ import { Level2 } from '../levels/level2.js';
 import { Player } from '../entities/player.js';
 import { HUD } from '../ui/hud.js';
 import { BackgroundManager } from '../environment/BackgroundManager.js';
+import { EffectManager } from '../engine/effectManager.js';
 
 class GameState {
     constructor(game) {
@@ -23,6 +24,7 @@ class GameState {
         this.levelCompleteDelay = 3000; // 3 seconds before next level
         this.isInitializing = false;
         this.debugMode = true; // Add debug mode flag
+        this.effectManager = new EffectManager(); // Add effect manager
     }
 
     /**
@@ -128,6 +130,9 @@ class GameState {
 
         this.game.collision.checkCollisions();
 
+        // Update effect manager
+        this.effectManager.update(deltaTime);
+
         // (Your existing logic for debug invincibility, level completion, game over, etc., can stay here)
         if (this.debugMode && this.player) {
             this.player.health = this.player.maxHealth;
@@ -169,6 +174,7 @@ class GameState {
             this.currentLevel.render(contexts);
         }
         this.game.entityManager.render(contexts);
+        this.effectManager.render(contexts.explosion);
         this.hud.render(contexts.ui);
 
         // Debug rendering to help identify issues
@@ -334,6 +340,9 @@ class GameState {
      */
     exit() {
         console.log('Exiting Game State');
+
+        // Clear effect manager
+        this.effectManager.clear();
 
         // Full cleanup when leaving the game
         if (this.currentLevel && typeof this.currentLevel.cleanup === 'function') {

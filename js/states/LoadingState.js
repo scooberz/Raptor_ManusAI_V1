@@ -10,55 +10,66 @@ export class LoadingState {
      */
     async enter() {
         console.log("--- Running Final, Corrected LoadingState ---");
-        const allAssets = [
-            // UI & Backgrounds
-            { key: 'logo', type: 'image', path: 'assets/images/ui/game_logo.png' },
-            { key: 'menuBackground', type: 'image', path: 'assets/images/ui/menu_background.png' },
-            { key: 'hangarBackground', type: 'image', path: 'assets/images/ui/hangar_background.png' },
-            { key: 'shopBackground', type: 'image', path: 'assets/images/ui/shop_background.png' },
-            { key: 'characterSelectBackground', type: 'image', path: 'assets/images/ui/character_select_background.png' },
-            { key: 'cutscenePanel1', type: 'image', path: 'assets/images/ui/Raptor intro cutscene 1.png' },
-            { key: 'cutscenePanel2', type: 'image', path: 'assets/images/ui/Raptor intro cutscene 2.png' },
-            { key: 'healthBar', type: 'image', path: 'assets/images/ui/health_bar.png' },
-            { key: 'shieldBar', type: 'image', path: 'assets/images/ui/shield_bar.png' },
-            // Player Assets
-            { key: 'playerShipBase', type: 'image', path: 'assets/images/player/player_ship_base.png' },
-            { key: 'playerShipLeft', type: 'image', path: 'assets/images/player/player_ship_left.png' },
-            { key: 'playerShipRight', type: 'image', path: 'assets/images/player/player_ship_right.png' },
-            { key: 'playerShipThrust', type: 'image', path: 'assets/images/player/player_ship_thrust.png' },
-            // Projectile Assets
-            { key: 'enemyBullet', type: 'image', path: 'assets/images/projectiles/enemy_projectile.png' },
-            { key: 'MISSILE', type: 'image', path: 'assets/images/projectiles/player_missile.png' },
-            { key: 'enemyMissile', type: 'image', path: 'assets/images/projectiles/enemyMissile.png' },
-            // Enemy Assets
-            { key: 'enemyStriker', type: 'image', path: 'assets/images/enemies/striker.png' },
-            { key: 'enemyCyclone', type: 'image', path: 'assets/images/enemies/cyclone.png' },
-            { key: 'enemyGnat', type: 'image', path: 'assets/images/enemies/gnat.png' },
-            { key: 'enemyReaper', type: 'image', path: 'assets/images/enemies/reaper.png' },
-            { key: 'enemyDart', type: 'image', path: 'assets/images/enemies/dart.png' },
-            { key: 'enemyGoliath', type: 'image', path: 'assets/images/enemies/goliath.png' },
-            { key: 'enemyCutter', type: 'image', path: 'assets/images/enemies/cutter.png' },
-            { key: 'enemyMine', type: 'image', path: 'assets/images/enemies/mine.png' },
-            { key: 'enemyTurret', type: 'image', path: 'assets/images/enemies/enemy_turret.png' },
-            { key: 'bossLevel1', type: 'image', path: 'assets/images/enemies/boss_level1.png' },
-            // Environment & Backgrounds
-            { key: 'backgroundLevel1', type: 'image', path: 'assets/images/environment/background_level1.png' },
-            { key: 'fuelTank', type: 'image', path: 'assets/images/environment/FUEL_TANK.png' },
-            { key: 'bunker', type: 'image', path: 'assets/images/environment/BUNKER.png' },
-            { key: 'radarDish', type: 'image', path: 'assets/images/environment/RADAR_DISH.png' },
-            // Effects & Collectibles
-            { key: 'explosion1', type: 'image', path: 'assets/images/explosions/explosion_1.png' },
-            { key: 'shieldPickup', type: 'image', path: 'assets/images/collectibles/shield_pickup.png' },
-            { key: 'megabombPickup', type: 'image', path: 'assets/images/collectibles/megabomb_pickup.png' },
-        ];
+        
+        // Set up progress callback
+        this.game.assets.setProgressCallback((progress) => {
+            this.loadingProgress = progress / 100; // Convert percentage to 0-1 range
+        });
+        
+        // Define all assets in the format expected by AssetManager
+        // Only include assets that haven't been loaded yet
+        const allAssets = {
+            images: {
+                // UI & Backgrounds (skip logo as it's already loaded in BootState)
+                'menuBackground': 'assets/images/ui/menu_background.png',
+                'hangarBackground': 'assets/images/ui/hangar_background.png',
+                'shopBackground': 'assets/images/ui/shop_background.png',
+                'characterSelectBackground': 'assets/images/ui/character_select_background.png',
+                'cutscenePanel1': 'assets/images/ui/Raptor intro cutscene 1.png',
+                'cutscenePanel2': 'assets/images/ui/Raptor intro cutscene 2.png',
+                'healthBar': 'assets/images/ui/health_bar.png',
+                'shieldBar': 'assets/images/ui/shield_bar.png',
+                // Player Assets
+                'playerShipBase': 'assets/images/player/player_ship_base.png',
+                'playerShipLeft': 'assets/images/player/player_ship_left.png',
+                'playerShipRight': 'assets/images/player/player_ship_right.png',
+                'playerShipThrust': 'assets/images/player/player_ship_thrust.png',
+                // Projectile Assets
+                'enemyBullet': 'assets/images/projectiles/enemy_projectile.png',
+                'MISSILE': 'assets/images/projectiles/player_missile.png',
+                'enemyMissile': 'assets/images/projectiles/enemyMissile.png',
+                // Enemy Assets
+                'enemyStriker': 'assets/images/enemies/striker.png',
+                'enemyCyclone': 'assets/images/enemies/cyclone.png',
+                'enemyGnat': 'assets/images/enemies/gnat.png',
+                'enemyReaper': 'assets/images/enemies/reaper.png',
+                'enemyDart': 'assets/images/enemies/dart.png',
+                'enemyGoliath': 'assets/images/enemies/goliath.png',
+                'enemyCutter': 'assets/images/enemies/cutter.png',
+                'enemyMine': 'assets/images/enemies/mine.png',
+                'enemyTurret': 'assets/images/enemies/enemy_turret.png',
+                'bossLevel1': 'assets/images/enemies/boss_level1.png',
+                // Environment & Backgrounds
+                'backgroundLevel1': 'assets/images/environment/background_level1.png',
+                'tileset_level1': 'assets/images/environment/tileset.png',
+                'fuelTank': 'assets/images/environment/FUEL_TANK.png',
+                'bunker': 'assets/images/environment/BUNKER.png',
+                'radarDish': 'assets/images/environment/RADAR_DISH.png',
+                // Effects & Collectibles
+                'explosion1': 'assets/images/explosions/explosion_1.png',
+                'shieldPickup': 'assets/images/collectibles/shield_pickup.png',
+                'megabombPickup': 'assets/images/collectibles/megabomb_pickup.png',
+            }
+        };
+        
         try {
-            await this.game.assets.loadAll(allAssets, (progress) => {
-                this.loadingProgress = progress;
-            });
+            await this.game.assets.loadAssets(allAssets);
             console.log("SUCCESS: All assets loaded. Transitioning state...");
             this.game.changeState('introCutscene');
         } catch (error) {
             console.error("CRITICAL ERROR in LoadingState:", error);
+            // Even if loading fails, try to continue to the next state
+            this.game.changeState('introCutscene');
         }
     }
 

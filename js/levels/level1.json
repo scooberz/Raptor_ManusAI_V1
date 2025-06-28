@@ -1,7 +1,25 @@
 {
     "level": 1,
     "levelName": "Bravo Sector",
-    "background": "backgroundLevel1",
+    "tileset": "tileset_level1",
+    "tilemap": [
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 1, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 2, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 1, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    ],
     "music": "gameMusic1",
     "waves": [
         {
@@ -78,18 +96,18 @@
                 { "type": "striker", "spawn_x": 450, "spawn_y": -100, "delay": 3000, "overrides": { "movementPattern": "move_straight_down", "firingPattern": "single_straight_shot", "fireRate": 1000, "speed": 90 }},
                 { "type": "striker", "spawn_x": 500, "spawn_y": -50,  "delay": 3500, "overrides": { "movementPattern": "move_straight_down", "firingPattern": "single_straight_shot", "fireRate": 750, "speed": 90 }},
                 { "type": "striker", "spawn_x": 450, "spawn_y": -150, "delay": 4000, "overrides": { "movementPattern": "move_straight_down", "firingPattern": "single_straight_shot", "fireRate": 950, "speed": 90 }},
-                { "type": "dart", "spawn_x": -30, "spawn_y": 50, "delay": 6000, "overrides": { "movementPattern": "swoop_and_dash", "firingPattern": "none" }},
-                { "type": "dart", "spawn_x": -30, "spawn_y": 30, "delay": 6150, "overrides": { "movementPattern": "swoop_and_dash", "firingPattern": "none" }},
-                { "type": "dart", "spawn_x": -30, "spawn_y": 10, "delay": 6300, "overrides": { "movementPattern": "swoop_and_dash", "firingPattern": "none" }},
-                { "type": "dart", "spawn_x": 630, "spawn_y": 50, "delay": 8000, "overrides": { "movementPattern": "swoop_and_dash", "firingPattern": "none" }},
-                { "type": "dart", "spawn_x": 630, "spawn_y": 30, "delay": 8150, "overrides": { "movementPattern": "swoop_and_dash", "firingPattern": "none" }},
-                { "type": "dart", "spawn_x": 630, "spawn_y": 10, "delay": 8300, "overrides": { "movementPattern": "swoop_and_dash", "firingPattern": "none" }},
-                { "type": "dart", "spawn_x": -30, "spawn_y": 50, "delay": 10000, "overrides": { "movementPattern": "swoop_and_dash", "firingPattern": "none" }},
-                { "type": "dart", "spawn_x": -30, "spawn_y": 30, "delay": 10150, "overrides": { "movementPattern": "swoop_and_dash", "firingPattern": "none" }},
-                { "type": "dart", "spawn_x": -30, "spawn_y": 10, "delay": 10300, "overrides": { "movementPattern": "swoop_and_dash", "firingPattern": "none" }},
-                { "type": "dart", "spawn_x": 630, "spawn_y": 50, "delay": 12000, "overrides": { "movementPattern": "swoop_and_dash", "firingPattern": "none" }},
-                { "type": "dart", "spawn_x": 630, "spawn_y": 30, "delay": 12150, "overrides": { "movementPattern": "swoop_and_dash", "firingPattern": "none" }},
-                { "type": "dart", "spawn_x": 630, "spawn_y": 10, "delay": 12300, "overrides": { "movementPattern": "swoop_and_dash", "firingPattern": "none" }}
+                { "type": "dart", "spawn_x": -30, "spawn_y": 50, "delay": 6000, "overrides": { "movementPattern": "swoop_and_dash", "firingPattern": "none", "speed": 40 }},
+                { "type": "dart", "spawn_x": -30, "spawn_y": 30, "delay": 6150, "overrides": { "movementPattern": "swoop_and_dash", "firingPattern": "none", "speed": 40 }},
+                { "type": "dart", "spawn_x": -30, "spawn_y": 10, "delay": 6300, "overrides": { "movementPattern": "swoop_and_dash", "firingPattern": "none", "speed": 40 }},
+                { "type": "dart", "spawn_x": 630, "spawn_y": 50, "delay": 8000, "overrides": { "movementPattern": "swoop_and_dash", "firingPattern": "none", "speed": 40 }},
+                { "type": "dart", "spawn_x": 630, "spawn_y": 30, "delay": 8150, "overrides": { "movementPattern": "swoop_and_dash", "firingPattern": "none", "speed": 40 }},
+                { "type": "dart", "spawn_x": 630, "spawn_y": 10, "delay": 8300, "overrides": { "movementPattern": "swoop_and_dash", "firingPattern": "none", "speed": 40 }},
+                { "type": "dart", "spawn_x": -30, "spawn_y": 50, "delay": 10000, "overrides": { "movementPattern": "swoop_and_dash", "firingPattern": "none", "speed": 40 }},
+                { "type": "dart", "spawn_x": -30, "spawn_y": 30, "delay": 10150, "overrides": { "movementPattern": "swoop_and_dash", "firingPattern": "none", "speed": 40 }},
+                { "type": "dart", "spawn_x": -30, "spawn_y": 10, "delay": 10300, "overrides": { "movementPattern": "swoop_and_dash", "firingPattern": "none", "speed": 40 }},
+                { "type": "dart", "spawn_x": 630, "spawn_y": 50, "delay": 12000, "overrides": { "movementPattern": "swoop_and_dash", "firingPattern": "none", "speed": 40 }},
+                { "type": "dart", "spawn_x": 630, "spawn_y": 30, "delay": 12150, "overrides": { "movementPattern": "swoop_and_dash", "firingPattern": "none", "speed": 40 }},
+                { "type": "dart", "spawn_x": 630, "spawn_y": 10, "delay": 12300, "overrides": { "movementPattern": "swoop_and_dash", "firingPattern": "none", "speed": 40 }}
             ]
         },
         {

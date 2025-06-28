@@ -213,12 +213,16 @@ class Game {
      * @param {string} stateName - The name of the state to switch to
      */
     async changeState(stateName) {
+        console.log(`Changing state from ${this.currentState ? this.currentState.constructor.name : 'null'} to ${stateName}`);
+        
         if (this.currentState && typeof this.currentState.exit === 'function') {
+            console.log(`Exiting current state: ${this.currentState.constructor.name}`);
             this.currentState.exit();
         }
 
         const newState = this.states[stateName];
         if (newState) {
+            console.log(`Found new state: ${stateName}, entering...`);
             this.currentState = newState;
             if (typeof this.currentState.enter === 'function') {
                 const result = this.currentState.enter();
@@ -226,6 +230,7 @@ class Game {
                     await result;
                 }
             }
+            console.log(`Successfully entered state: ${stateName}`);
         } else {
             console.error(`State "${stateName}" not found!`);
         }

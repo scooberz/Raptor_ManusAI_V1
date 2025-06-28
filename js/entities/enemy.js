@@ -3,7 +3,7 @@ import { Explosion } from './explosion.js';
 import { Collectible } from './collectible.js';
 
 class Enemy extends Entity {
-    constructor(game, x, y, type, health, scoreValue, collisionDamage) {
+    constructor(game, x, y, type, spriteKey, health, scoreValue, collisionDamage) {
         const stats = Enemy.stats[type] || {};
         const width = stats.width || 48;
         const height = stats.height || 48;
@@ -20,6 +20,15 @@ class Enemy extends Entity {
         this.moneyValue = stats.moneyValue || 25;
         this.collisionDamage = collisionDamage !== undefined ? collisionDamage : (stats.collisionDamage || 20);
 
+        // Load sprite and set ready state
+        this.sprite = this.game.assets.getImage(spriteKey);
+        if (this.sprite) {
+            this.isReady = true;
+        } else {
+            console.error(`Failed to load sprite with key "${spriteKey}" for enemy type "${this.type}".`);
+            this.isReady = false;
+        }
+
         // Default movement and weapon properties
         this.velocityY = 100; // A base value, can be overridden by patterns
         this.pattern = 'straight';
@@ -32,18 +41,6 @@ class Enemy extends Entity {
         this.hitTime = 0;
         this.hitDuration = 100; // ms
         this.hit = false;
-    }
-
-    /**
-     * Load enemy sprites and set ready state
-     */
-    loadSprites() {
-        // Check if the sprite was successfully loaded
-        if (this.sprite) {
-            this.isReady = true;
-        } else {
-            console.error(`Failed to load sprite for enemy type "${this.type}". Enemy will not be rendered.`);
-        }
     }
 
     /**

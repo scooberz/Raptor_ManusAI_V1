@@ -7,15 +7,15 @@ import { Projectile } from './projectile.js';
 import { HomingProjectile } from './homingProjectile.js';
 
 class Boss1 extends Enemy {
-    constructor(game, x, y) {
+    constructor(game, x, y, spriteKey) {
         // Define the boss's stats to pass to the parent Enemy constructor.
         const health = 800;
         const scoreValue = 5000;
         const moneyValue = 1000;
 
         // Call the parent constructor CORRECTLY.
-        // The Enemy constructor expects: (game, x, y, type, health, scoreValue)
-        super(game, x, y, 'boss1', health, scoreValue);
+        // The Enemy constructor expects: (game, x, y, type, spriteKey, health, scoreValue)
+        super(game, x, y, 'boss1', spriteKey, health, scoreValue);
         
         // --- Now, set properties specific to the Boss1 class ---
 
@@ -28,10 +28,6 @@ class Boss1 extends Enemy {
         this.layer = 'enemy';
         this.moneyValue = moneyValue;
         this.maxHealth = this.health; // Ensure maxHealth matches the real health.
-
-        // Load sprite
-        this.sprite = this.game.assets.getImage('bossLevel1');
-        this.loadSprites();
 
         // Movement parameters
         this.movementSpeed = 50;
@@ -74,7 +70,7 @@ class Boss1 extends Enemy {
     }
 
     handleAttacks(deltaTime) {
-        const now = this.game.gameTime; // Use gameTime for consistency
+        const now = this.game.currentState ? this.game.currentState.gameTime : 0; // Use level's gameTime
 
         if (now - this.lastMachineGunShot > this.machineGunCooldown) {
             this.lastMachineGunShot = now;
@@ -106,18 +102,19 @@ class Boss1 extends Enemy {
         for (let i = 0; i < numProjectiles; i++) {
             const angle = startAngle + (spreadAngle * i) / (numProjectiles - 1);
             
-            const projectile = new Projectile(
-                this.game,
+            const sprite = this.game.assets.getImage('enemyBullet');
+            const projectile = this.game.projectilePool.get();
+            projectile.activate(
                 bossX, bossY,
-                10, 20, // size
                 Math.cos(angle) * projectileSpeed, // velocityX
                 Math.sin(angle) * projectileSpeed, // velocityY
                 projectileDamage,
                 'enemy',
-                'enemyBullet' // spriteName
+                sprite
             );
             
             this.game.entityManager.add(projectile);
+            this.game.collision.addToGroup(projectile, 'enemyProjectiles');
         }
     }
 
@@ -131,6 +128,8 @@ class Boss1 extends Enemy {
 
         this.game.entityManager.add(missile1);
         this.game.entityManager.add(missile2);
+        this.game.collision.addToGroup(missile1, 'enemyProjectiles');
+        this.game.collision.addToGroup(missile2, 'enemyProjectiles');
     }
 
     render(context) {

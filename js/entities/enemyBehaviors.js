@@ -112,7 +112,7 @@ export const movementPatterns = {
                 // Set the arc distance and initial speed
                 enemy.behaviorState.swoopArcDistance = 250; // How far it moves horizontally
                 enemy.behaviorState.time = 0;
-                enemy.speed = enemy.speed || 200; // Use default speed if none is set
+                enemy.speed = enemy.speed || 100; // Use default speed if none is set
             }
 
             const state = enemy.behaviorState;
@@ -720,7 +720,9 @@ export const firingPatterns = {
                 const velocityX = (dx / distance) * 250; // Increased by 25% (was 200)
                 const velocityY = (dy / distance) * 250; // Increased by 25% (was 200)
                 const spriteName = getEnemyProjectileSprite(enemy);
-                const projectile = new Projectile(enemy.game, enemy.x, enemy.y, 8, 16, velocityX, velocityY, 10, 'enemy', spriteName);
+                const sprite = enemy.game.assets.getImage(spriteName);
+                const projectile = enemy.game.projectilePool.get();
+                projectile.activate(enemy.x, enemy.y, velocityX, velocityY, 10, 'enemy', sprite);
                 enemy.game.entityManager.add(projectile);
                 enemy.game.collision.addToGroup(projectile, 'enemyProjectiles');
             }
@@ -739,7 +741,9 @@ export const firingPatterns = {
             const velocityX = 0;
             const velocityY = 188; // Increased by 25% (was 150)
             const spriteName = getEnemyProjectileSprite(enemy);
-            const projectile = new Projectile(enemy.game, enemy.x, enemy.y, 8, 16, velocityX, velocityY, 10, 'enemy', spriteName);
+            const sprite = enemy.game.assets.getImage(spriteName);
+            const projectile = enemy.game.projectilePool.get();
+            projectile.activate(enemy.x, enemy.y, velocityX, velocityY, 10, 'enemy', sprite);
             enemy.game.entityManager.add(projectile);
             enemy.game.collision.addToGroup(projectile, 'enemyProjectiles');
             enemy.fireTimer = enemy.fireRate || 1200; // Faster default rate (was 3000)
@@ -756,6 +760,8 @@ export const firingPatterns = {
         if (enemy.fireTimer <= 0) {
             const projectileSpeed = 188; // Increased by 25% (was 150)
             const spriteName = getEnemyProjectileSprite(enemy);
+            const sprite = enemy.game.assets.getImage(spriteName);
+            
             // Center bullet
             const centerVelocityX = 0;
             const centerVelocityY = projectileSpeed;
@@ -766,9 +772,12 @@ export const firingPatterns = {
             const rightVelocityX = projectileSpeed * 0.26;
             const rightVelocityY = projectileSpeed * 0.96;
             
-            const centerProjectile = new Projectile(enemy.game, enemy.x, enemy.y, 8, 16, centerVelocityX, centerVelocityY, 10, 'enemy', spriteName);
-            const leftProjectile = new Projectile(enemy.game, enemy.x, enemy.y, 8, 16, leftVelocityX, leftVelocityY, 10, 'enemy', spriteName);
-            const rightProjectile = new Projectile(enemy.game, enemy.x, enemy.y, 8, 16, rightVelocityX, rightVelocityY, 10, 'enemy', spriteName);
+            const centerProjectile = enemy.game.projectilePool.get();
+            centerProjectile.activate(enemy.x, enemy.y, centerVelocityX, centerVelocityY, 10, 'enemy', sprite);
+            const leftProjectile = enemy.game.projectilePool.get();
+            leftProjectile.activate(enemy.x, enemy.y, leftVelocityX, leftVelocityY, 10, 'enemy', sprite);
+            const rightProjectile = enemy.game.projectilePool.get();
+            rightProjectile.activate(enemy.x, enemy.y, rightVelocityX, rightVelocityY, 10, 'enemy', sprite);
             
             enemy.game.entityManager.add(centerProjectile);
             enemy.game.entityManager.add(leftProjectile);
@@ -833,7 +842,9 @@ export const firingPatterns = {
                     const distance = Math.sqrt(dx * dx + dy * dy);
                     const velocity = { x: (dx / distance) * 375, y: (dy / distance) * 375 }; // Increased by 25% (was 300)
                     const spriteName = getEnemyProjectileSprite(enemy);
-                    const projectile = new Projectile(enemy.game, enemy.x, enemy.y, 6, 12, velocity.x, velocity.y, 5, 'enemy', spriteName);
+                    const sprite = enemy.game.assets.getImage(spriteName);
+                    const projectile = enemy.game.projectilePool.get();
+                    projectile.activate(enemy.x, enemy.y, velocity.x, velocity.y, 5, 'enemy', sprite);
                     enemy.game.entityManager.add(projectile);
                     enemy.game.collision.addToGroup(projectile, 'enemyProjectiles');
                 }
@@ -863,13 +874,16 @@ export const firingPatterns = {
             // Create the left-moving projectile (down and left at 45 degrees)
             const leftVelocity = { x: -projectileSpeed * 0.707, y: projectileSpeed * 0.707 };
             const spriteName = getEnemyProjectileSprite(enemy);
-            const leftProjectile = new Projectile(enemy.game, enemy.x + enemy.width / 2, enemy.y + enemy.height / 2, 8, 16, leftVelocity.x, leftVelocity.y, damage, 'enemy', spriteName);
+            const sprite = enemy.game.assets.getImage(spriteName);
+            const leftProjectile = enemy.game.projectilePool.get();
+            leftProjectile.activate(enemy.x + enemy.width / 2, enemy.y + enemy.height / 2, leftVelocity.x, leftVelocity.y, damage, 'enemy', sprite);
             enemy.game.entityManager.add(leftProjectile);
             enemy.game.collision.addToGroup(leftProjectile, 'enemyProjectiles');
             
             // Create the right-moving projectile (down and right at 45 degrees)
             const rightVelocity = { x: projectileSpeed * 0.707, y: projectileSpeed * 0.707 };
-            const rightProjectile = new Projectile(enemy.game, enemy.x + enemy.width / 2, enemy.y + enemy.height / 2, 8, 16, rightVelocity.x, rightVelocity.y, damage, 'enemy', spriteName);
+            const rightProjectile = enemy.game.projectilePool.get();
+            rightProjectile.activate(enemy.x + enemy.width / 2, enemy.y + enemy.height / 2, rightVelocity.x, rightVelocity.y, damage, 'enemy', sprite);
             enemy.game.entityManager.add(rightProjectile);
             enemy.game.collision.addToGroup(rightProjectile, 'enemyProjectiles');
 
@@ -905,9 +919,11 @@ export const firingPatterns = {
                 const angle = (Math.PI * 2 * i) / 16;
                 const velocityX = Math.cos(angle) * 313; // Increased by 25% (was 250)
                 const velocityY = Math.sin(angle) * 313; // Increased by 25% (was 250)
-                const proj = new Projectile(enemy.game, enemy.x + enemy.width/2, enemy.y + enemy.height/2, 8, 8, velocityX, velocityY, 15, 'enemy', 'enemyBullet');
-                enemy.game.entityManager.add(proj);
-                enemy.game.collision.addToGroup(proj, 'enemyProjectiles');
+                const sprite = enemy.game.assets.getImage('enemyBullet');
+                const projectile = enemy.game.projectilePool.get();
+                projectile.activate(enemy.x + enemy.width/2, enemy.y + enemy.height/2, velocityX, velocityY, 15, 'enemy', sprite);
+                enemy.game.entityManager.add(projectile);
+                enemy.game.collision.addToGroup(projectile, 'enemyProjectiles');
             }
             state.desperationTimer = 3500; // 3.5s between desperation attacks
         }
@@ -926,15 +942,11 @@ export const firingPatterns = {
         // --- Firing Straight Shooters ---
         state.straightShotTimer -= deltaTime;
         if (state.straightShotTimer <= 0) {
-            const missileVelocity = { x: 0, y: 438 }; // Increased by 25% (was 350)
-            // Left pod
-            const leftMissile = new Projectile(enemy.game, enemy.x + 20, enemy.y + enemy.height - 20, 8, 16, missileVelocity.x, missileVelocity.y, 20, 'enemy', 'enemyMissile');
-            enemy.game.entityManager.add(leftMissile);
-            enemy.game.collision.addToGroup(leftMissile, 'enemyProjectiles');
-            // Right pod
-            const rightMissile = new Projectile(enemy.game, enemy.x + enemy.width - 28, enemy.y + enemy.height - 20, 8, 16, missileVelocity.x, missileVelocity.y, 20, 'enemy', 'enemyMissile');
-            enemy.game.entityManager.add(rightMissile);
-            enemy.game.collision.addToGroup(rightMissile, 'enemyProjectiles');
+            const sprite = enemy.game.assets.getImage('enemyMissile');
+            const missile = new Missile(enemy.game, enemy.x + 20, enemy.y + enemy.height - 20, 20, 'enemy', { x: 0, y: 438 });
+            missile.sprite = sprite;
+            enemy.game.entityManager.add(missile);
+            enemy.game.collision.addToGroup(missile, 'enemyProjectiles');
             state.straightShotTimer = ((enemy.overrides.straightFireRate || 2000) / 3);
             // After every 4 straight shots, pause to reposition
             state.straightShotsFired = (state.straightShotsFired || 0) + 1;
@@ -954,14 +966,16 @@ export const firingPatterns = {
             state.aimedBurstDelay -= deltaTime;
             if (state.aimedBurstShots < 3 && state.aimedBurstDelay <= 0) {
                 if (player) {
+                    const sprite = enemy.game.assets.getImage('enemyBullet');
                     const dx = player.x - (enemy.x + enemy.width / 2);
                     const dy = player.y - (enemy.y + enemy.height / 2);
                     const angle = Math.atan2(dy, dx);
                     const velocityX = Math.cos(angle) * 375; // Increased by 25% (was 300)
                     const velocityY = Math.sin(angle) * 375; // Increased by 25% (was 300)
-                    const proj = new Projectile(enemy.game, enemy.x + enemy.width/2, enemy.y + enemy.height/2, 8, 8, velocityX, velocityY, 15, 'enemy', 'enemyBullet');
-                    enemy.game.entityManager.add(proj);
-                    enemy.game.collision.addToGroup(proj, 'enemyProjectiles');
+                    const projectile = enemy.game.projectilePool.get();
+                    projectile.activate(enemy.x + enemy.width/2, enemy.y + enemy.height/2, velocityX, velocityY, 15, 'enemy', sprite);
+                    enemy.game.entityManager.add(projectile);
+                    enemy.game.collision.addToGroup(projectile, 'enemyProjectiles');
                 }
                 state.aimedBurstShots++;
                 state.aimedBurstDelay = 120; // 120ms between burst shots
@@ -988,14 +1002,16 @@ export const firingPatterns = {
         // Firing Cannons (spread shot aimed at player)
         if (state.cannonTimer <= 0) {
             if (player) {
+                const sprite = enemy.game.assets.getImage('enemyBullet');
                 for (let i = -1; i <= 1; i++) {
                     const angleToPlayer = Math.atan2(player.y - enemy.y, player.x - enemy.x);
                     const angle = angleToPlayer + (i * 0.2); // 0.2 radians spread
                     const velocityX = Math.cos(angle) * 375; // Increased by 25% (was 300)
                     const velocityY = Math.sin(angle) * 375; // Increased by 25% (was 300)
-                    const proj = new Projectile(enemy.game, enemy.x + enemy.width/2, enemy.y + enemy.height/2, 8, 8, velocityX, velocityY, 10, 'enemy', 'enemyBullet');
-                    enemy.game.entityManager.add(proj);
-                    enemy.game.collision.addToGroup(proj, 'enemyProjectiles');
+                    const projectile = enemy.game.projectilePool.get();
+                    projectile.activate(enemy.x + enemy.width/2, enemy.y + enemy.height/2, velocityX, velocityY, 10, 'enemy', sprite);
+                    enemy.game.entityManager.add(projectile);
+                    enemy.game.collision.addToGroup(projectile, 'enemyProjectiles');
                 }
             }
             state.cannonTimer = enemy.overrides.cannonFireRate || 1200;
@@ -1003,8 +1019,9 @@ export const firingPatterns = {
 
         // Firing Missiles (straight forward)
         if (state.missileTimer <= 0) {
-            const missileVelocity = { x: 0, y: 375 }; // Increased by 25% (was 300)
-            const missile = new Missile(enemy.game, enemy.x + enemy.width/2, enemy.y + enemy.height, 40, 'enemy', missileVelocity);
+            const sprite = enemy.game.assets.getImage('enemyMissile');
+            const missile = new Missile(enemy.game, enemy.x + enemy.width/2, enemy.y + enemy.height, 40, 'enemy', { x: 0, y: 375 });
+            missile.sprite = sprite;
             enemy.game.entityManager.add(missile);
             enemy.game.collision.addToGroup(missile, 'enemyProjectiles'); // CRUCIAL STEP
             state.missileTimer = enemy.overrides.missileFireRate || 4000;

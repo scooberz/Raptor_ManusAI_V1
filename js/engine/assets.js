@@ -2,7 +2,7 @@
  * AssetManager class
  * Handles loading and managing game assets (images, audio, data)
  */
-export class AssetManager {
+class AssetManager {
     constructor() {
         this.images = {};
         this.audio = {}; // This will now be managed by AudioManager
@@ -23,27 +23,38 @@ export class AssetManager {
      * @returns {Promise} A promise that resolves when the image is loaded
      */
     loadImage(key, src) {
+        // Check if image is already loaded
+        if (this.images[key]) {
+            console.log(`Image ${key} already loaded, skipping`);
+            return Promise.resolve(this.images[key]);
+        }
+        
+        this.totalAssets++;
+        console.log(`Loading image: ${key} from ${src}`);
+        
         return new Promise((resolve, reject) => {
             const image = new Image();
-
-            // This event fires when the image has been fully downloaded and is ready.
+            image.crossOrigin = 'anonymous';
+            
             image.onload = () => {
-                console.log(`SUCCESS: Image with key '${key}' loaded successfully.`);
+                console.log(`Image loaded: ${key}, size: ${image.width}x${image.height}`);
+                
+                // Store the image directly without processing
                 this.images[key] = image;
+                this.loadedAssets++;
+                this.notifyProgress();
                 resolve(image);
             };
-
-            // This event fires if there is a network error or the file is missing.
-            image.onerror = () => {
-                console.error(`ERROR: Failed to load image with key '${key}' from path: ${src}`);
+            
+            image.onerror = (error) => {
+                console.error(`Failed to load image: ${src}`, error);
                 reject(new Error(`Failed to load image: ${src}`));
             };
-
-            // Start the loading process
+            
             image.src = src;
         });
     }
-
+    
     /**
      * Load a JSON data asset
      * @param {string} key - The key to store the data under
@@ -87,22 +98,6 @@ export class AssetManager {
             });
         }
         
-        // Define and load all new enemy sprites
-        const enemySprites = {
-            'enemyStriker': 'assets/images/enemies/striker.png',
-            'enemyCyclone': 'assets/images/enemies/cyclone.png',
-            'enemyGnat': 'assets/images/enemies/gnat.png',
-            'enemyReaper': 'assets/images/enemies/reaper.png',
-            'enemyDart': 'assets/images/enemies/dart.png',
-            'enemyGoliath': 'assets/images/enemies/goliath.png',
-            'enemyCutter': 'assets/images/enemies/cutter.png',
-            'enemyMine': 'assets/images/enemies/mine.png'
-        };
-
-        Object.entries(enemySprites).forEach(([key, src]) => {
-            promises.push(this.loadImage(key, src));
-        });
-        
         if (assets.data) {
             Object.entries(assets.data).forEach(([key, src]) => {
                 promises.push(this.loadJSON(key, src));
@@ -117,10 +112,6 @@ export class AssetManager {
      * @returns {Image} The image asset
      */
     getImage(key) {
-        if (!this.images[key]) {
-            console.warn(`AssetManager: Image with key "${key}" was requested but not found or not yet loaded.`);
-            return null;
-        }
         return this.images[key];
     }
     
@@ -218,13 +209,14 @@ export class AssetManager {
                 
                 // Projectile assets
                 'playerBullet': 'assets/images/projectiles/enemy_bullet.png',
-                'enemyBullet': 'assets/images/projectiles/enemy_projectile.png',
-                'enemyMissile': 'assets/images/projectiles/enemyMissile.png',
-                'MISSILE': 'assets/images/projectiles/player_missile.png',
+                'enemyBullet': 'assets/images/projectiles/ENEMY_BULLET.png',
+                'enemyMissile': 'assets/images/projectiles/ENEMY_MISSILE.png',
+                'missile': 'assets/images/projectiles/MISSILE.png',
                 
                 // Environment assets
-                'backgroundLevel1': 'assets/images/environment/background_level2.png',
+                'backgroundLevel1': 'assets/images/environment/background_level1.png',
                 'backgroundLevel2': 'assets/images/environment/background_level2.png',
+                'tileset_level1': 'assets/images/environment/tileset.png',
                 
                 // Destructible environment assets
                 'fuelTank': 'assets/images/environment/FUEL_TANK.png',
@@ -234,6 +226,7 @@ export class AssetManager {
                 // Effects
                 'explosion1': 'assets/images/explosions/explosion_2.png',
                 'explosion2': 'assets/images/explosions/explosion_2.png',
+                'impactEffect': 'assets/images/effects/impact_effect.png',
                 
                 // Collectibles
                 'healthPickup': 'assets/images/collectibles/shield_pickup.png',
@@ -242,8 +235,7 @@ export class AssetManager {
                 
                 // UI assets
                 'healthBar': 'assets/images/ui/health_bar.png',
-                'shieldBar': 'assets/images/ui/shield_bar.png',
-                'shopBackground': 'assets/images/ui/shop_background.png'
+                'shieldBar': 'assets/images/ui/shield_bar.png'
             }
         };
         
@@ -261,48 +253,7 @@ export class AssetManager {
             // Don't throw error - let the game continue with partial assets
         }
     }
-
-    /**
-     * Load all assets with progress callback
-     * @param {Array} assetList - Array of asset definitions {key, type, path}
-     * @param {Function} onProgress - Progress callback (progress: 0.0-1.0)
-     */
-    async loadAll(assetList, onProgress) {
-        let loadedAssets = 0;
-        const totalAssets = assetList.length;
-        const promises = assetList.map(asset =>
-            this.load(asset.key, asset.type, asset.path)
-                .then(loadedAsset => {
-                    this.images[asset.key] = loadedAsset;
-                    loadedAssets++;
-                    if (onProgress) {
-                        onProgress(loadedAssets / totalAssets);
-                    }
-                    console.log(`SUCCESS: Image with key '${asset.key}' loaded successfully.`);
-                    return loadedAsset;
-                })
-                .catch(error => {
-                    console.error(`Failed to load asset ${asset.key}:`, error);
-                    // Allow other assets to continue loading
-                    return null;
-                })
-        );
-        await Promise.all(promises);
-    }
-
-    load(key, type, path) {
-        // The 'load' method is now defined on the class instance
-        switch (type) {
-            case 'image':
-                return new Promise((resolve, reject) => {
-                    const image = new Image();
-                    image.onload = () => resolve(image);
-                    image.onerror = () => reject(new Error(`Failed to load image: ${path}`));
-                    image.src = path;
-                });
-            // Add cases for 'audio' and 'json' if needed
-            default:
-                return Promise.reject(new Error(`Unknown asset type: ${type}`));
-        }
-    }
 }
+
+export { AssetManager };
+
