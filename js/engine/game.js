@@ -10,6 +10,7 @@ import { CollisionSystem } from './collision.js';
 import { EntityManager } from './entity.js';
 import { SaveManager } from './saveManager.js';
 import { ObjectPool } from './ObjectPool.js';
+import { TouchHandler } from './touchHandler.js';
 import { Projectile } from '../entities/projectile.js';
 import { Missile } from '../entities/missile.js';
 import { BootState } from '../states/boot.js';
@@ -27,11 +28,10 @@ import { CharacterSelectState } from '../states/characterSelect.js';
 class Game {
     constructor() {
         // --- TIMING & FPS LOCK ---
+        this.fps = 30;
+        this.frameInterval = 1000 / this.fps;
         this.lastTime = 0;
-        this.accumulator = 0;
-        this.timeStep = 1000 / 60; // This locks our logic to 60 FPS
-        this.currentFPS = 0;
-        this.debugMode = false; // Enable debug logging for the game loop
+        this.timer = 0;
 
         // --- BIND THE GAME LOOP'S CONTEXT ---
         this.gameLoop = this.gameLoop.bind(this);
@@ -62,6 +62,18 @@ class Game {
         window.addEventListener('resize', () => this.resize());
 
         this.playerData = { score: 0, money: 0 };
+
+        // --- Touch Support Detection ---
+        this.isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+        this.touchHandler = null;
+
+        if (this.isTouchDevice) {
+            console.log("Touch device detected. Initializing touch controls.");
+            this.touchHandler = new TouchHandler(this);
+        } else {
+            console.log("Keyboard and mouse controls enabled.");
+        }
+        // --- End Touch Support ---
 
         // --- Core Engine Components ---
         this.input = new InputHandler();
@@ -98,7 +110,9 @@ class Game {
         })();
         
         // Start the main game loop
-        requestAnimationFrame(this.gameLoop);
+        this.lastTime = 0;
+        this.running = true; // Add a running flag
+        this.gameLoop(0);
     }
 
     /**
@@ -182,30 +196,25 @@ class Game {
      * @param {number} timestamp - The current time provided by the browser
      */
     gameLoop(timestamp) {
-        // Fallback for the first frame to prevent a large deltaTime
-        if (!this.lastTime) {
-            this.lastTime = timestamp;
-        }
-
         const deltaTime = timestamp - this.lastTime;
         this.lastTime = timestamp;
 
-        // For the debug overlay
-        this.currentFPS = Math.round(1000 / deltaTime);
+        this.timer += deltaTime;
 
-        this.accumulator += deltaTime;
-
-        // Run the fixed-step update loop for game logic
-        while (this.accumulator >= this.timeStep) {
-            this.update(this.timeStep);
-            this.accumulator -= this.timeStep;
+        // If enough time has passed, update the game logic
+        if (this.timer > this.frameInterval) {
+            // Use the fixed frameInterval for the update to ensure consistency
+            this.update(this.frameInterval);
+            this.timer = 0; // Reset the timer
         }
 
-        // Render graphics as fast as possible
+        // Render every frame, regardless of logic update
         this.render();
 
         // Request the next frame
-        requestAnimationFrame(this.gameLoop);
+        if (this.running) {
+            requestAnimationFrame(this.gameLoop.bind(this));
+        }
     }
 
     /**

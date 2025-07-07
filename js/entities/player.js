@@ -139,12 +139,31 @@ class Player extends Entity {
      * Handle player movement based on input
      */
     handleMovement() {
-        // Get mouse position
-        const mousePos = this.game.input.getMousePosition();
+        let targetX, targetY;
 
-        // Calculate direction to mouse
-        const targetX = mousePos.x - this.width / 2;
-        const targetY = mousePos.y - this.height / 2;
+        // --- Touch Controls ---
+        if (this.game.isTouchDevice && this.game.touchHandler) {
+            const touchHandler = this.game.touchHandler;
+            
+            // If touching, move towards the target point
+            if (touchHandler.isTouching) {
+                targetX = touchHandler.touchX - this.width / 2;
+                targetY = touchHandler.touchY - this.height / 2;
+            } else {
+                // If not touching, don't move
+                this.velocityX = 0;
+                this.velocityY = 0;
+                return;
+            }
+        } else {
+            // --- Keyboard/Mouse Controls ---
+            // Get mouse position
+            const mousePos = this.game.input.getMousePosition();
+
+            // Calculate direction to mouse
+            targetX = mousePos.x - this.width / 2;
+            targetY = mousePos.y - this.height / 2;
+        }
 
         // Calculate distance to target
         const dx = targetX - this.x;
@@ -188,16 +207,29 @@ class Player extends Entity {
      */
     handleWeapons() {
         const now = Date.now();
+        let shouldFire = false;
 
-        // Primary weapon firing (machine gun) - left mouse button
-        if (this.game.input.isMouseButtonPressed('left')) { // Left mouse button
+        // --- Touch Controls ---
+        if (this.game.isTouchDevice && this.game.touchHandler) {
+            const touchHandler = this.game.touchHandler;
+            
+            // Set firing state based on touch
+            shouldFire = touchHandler.isTouching;
+        } else {
+            // --- Keyboard/Mouse Controls ---
+            // Primary weapon firing (machine gun) - left mouse button
+            shouldFire = this.game.input.isMouseButtonPressed('left');
+        }
+
+        // Fire weapons if input is active
+        if (shouldFire) {
             const cannon = this.weapons['CANNON'];
             if (now - cannon.lastFired >= cannon.fireRate) {
                 this.fireCannon();
                 cannon.lastFired = now;
             }
 
-            // Auto-fire missiles while holding left mouse button (only if enabled)
+            // Auto-fire missiles while holding input (only if enabled)
             if (this.missileAutoFire) {
                 const missile = this.weapons['MISSILE'];
                 if (now - missile.lastFired >= missile.fireRate) {
@@ -207,13 +239,13 @@ class Player extends Entity {
             }
         }
 
-        // Right mouse button toggles missile auto-fire mode
-        if (this.game.input.wasMouseButtonJustPressed('right')) { // Right mouse button
+        // Right mouse button toggles missile auto-fire mode (only for mouse/keyboard)
+        if (!this.game.isTouchDevice && this.game.input.wasMouseButtonJustPressed('right')) {
             this.missileAutoFire = !this.missileAutoFire;
             console.log(`Missile auto-fire mode: ${this.missileAutoFire ? 'ON' : 'OFF'}`);
         }
 
-        // Megabomb
+        // Megabomb (keyboard only for now)
         if (this.game.input.isKeyPressed('b')) {
             if (this.megabombs > 0 && now - this.lastMegabombTime > this.megabombCooldown) {
                 this.lastMegabombTime = now;

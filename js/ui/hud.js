@@ -42,6 +42,11 @@ class HUD {
         
         // Render boss approaching message if needed
         this.renderBossApproachingMessage(context);
+        
+        // Render touch control indicator if on touch device
+        if (this.game.isTouchDevice) {
+            this.renderTouchIndicator(context);
+        }
     }
     
     /**
@@ -255,6 +260,27 @@ class HUD {
         
         // Reset shadow
         context.shadowBlur = 0;
+    }
+    
+    /**
+     * Render touch control indicator
+     * @param {CanvasRenderingContext2D} context - The canvas context to render to
+     */
+    renderTouchIndicator(context) {
+        const touchHandler = this.game.touchHandler;
+        if (!touchHandler) return;
+        
+        // Show touch status in top-left corner
+        context.fillStyle = touchHandler.isTouching ? '#00ff00' : '#666';
+        context.font = '12px Arial';
+        context.textAlign = 'left';
+        context.fillText('TOUCH', 10, 20);
+        
+        // Show firing indicator
+        if (touchHandler.isTouching) {
+            context.fillStyle = '#ff0000';
+            context.fillText('FIRING', 10, 35);
+        }
     }
 }
 

@@ -98,5 +98,31 @@ body, html {
     display: none;
 }
 
+/* Touch-specific styles for mobile devices */
+@media (hover: none) and (pointer: coarse) {
+    /* Prevent text selection on touch devices */
+    * {
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        -khtml-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        -webkit-tap-highlight-color: transparent;
+    }
+    
+    /* Ensure buttons and interactive elements are large enough for touch */
+    button, [role="button"], .clickable {
+        min-height: 44px;
+        min-width: 44px;
+        touch-action: manipulation;
+    }
+    
+    /* Prevent zooming on double-tap */
+    canvas {
+        touch-action: none;
+    }
+}
+
 /* Remove the media query since we want fullscreen regardless of screen size */
 
