@@ -23,6 +23,7 @@ import { HangarState } from '../states/hangar.js';
 import { SupplyState } from '../states/supply.js';
 import ShopState from '../states/shop.js';
 import { CharacterSelectState } from '../states/characterSelect.js';
+import { logger } from '../utils/logger.js';
 
 class Game {
     constructor() {
@@ -159,6 +160,26 @@ class Game {
             this.currentState.update(deltaTime);
         }
         this.input.update();
+
+        // Handle debug inputs
+        if (this.input.skipWavePressed) {
+            logger.debug("DEBUG: Skip Wave Pressed!");
+            if (this.currentState && typeof this.currentState.skipWave === 'function') {
+                this.currentState.skipWave();
+            }
+        }
+
+        if (this.input.restartLevelPressed) {
+            logger.debug("DEBUG: Restart Level Pressed!");
+            if (this.currentState && typeof this.currentState.restartLevel === 'function') {
+                this.currentState.restartLevel();
+            }
+        }
+
+        if (this.input.cycleLevelPressed) {
+            logger.debug("DEBUG: Cycle Level Pressed!");
+            this.cycleLevel();
+        }
     }
 
     /**
@@ -209,20 +230,35 @@ class Game {
     }
 
     /**
+     * Cycles through game levels for debugging purposes.
+     * This method is intended for development and testing.
+     */
+    cycleLevel() {
+        logger.debug("Attempting to cycle level...");
+        // Implement level cycling logic here
+        // For example, if you have a GameState that manages levels:
+        if (this.currentState instanceof GameState) {
+            this.currentState.cycleLevel();
+        } else {
+            logger.debug("Cannot cycle level: Not in GameState.");
+        }
+    }
+
+    /**
      * Change the current game state
      * @param {string} stateName - The name of the state to switch to
      */
     async changeState(stateName) {
-        console.log(`Changing state from ${this.currentState ? this.currentState.constructor.name : 'null'} to ${stateName}`);
+        logger.info(`Changing state from ${this.currentState ? this.currentState.constructor.name : 'null'} to ${stateName}`);
         
         if (this.currentState && typeof this.currentState.exit === 'function') {
-            console.log(`Exiting current state: ${this.currentState.constructor.name}`);
+            logger.info(`Exiting current state: ${this.currentState.constructor.name}`);
             this.currentState.exit();
         }
 
         const newState = this.states[stateName];
         if (newState) {
-            console.log(`Found new state: ${stateName}, entering...`);
+            logger.info(`Found new state: ${stateName}, entering...`);
             this.currentState = newState;
             if (typeof this.currentState.enter === 'function') {
                 const result = this.currentState.enter();
@@ -230,9 +266,9 @@ class Game {
                     await result;
                 }
             }
-            console.log(`Successfully entered state: ${stateName}`);
+            logger.info(`Successfully entered state: ${stateName}`);
         } else {
-            console.error(`State "${stateName}" not found!`);
+            logger.error(`State "${stateName}" not found!`);
         }
     }
 }

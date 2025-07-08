@@ -6,6 +6,7 @@ import { Enemy } from './enemy.js';
 import { Boss1 } from './boss1.js';
 import { DestructibleObject } from './destructibleObject.js';
 import { movementPatterns, firingPatterns } from './enemyBehaviors.js';
+import { logger } from '../utils/logger.js';
 
 class EnemyFactory {
     constructor(game) {
@@ -23,7 +24,7 @@ class EnemyFactory {
         const { type, spawn_x, spawn_y, overrides = {} } = enemyInfo;
 
         // Diagnostic log before switch
-        console.log(`FACTORY INPUT: Received request to create type: "${type}"`);
+        logger.debug(`FACTORY INPUT: Received request to create type: "${type}"`);
 
         switch (type) {
             case 'fighter':
@@ -68,7 +69,7 @@ class EnemyFactory {
                     const swoopDirection = Math.random() < 0.5 ? 'swoop_from_left' : 'swoop_from_right';
                     enemy.movementUpdate = movementPatterns[swoopDirection];
                     enemy.velocityY = 400; // High speed by default
-                    console.log(`Dart assigned ${swoopDirection} pattern`);
+                    logger.debug(`Dart assigned ${swoopDirection} pattern`);
                 }
                 break;
 
@@ -97,14 +98,12 @@ class EnemyFactory {
                 break;
 
             default:
-                console.error(`Unknown enemy type requested: "${type}"`);
+                logger.error(`Unknown enemy type requested: "${type}"`);
                 return null;
         }
 
         // Diagnostic log after switch
-        if (enemy) {
-            console.log(`FACTORY OUTPUT: Successfully created object with constructor: ${enemy.constructor.name}`);
-        }
+        if (enemy) { logger.debug(`FACTORY OUTPUT: Successfully created object with constructor: ${enemy.constructor.name}`); }
 
         // --- Apply Overrides ---
         if (enemy) {

@@ -8,6 +8,7 @@ import { HomingProjectile } from '../entities/homingProjectile.js';
 import { BackgroundManager } from '../environment/BackgroundManager.js';
 import { Collectible } from '../entities/collectible.js';
 import { Enemy } from '../entities/enemy.js';
+import { logger } from '../utils/logger.js';
 
 class Level2 {
     constructor(game) {
@@ -917,7 +918,7 @@ class Level2 {
         
         // Log wave change
         if (this.waveIndex < this.levelData.waves.length) {
-            console.log(`Starting Wave ${this.waveIndex + 1}: ${this.levelData.waves[this.waveIndex].name}`);
+            logger.info(`Starting Wave ${this.waveIndex + 1}: ${this.levelData.waves[this.waveIndex].name}`);
         }
     }
     
@@ -925,7 +926,7 @@ class Level2 {
      * Force advance to the next wave (debug feature)
      */
     forceNextWave() {
-        console.log("DEBUG: Forcing next wave.");
+        logger.debug("DEBUG: Forcing next wave.");
         
         // Clear out any remaining enemies from the current wave
         const enemies = this.game.collision.collisionGroups.enemies;
@@ -938,9 +939,9 @@ class Level2 {
         if (this.waveIndex < this.levelData.waves.length - 1) {
             this.waveIndex++;
             this.waveStartTime = this.levelTime;
-            console.log(`DEBUG: Advanced to wave index ${this.waveIndex + 1}: ${this.levelData.waves[this.waveIndex].name}`);
+            logger.debug(`DEBUG: Advanced to wave index ${this.waveIndex + 1}: ${this.levelData.waves[this.waveIndex].name}`);
         } else {
-            console.log("DEBUG: Already on the last wave.");
+            logger.debug("DEBUG: Already on the last wave.");
         }
     }
     

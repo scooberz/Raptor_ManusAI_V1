@@ -25,7 +25,7 @@ class ObjectPool {
 
         // If no objects are available, expand the pool by one.
         // This is a failsafe; ideally, the initial size is sufficient.
-        console.warn("ObjectPool expanded. Consider increasing initial size.");
+        if (window.DEBUG) { console.warn("ObjectPool expanded. Consider increasing initial size."); }
         const newObject = this.objectFactory();
         this.pool.push(newObject);
         return newObject;

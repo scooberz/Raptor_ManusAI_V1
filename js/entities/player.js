@@ -6,6 +6,7 @@ import { Entity } from '../engine/entity.js';
 import { Explosion } from './explosion.js';
 import { Projectile } from './projectile.js';
 import { Missile } from './missile.js';
+import { logger } from '../utils/logger.js';
 
 class Player extends Entity {
     constructor(game, x, y) {
@@ -77,7 +78,7 @@ class Player extends Entity {
             this.score = this.game.playerData.score || 0;
             this.shield = this.game.playerData.shield || 0;
             this.unlockedWeapons = this.game.playerData.unlockedWeapons || ['MISSILE'];
-            console.log(`Player synced with playerData: health=${this.health}, money=${this.money}`);
+            logger.debug(`Player synced with playerData: health=${this.health}, money=${this.money}`);
         }
     }
 
@@ -96,7 +97,7 @@ class Player extends Entity {
         if (this.sprites.base && this.sprites.left && this.sprites.right) {
             this.isReady = true; // <-- Set the flag to true only if assets are loaded
         } else {
-            console.error("Failed to load one or more player sprites. Player will not be rendered.");
+            logger.error("Failed to load one or more player sprites. Player will not be rendered.");
         }
     }
 
@@ -210,7 +211,7 @@ class Player extends Entity {
         // Right mouse button toggles missile auto-fire mode
         if (this.game.input.wasMouseButtonJustPressed('right')) { // Right mouse button
             this.missileAutoFire = !this.missileAutoFire;
-            console.log(`Missile auto-fire mode: ${this.missileAutoFire ? 'ON' : 'OFF'}`);
+            logger.debug(`Missile auto-fire mode: ${this.missileAutoFire ? 'ON' : 'OFF'}`);
         }
 
         // Megabomb
@@ -412,12 +413,24 @@ class Player extends Entity {
      * Add health
      * @param {number} amount - Amount of health to add
      */
+        /**
+     * Add health
+     * @param {number} amount - Amount of health to add
+     */
     addHealth(amount) {
         this.health = Math.min(this.health + amount, this.maxHealth);
         // Sync with playerData
         if (this.game.playerData) {
             this.game.playerData.health = this.health;
         }
+    }
+
+    /**
+     * Collect a health pickup.
+     * @param {number} amount - The amount of health in the pickup.
+     */
+    collectHealthPickup(amount) {
+        this.addHealth(amount);
     }
 
     /**

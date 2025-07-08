@@ -4,6 +4,7 @@
  * This class manages the persistence of game state between sessions, including
  * player progress, stats, and game time.
  */
+import { logger } from '../utils/logger.js';
 class SaveManager {
     /**
      * Create a new SaveManager instance
@@ -37,10 +38,10 @@ class SaveManager {
         try {
             // Convert save data to JSON string and store in localStorage
             localStorage.setItem(this.saveKey, JSON.stringify(saveData));
-            console.log('Game saved successfully');
+            logger.info('Game saved successfully');
             return true;
         } catch (error) {
-            console.error('Error saving game:', error);
+            logger.error('Error saving game:', error);
             return false;
         }
     }
@@ -57,7 +58,7 @@ class SaveManager {
             // Parse the JSON string back into an object
             return JSON.parse(saveData);
         } catch (error) {
-            console.error('Error loading game:', error);
+            logger.error('Error loading game:', error);
             return null;
         }
     }
@@ -77,10 +78,10 @@ class SaveManager {
     deleteSaveGame() {
         try {
             localStorage.removeItem(this.saveKey);
-            console.log('Save game deleted');
+            logger.info('Save game deleted');
             return true;
         } catch (error) {
-            console.error('Error deleting save game:', error);
+            logger.error('Error deleting save game:', error);
             return false;
         }
     }

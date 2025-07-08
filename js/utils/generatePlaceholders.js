@@ -2,6 +2,7 @@
 
 const fs = require('fs');
 const { createCanvas } = require('canvas');
+const { logger } = require('./logger.js');
 
 /**
  * Creates a placeholder image and saves it to a specified path.
@@ -33,7 +34,7 @@ function generatePlaceholderImage(width, height, text, outputPath) {
     // Save the image
     const buffer = canvas.toBuffer('image/png');
     fs.writeFileSync(outputPath, buffer);
-    console.log(`Generated placeholder: ${outputPath}`);
+    logger.info(`Generated placeholder: ${outputPath}`);
 }
 
 // --- List of ALL placeholder images to generate ---
@@ -68,4 +69,4 @@ imagesToGenerate.forEach(img => {
     }
 });
 
-console.log('Placeholder generation complete!');
+logger.info('Placeholder generation complete!');

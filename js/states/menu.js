@@ -2,6 +2,7 @@
  * MenuState class
  * Handles the main menu of the game
  */
+import { logger } from '../utils/logger.js';
 class MenuState {
     constructor(game) {
         this.game = game;
@@ -21,7 +22,7 @@ class MenuState {
      * Enter the menu state
      */
     enter() {
-        console.log('Entering Menu State');
+        logger.info('Entering Menu State');
         
         try {
             // Show menu screen, hide others
@@ -33,11 +34,11 @@ class MenuState {
             if (loadingScreen) loadingScreen.style.display = 'none';
             if (gameOverScreen) gameOverScreen.style.display = 'none';
             
-            console.log('Menu screen elements updated');
+            logger.debug('Menu screen elements updated');
             
             // Get background from assets
             this.background = this.game.assets.getImage('menuBackground');
-            console.log('Menu background loaded:', !!this.background);
+            logger.debug('Menu background loaded:', !!this.background);
             
             // Assets are now loaded upfront in LoadingState, so no need for callbacks
             
@@ -46,9 +47,9 @@ class MenuState {
             
             // Set up menu screen
             this.setupMenuScreen();
-            console.log('Menu screen setup complete');
+            logger.info('Menu screen setup complete');
         } catch (error) {
-            console.error('Error in MenuState.enter():', error);
+            logger.error('Error in MenuState.enter():', error);
         }
     }
     
@@ -167,7 +168,7 @@ class MenuState {
      * Start a new game
      */
     startNewGame() {
-        console.log('Starting new game - all assets loaded');
+        logger.info('Starting new game - all assets loaded');
         this.game.changeState('characterSelect');
     }
     
@@ -175,7 +176,7 @@ class MenuState {
      * Load a saved game
      */
     loadGame() {
-        console.log('Loading saved game');
+        logger.info('Loading saved game');
         // TODO: Implement save/load functionality
         this.showLoadGameScreen();
     }
@@ -219,7 +220,7 @@ class MenuState {
                     hasValidSave = true;
                 }
             } catch (error) {
-                console.error('Error parsing saved data:', error);
+                logger.error('Error parsing saved data:', error);
                 hasValidSave = false;
             }
         }
@@ -596,7 +597,7 @@ class MenuState {
      * Exit the menu state
      */
     exit() {
-        console.log('Exiting Menu State');
+        logger.info('Exiting Menu State');
         
         // Hide menu screen
         document.getElementById('menu-screen').style.display = 'none';

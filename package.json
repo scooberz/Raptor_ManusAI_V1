@@ -4,9 +4,17 @@
   "description": "Raptor: Call of the Shadows Reimagined",
   "main": "js/main.js",
   "scripts": {
+    "test": "jest",
     "generate-placeholders": "node js/utils/generatePlaceholders.js"
   },
   "dependencies": {
     "canvas": "^2.11.2"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.28.0",
+    "@babel/preset-env": "^7.28.0",
+    "babel-jest": "^30.0.4",
+    "jest": "^30.0.4",
+    "jest-environment-jsdom": "^30.0.4"
   }
-} 
+}

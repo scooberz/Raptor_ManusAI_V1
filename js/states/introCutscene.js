@@ -2,6 +2,8 @@
  * IntroCutsceneState class
  * Plays a cinematic intro sequence with images and text overlays
  */
+import { logger } from '../utils/logger.js';
+
 export class IntroCutsceneState {
     constructor(game) {
         this.game = game;
@@ -19,11 +21,11 @@ export class IntroCutsceneState {
         if (loadingScreen) {
             loadingScreen.style.display = 'none';
         }
-        console.log("Entering IntroCutsceneState");
+        logger.info("Entering IntroCutsceneState");
         
         // If cutscene has already played once, go directly to menu
         if (this.hasPlayedOnce) {
-            console.log("Cutscene already played once, going to menu");
+            logger.info("Cutscene already played once, going to menu");
             this.game.changeState('menu');
             return;
         }
@@ -31,26 +33,26 @@ export class IntroCutsceneState {
         // Assets are now loaded upfront in LoadingState, so no need to load gameplay assets here
         
         try {
-            console.log("Loading intro cutscene script...");
+            logger.info("Loading intro cutscene script...");
             const response = await fetch('assets/data/introCutscene.json');
             this.script = await response.json();
-            console.log("Cutscene script loaded:", this.script);
+            logger.info("Cutscene script loaded:", this.script);
             this.currentEventIndex = -1;
             this.nextEvent(); // Start the first event
-            console.log("First event started, currentEventIndex:", this.currentEventIndex);
+            logger.info("First event started, currentEventIndex:", this.currentEventIndex);
             
             // Add listeners to skip
             window.addEventListener('keydown', this.skipListener);
             window.addEventListener('mousedown', this.skipListener);
         } catch (error) {
-            console.error("Failed to load cutscene script:", error);
+            logger.error("Failed to load cutscene script:", error);
             this.hasPlayedOnce = true; // Mark as played even on error
             this.game.changeState('menu');
         }
     }
 
     exit() {
-        console.log("Exiting IntroCutsceneState");
+        logger.info("Exiting IntroCutsceneState");
         // CRITICAL: Remove listeners to prevent them from firing in other states
         window.removeEventListener('keydown', this.skipListener);
         window.removeEventListener('mousedown', this.skipListener);
@@ -63,33 +65,33 @@ export class IntroCutsceneState {
     }
 
     skip() {
-        console.log("Cutscene event skipped by user.");
+        logger.debug("Cutscene event skipped by user.");
         // Force the timer to zero to immediately advance to the next event
         this.eventTimer = 0;
     }
 
     nextEvent() {
         this.currentEventIndex++;
-        console.log("nextEvent called, new index:", this.currentEventIndex);
+        logger.debug("nextEvent called, new index:", this.currentEventIndex);
         const currentEvent = this.script.events[this.currentEventIndex];
 
         if (!currentEvent || currentEvent.type === 'end_scene') {
-            console.log("End of cutscene reached, transitioning to menu");
+            logger.info("End of cutscene reached, transitioning to menu");
             this.hasPlayedOnce = true; // Mark cutscene as played
             this.game.changeState('menu');
             return;
         }
 
-        console.log("Current event:", currentEvent);
+        logger.debug("Current event:", currentEvent);
         this.eventTimer = currentEvent.duration;
         
         if (currentEvent.type === 'show_image') {
             this.lastImage = this.game.assets.getImage(currentEvent.asset);
-            console.log("Loading image for asset:", currentEvent.asset, "Image found:", !!this.lastImage);
+            logger.debug("Loading image for asset:", currentEvent.asset, "Image found:", !!this.lastImage);
             this.lastText = null;
         } else if (currentEvent.type === 'show_image_with_text') {
             this.lastImage = this.game.assets.getImage(currentEvent.asset);
-            console.log("Loading image for asset:", currentEvent.asset, "Image found:", !!this.lastImage);
+            logger.debug("Loading image for asset:", currentEvent.asset, "Image found:", !!this.lastImage);
             this.lastText = currentEvent.text;
         } else if (currentEvent.type === 'show_text') {
             this.lastText = currentEvent.text;
@@ -101,14 +103,14 @@ export class IntroCutsceneState {
 
         this.eventTimer -= deltaTime;
         if (this.eventTimer <= 0) {
-            console.log("Event timer expired, advancing to next event");
+            logger.debug("Event timer expired, advancing to next event");
             this.nextEvent();
         }
     }
 
     render(contexts) {
         if (!this.script || !this.script.events[this.currentEventIndex]) {
-            console.log("Render: No script or no current event");
+            logger.spam("Render: No script or no current event");
             return;
         }
         

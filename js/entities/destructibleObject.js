@@ -6,6 +6,7 @@ import { Entity } from '../engine/entity.js';
 import { Explosion } from './explosion.js';
 import { ImpactEffect } from './impactEffect.js';
 import { getEnvironmentData } from '../../assets/data/environmentData.js';
+import { logger } from '../utils/logger.js';
 
 class DestructibleObject extends Entity {
     constructor(game, x, y, environmentType, spriteKey) {
@@ -33,7 +34,7 @@ class DestructibleObject extends Entity {
         if (this.sprite) {
             this.isReady = true;
         } else {
-            console.error(`Failed to load sprite with key "${spriteKey}" for environment object: ${environmentType}.`);
+            logger.error(`Failed to load sprite with key "${spriteKey}" for environment object: ${environmentType}.`);
             this.isReady = false;
         }
         

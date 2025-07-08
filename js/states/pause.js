@@ -2,6 +2,7 @@
  * PauseState class
  * Handles the game pause state as a simple overlay without changing game states
  */
+import { logger } from '../utils/logger.js';
 class PauseState {
     /**
      * Create a new PauseState instance
@@ -43,7 +44,7 @@ class PauseState {
     pauseGame() {
         if (this.isPaused) return;
         
-        console.log('Pausing game with overlay');
+        logger.info('Pausing game with overlay');
         this.isPaused = true;
         
         // Stop game audio (AudioManager doesn't have pause/resume, only stop)
@@ -59,7 +60,7 @@ class PauseState {
     resumeGame() {
         if (!this.isPaused) return;
         
-        console.log('Resuming game');
+        logger.info('Resuming game');
         this.isPaused = false;
         
         // Remove the pause overlay

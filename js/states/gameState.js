@@ -8,6 +8,7 @@ import { Player } from '../entities/player.js';
 import { HUD } from '../ui/hud.js';
 import { BackgroundManager } from '../environment/BackgroundManager.js';
 import { EffectManager } from '../engine/effectManager.js';
+import { logger } from '../utils/logger.js';
 
 class GameState {
     constructor(game) {
@@ -31,7 +32,7 @@ class GameState {
      * Enter the game state
      */
     async enter() {
-        console.log('Entering Game State');
+        logger.info('Entering Game State');
 
         // Prevent multiple rapid transitions
         if (this.isInitializing) return;
@@ -110,12 +111,12 @@ class GameState {
         // (Your existing debug mode toggles can stay here)
         if (this.game.input.wasKeyJustPressed('1')) {
             this.debugMode = !this.debugMode;
-            console.log(`Debug mode ${this.debugMode ? 'enabled' : 'disabled'}`);
+            logger.debug(`Debug mode ${this.debugMode ? 'enabled' : 'disabled'}`);
         }
 
         // Restart level with '3' key (debug)
         if (this.game.input.restartLevelPressed) {
-            console.log('Restarting current level...');
+            logger.debug('Restarting current level...');
             this.restartLevel();
             this.game.input.restartLevelPressed = false; // Reset the flag
         }
@@ -294,9 +295,9 @@ class GameState {
             // Save to localStorage
             try {
                 localStorage.setItem('raptor_manus_save', JSON.stringify(this.game.playerData));
-                console.log('Player data saved after level completion:', this.game.playerData);
+                logger.info('Player data saved after level completion:', this.game.playerData);
             } catch (error) {
-                console.error('Error saving player data after level completion:', error);
+                logger.error('Error saving player data after level completion:', error);
             }
         }
 
@@ -307,7 +308,7 @@ class GameState {
      * Restart the current level (debug function)
      */
     async restartLevel() {
-        console.log(`Restarting level ${this.level}...`);
+        logger.info(`Restarting level ${this.level}...`);
 
         // Reset level completion state
         this.levelComplete = false;
@@ -332,14 +333,49 @@ class GameState {
         // Reinitialize the current level
         await this.initializeLevel();
 
-        console.log(`Level ${this.level} restarted successfully`);
+        logger.info(`Level ${this.level} restarted successfully`);
+    }
+
+    /**
+     * Cycles to the next level for debugging purposes.
+     * If the current level is the last one, it loops back to the first level.
+     */
+    async cycleLevel() {
+        logger.info("Cycling level...");
+        this.level++;
+        // Assuming you have a maximum number of levels, e.g., 2
+        const maxLevels = 2; // Adjust this based on your actual number of levels
+        if (this.level > maxLevels) {
+            this.level = 1;
+        }
+
+        // Reset level completion state
+        this.levelComplete = false;
+        this.levelCompleteTime = 0;
+
+        // Clear all entities except the player
+        this.game.collision.clearAll();
+        this.game.entityManager.clear();
+
+        // Re-add the player
+        this.game.entityManager.add(this.player);
+        this.game.collision.addToGroup(this.player, 'player');
+
+        // Reset player position to starting position
+        this.player.x = this.game.width / 2 - 32;
+        this.player.y = this.game.height - 100;
+
+        // Reinitialize the current level
+        await this.initializeLevel();
+
+        logger.info(`Cycled to level ${this.level}`);
     }
 
     /**
      * Exit the game state
      */
     exit() {
-        console.log('Exiting Game State');
+        logger.info('Exiting Game State');
 
         // Clear effect manager
         this.effectManager.clear();

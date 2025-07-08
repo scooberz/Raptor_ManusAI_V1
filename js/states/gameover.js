@@ -2,6 +2,7 @@
  * GameOverState class
  * Handles the game over state
  */
+import { logger } from '../utils/logger.js';
 class GameOverState {
     constructor(game) {
         this.game = game;
@@ -20,7 +21,7 @@ class GameOverState {
      * Enter the game over state
      */
     enter() {
-        console.log('Entering Game Over State');
+        logger.info('Entering Game Over State');
         
         // Show game over screen
         document.getElementById('game-over-screen').style.display = 'flex';
@@ -188,7 +189,7 @@ class GameOverState {
      * Exit the game over state
      */
     exit() {
-        console.log('Exiting Game Over State');
+        logger.info('Exiting Game Over State');
         
         // Hide game over screen
         document.getElementById('game-over-screen').style.display = 'none';

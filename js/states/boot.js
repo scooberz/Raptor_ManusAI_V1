@@ -2,6 +2,7 @@
  * BootState class
  * Initial game state that sets up the game and loads essential assets
  */
+import { logger } from '../utils/logger.js';
 class BootState {
     constructor(game) {
         this.game = game;
@@ -11,7 +12,7 @@ class BootState {
      * Enter the boot state
      */
     enter() {
-        console.log('Entering Boot State');
+        logger.info('Entering Boot State');
         
         // Hide all screens except loading
         document.getElementById('menu-screen').style.display = 'none';
@@ -54,7 +55,7 @@ class BootState {
                 this.game.changeState('loading');
             })
             .catch(error => {
-                console.error('Error loading essential assets:', error);
+                logger.error('Error loading essential assets:', error);
                 // Show error message on loading screen
                 document.getElementById('loading-screen').textContent = 'Error loading game assets. Please refresh the page.';
             });
@@ -86,7 +87,7 @@ class BootState {
      * Exit the boot state
      */
     exit() {
-        console.log('Exiting Boot State');
+        logger.info('Exiting Boot State');
         
         // Clear the onComplete callback to prevent it from being triggered later
         this.game.assets.setCompleteCallback(null);

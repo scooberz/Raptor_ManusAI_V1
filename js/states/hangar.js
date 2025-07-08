@@ -2,6 +2,7 @@
  * HangarState class
  * Represents the hangar screen between missions
  */
+import { logger } from '../utils/logger.js';
 class HangarState {
     constructor(game) {
         this.game = game;
@@ -284,7 +285,7 @@ class HangarState {
 
     exit() {
         document.getElementById('hangar-screen').style.display = 'none';
-        console.log('Exiting Hangar State');
+        logger.info('Exiting Hangar State');
     }
 }
 

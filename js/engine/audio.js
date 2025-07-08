@@ -2,6 +2,7 @@
  * AudioManager class
  * Handles sound effects and music playback using Web Audio API
  */
+import { logger } from '../utils/logger.js';
 class AudioManager {
     constructor(assetList) {
         this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -63,11 +64,11 @@ class AudioManager {
 
     // --- Asset Loading ---
     async loadAssets(assetList) {
-        console.log("Loading audio assets...");
+        logger.info("Loading audio assets...");
         const audioAssets = this.parseAssetListForAudio(assetList);
         const promises = Object.entries(audioAssets).map(([key, path]) => this.loadSound(key, path));
         await Promise.all(promises);
-        console.log("All audio assets loaded.");
+        logger.info("All audio assets loaded.");
     }
 
     parseAssetListForAudio(assetList) {
@@ -88,9 +89,9 @@ class AudioManager {
             const audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
             // Use the key as the sound name
             this.soundBuffers[key] = audioBuffer;
-            console.log(`Loaded ${key}`);
+            logger.debug(`Loaded ${key}`);
         } catch (error) {
-            console.error(`Error loading sound ${key} from ${url}:`, error);
+            logger.error(`Error loading sound ${key} from ${url}:`, error);
         }
     }
 
@@ -98,7 +99,7 @@ class AudioManager {
     playSound(soundName, pitchVariation = 0.1, xPosition = null) {
         const buffer = this.soundBuffers[soundName];
         if (!buffer) {
-            console.warn(`[AudioManager] Sound not found: '${soundName}'`);
+            logger.debug(`[AudioManager] Sound not found: '${soundName}'`);
             return;
         }
 
@@ -147,7 +148,7 @@ class AudioManager {
 
         const buffer = this.soundBuffers[musicName]; // Music is also stored in soundBuffers
         if (!buffer) {
-            console.warn(`[AudioManager] Music not found: '${musicName}'`);
+            logger.debug(`[AudioManager] Music not found: '${musicName}'`);
             return;
         }
 

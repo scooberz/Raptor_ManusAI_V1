@@ -2,6 +2,7 @@
  * SupplyState class
  * Handles the supply shop state for buying items
  */
+import { logger } from '../utils/logger.js';
 class SupplyState {
     constructor(game) {
         this.game = game;
@@ -11,7 +12,7 @@ class SupplyState {
      * Enter the supply state
      */
     enter() {
-        console.log('Entering Supply State');
+        logger.info('Entering Supply State');
         
         // For the simplified version, we'll just return to the game
         // In a full implementation, this would show a shop interface
@@ -37,7 +38,7 @@ class SupplyState {
      * Exit the supply state
      */
     exit() {
-        console.log('Exiting Supply State');
+        logger.info('Exiting Supply State');
     }
 }
 

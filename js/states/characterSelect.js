@@ -2,6 +2,7 @@
  * CharacterSelectState class
  * Handles the character creation and selection screen
  */
+import { logger } from '../utils/logger.js';
 class CharacterSelectState {
     constructor(game) {
         this.game = game;
@@ -12,7 +13,7 @@ class CharacterSelectState {
      * Enter the character select state
      */
     enter() {
-        console.log('Entering Character Select State');
+        logger.info('Entering Character Select State');
         
         // Show character select screen
         document.getElementById('character-select-screen').style.display = 'flex';
@@ -297,9 +298,9 @@ class CharacterSelectState {
         // Save to localStorage
         try {
             localStorage.setItem('raptor_manus_save', JSON.stringify(playerData));
-            console.log('Pilot created and saved:', playerData);
+            logger.info('Pilot created and saved:', playerData);
         } catch (error) {
-            console.error('Error saving pilot data:', error);
+            logger.error('Error saving pilot data:', error);
         }
         
         // Set player data in game
@@ -341,7 +342,7 @@ class CharacterSelectState {
      */
     exit() {
         document.getElementById('character-select-screen').style.display = 'none';
-        console.log('Exiting Character Select State');
+        logger.info('Exiting Character Select State');
     }
 }
 

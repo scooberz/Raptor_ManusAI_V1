@@ -1,4 +1,5 @@
 import shopItems from '../data/shopItems.js';
+import { logger } from '../utils/logger.js';
 
 class ShopState {
     constructor(game) {
@@ -8,12 +9,12 @@ class ShopState {
     }
 
     enter() {
-        console.log("Entering Shop State");
+        logger.info("Entering Shop State");
         this.setupShopScreen();
     }
 
     exit() {
-        console.log("Exiting Shop State");
+        logger.info("Exiting Shop State");
         const shopScreen = document.getElementById('shop-screen');
         if (shopScreen) {
             shopScreen.style.display = 'none';
@@ -358,7 +359,7 @@ class ShopState {
             currentMoney = this.game.playerData.money;
             moneySource = this.game.playerData;
         } else {
-            console.log("No money source found - cannot purchase items");
+            logger.debug("No money source found - cannot purchase items");
             return;
         }
 
@@ -367,7 +368,7 @@ class ShopState {
             
             // Apply effect to both player and playerData if they exist
             if (this.game.player) {
-                console.log(`Purchased ${item.name} for $${item.price}`);
+                logger.info(`Purchased ${item.name} for ${item.price}`);
                 this.applyItemEffect(this.game.player, item);
             }
             
@@ -378,7 +379,7 @@ class ShopState {
                 try {
                     localStorage.setItem('raptor_manus_save', JSON.stringify(this.game.playerData));
                 } catch (error) {
-                    console.error('Error saving updated player data:', error);
+                    logger.error('Error saving updated player data:', error);
                 }
             }
             
@@ -387,7 +388,7 @@ class ShopState {
             this.updateHealthDisplay();
             this.refreshShopDisplay();
         } else {
-            console.log("Not enough funds!");
+            logger.debug("Not enough funds!");
         }
     }
 
@@ -437,7 +438,7 @@ class ShopState {
                     const currentHealth = player.health || 75;
                     const newHealth = Math.min(100, currentHealth + effect.value);
                     player.health = newHealth;
-                    console.log(`Energy module applied: ${currentHealth} -> ${newHealth}`);
+                    logger.debug(`Energy module applied: ${currentHealth} -> ${newHealth}`);
                 } else {
                     player[effect.stat] = (player[effect.stat] || 0) + effect.value;
                 }
@@ -452,7 +453,7 @@ class ShopState {
                 break;
         }
         
-         console.log(`Applied effect: ${item.name}. New player stats:`, player);
+        logger.debug(`Applied effect: ${item.name}. New player stats:`, player);
     }
 }
 

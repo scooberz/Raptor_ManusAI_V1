@@ -2,6 +2,7 @@
  * AssetManager class
  * Handles loading and managing game assets (images, audio, data)
  */
+import { logger } from '../utils/logger.js';
 class AssetManager {
     constructor() {
         this.images = {};
@@ -25,19 +26,19 @@ class AssetManager {
     loadImage(key, src) {
         // Check if image is already loaded
         if (this.images[key]) {
-            console.log(`Image ${key} already loaded, skipping`);
+            logger.debug(`Image ${key} already loaded, skipping`);
             return Promise.resolve(this.images[key]);
         }
         
         this.totalAssets++;
-        console.log(`Loading image: ${key} from ${src}`);
+        logger.debug(`Loading image: ${key} from ${src}`);
         
         return new Promise((resolve, reject) => {
             const image = new Image();
             image.crossOrigin = 'anonymous';
             
             image.onload = () => {
-                console.log(`Image loaded: ${key}, size: ${image.width}x${image.height}`);
+                logger.debug(`Image loaded: ${key}, size: ${image.width}x${image.height}`);
                 
                 // Store the image directly without processing
                 this.images[key] = image;
@@ -47,7 +48,7 @@ class AssetManager {
             };
             
             image.onerror = (error) => {
-                console.error(`Failed to load image: ${src}`, error);
+                logger.error(`Failed to load image: ${src}`, error);
                 reject(new Error(`Failed to load image: ${src}`));
             };
             
@@ -78,7 +79,7 @@ class AssetManager {
                 return data;
             })
             .catch(error => {
-                console.error(`Failed to load JSON: ${src}`, error);
+                logger.error(`Failed to load JSON: ${src}`, error);
                 throw error;
             });
     }
@@ -182,7 +183,7 @@ class AssetManager {
      * This method loads all the heavy assets needed for actual gameplay
      */
     async loadGameplayAssets() {
-        console.log("Starting background load of gameplay assets...");
+        logger.info("Starting background load of gameplay assets...");
         this.gameplayAssetsLoaded = false;
         
         // Define all gameplay assets
@@ -242,14 +243,14 @@ class AssetManager {
         try {
             await this.loadAssets(gameplayAssets);
             this.gameplayAssetsLoaded = true;
-            console.log("Gameplay assets have been successfully loaded in the background.");
+            logger.info("Gameplay assets have been successfully loaded in the background.");
             
             // Notify callback if set
             if (this.onGameplayAssetsLoaded) {
                 this.onGameplayAssetsLoaded();
             }
         } catch (error) {
-            console.error("Failed to load gameplay assets:", error);
+            logger.error("Failed to load gameplay assets:", error);
             // Don't throw error - let the game continue with partial assets
         }
     }

@@ -2,6 +2,7 @@
  * InputHandler class
  * Handles keyboard and mouse input with state tracking for a single frame.
  */
+import { logger } from '../utils/logger.js';
 class InputHandler {
     constructor() {
         // Keyboard state
@@ -19,6 +20,7 @@ class InputHandler {
         // Debug-specific flags
         this.skipWavePressed = false;
         this.restartLevelPressed = false;
+        this.cycleLevelPressed = false;
 
         // Bind 'this' context once to prevent issues in event listeners
         this.handleKeyDown = this.handleKeyDown.bind(this);
@@ -53,7 +55,7 @@ class InputHandler {
 
     handleKeyDown(event) {
         // For debugging, let's see every key press
-        console.log(`Key pressed: ${event.key}`);
+        logger.spam(`Key pressed: ${event.key}`);
 
         // Set the state for continuous-press keys
         this.keys[event.key] = true;
@@ -61,12 +63,17 @@ class InputHandler {
         // --- Handle single-press debug flags ---
         if (event.key === '2' || event.key === 'Numpad2') {
             this.skipWavePressed = true;
-            console.log(`INPUT_HANDLER: skipWavePressed flag SET to: ${this.skipWavePressed}`);
+            logger.debug(`INPUT_HANDLER: skipWavePressed flag SET to: ${this.skipWavePressed}`);
         }
         
         if (event.key === '3' || event.key === 'Numpad3') {
             this.restartLevelPressed = true;
-            console.log(`INPUT_HANDLER: restartLevelPressed flag SET to: ${this.restartLevelPressed}`);
+            logger.debug(`INPUT_HANDLER: restartLevelPressed flag SET to: ${this.restartLevelPressed}`);
+        }
+        
+        if (event.key === '4' || event.key === 'Numpad4') {
+            this.cycleLevelPressed = true;
+            logger.debug(`INPUT_HANDLER: cycleLevelPressed flag SET to: ${this.cycleLevelPressed}`);
         }
 
         // Prevent default browser actions for game keys to stop the window from scrolling
@@ -84,6 +91,10 @@ class InputHandler {
         
         if (event.key === '3' || event.key === 'Numpad3') {
             this.restartLevelPressed = false;
+        }
+        
+        if (event.key === '4' || event.key === 'Numpad4') {
+            this.cycleLevelPressed = false;
         }
     }
 

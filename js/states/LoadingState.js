@@ -1,3 +1,5 @@
+import { logger } from '../utils/logger.js';
+
 export class LoadingState {
     constructor(game) {
         this.game = game;
@@ -9,7 +11,7 @@ export class LoadingState {
      * load all assets and then transition to the next state.
      */
     async enter() {
-        console.log("--- Running Final, Corrected LoadingState ---");
+        logger.info("--- Running Final, Corrected LoadingState ---");
         
         // Set up progress callback
         this.game.assets.setProgressCallback((progress) => {
@@ -64,10 +66,10 @@ export class LoadingState {
         
         try {
             await this.game.assets.loadAssets(allAssets);
-            console.log("SUCCESS: All assets loaded. Transitioning state...");
+            logger.info("SUCCESS: All assets loaded. Transitioning state...");
             this.game.changeState('introCutscene');
         } catch (error) {
-            console.error("CRITICAL ERROR in LoadingState:", error);
+            logger.error("CRITICAL ERROR in LoadingState:", error);
             // Even if loading fails, try to continue to the next state
             this.game.changeState('introCutscene');
         }

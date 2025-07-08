@@ -4,6 +4,7 @@
  */
 import { Projectile } from './projectile.js';
 import { Missile } from './missile.js';
+import { logger } from '../utils/logger.js';
 
 export const movementPatterns = {
     // Enemy just moves based on its default velocity (usually straight down)
@@ -57,7 +58,7 @@ export const movementPatterns = {
         if (enemy.patternState === undefined) {
             enemy.patternState = { initialDx: 250 };
             enemy.velocityX = enemy.patternState.initialDx;
-            console.log('Swoop from left initialized:', enemy.x, enemy.y, enemy.velocityX, enemy.velocityY);
+            logger.debug(`Swoop from left initialized: ${enemy.x}, ${enemy.y}, ${enemy.velocityX}, ${enemy.velocityY}`);
         }
 
         // As the enemy moves down the first 300 pixels of the screen, gradually reduce its horizontal speed to 0.
@@ -80,7 +81,7 @@ export const movementPatterns = {
         if (enemy.patternState === undefined) {
             enemy.patternState = { initialDx: -250 };
             enemy.velocityX = enemy.patternState.initialDx;
-            console.log('Swoop from right initialized:', enemy.x, enemy.y, enemy.velocityX, enemy.velocityY);
+            logger.debug(`Swoop from right initialized: ${enemy.x}, ${enemy.y}, ${enemy.velocityX}, ${enemy.velocityY}`);
         }
 
         // As the enemy moves down the first 300 pixels of the screen, gradually reduce its horizontal speed to 0.

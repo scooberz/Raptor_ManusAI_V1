@@ -3,6 +3,7 @@
  * Factory for creating destructible environmental objects
  */
 import { DestructibleObject } from './destructibleObject.js';
+import { logger } from '../utils/logger.js';
 
 class EnvironmentFactory {
     constructor(game) {
@@ -17,7 +18,7 @@ class EnvironmentFactory {
     createEnvironmentObject(envInfo) {
         const { type, x, y } = envInfo;
 
-        console.log(`ENVIRONMENT FACTORY: Creating ${type} at (${x}, ${y})`);
+        logger.debug(`ENVIRONMENT FACTORY: Creating ${type} at (${x}, ${y})`);
 
         try {
             const envObject = new DestructibleObject(this.game, x, y, type);
@@ -29,10 +30,10 @@ class EnvironmentFactory {
                 this.game.state.level.logicalGrid.registerObject(envObject);
             }
             
-            console.log(`ENVIRONMENT FACTORY: Successfully created ${type}`);
+            logger.debug(`ENVIRONMENT FACTORY: Successfully created ${type}`);
             return envObject;
         } catch (error) {
-            console.error(`ENVIRONMENT FACTORY: Failed to create ${type}:`, error);
+            logger.error(`ENVIRONMENT FACTORY: Failed to create ${type}:`, error);
             return null;
         }
     }

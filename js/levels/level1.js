@@ -6,6 +6,7 @@ import { EnemyFactory } from '../entities/enemyFactory.js';
 import { EnvironmentFactory } from '../entities/environmentFactory.js';
 import { BackgroundManager } from '../environment/BackgroundManager.js';
 import { Tilemap } from '../environment/tilemap.js';
+import { logger } from '../utils/logger.js';
 
 class Level1 {
     constructor(game) {
@@ -37,7 +38,7 @@ class Level1 {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             this.levelData = await response.json();
-            console.log(`Successfully loaded level data: ${this.levelData.levelName}`);
+            logger.info(`Successfully loaded level data: ${this.levelData.levelName}`);
 
             // 1. Create scrolling background
             const bgImage = this.game.assets.getImage('backgroundLevel1');
@@ -68,7 +69,7 @@ class Level1 {
             this.game.audio.playMusic('gameMusic1');
 
         } catch (error) {
-            console.error("Failed to load level1.json:", error);
+            logger.error("Failed to load level1.json:", error);
             throw error;
         }
         return this; // Return the instance for chaining
@@ -100,7 +101,7 @@ class Level1 {
         if (this.bossDefeated && !this.transitioning) {
             this.transitioning = true;
             this.levelComplete = true;
-            console.log("Boss defeated! Transitioning to Hangar in 3 seconds...");
+            logger.info("Boss defeated! Transitioning to Hangar in 3 seconds...");
             setTimeout(() => {
                 this.game.changeState('hangar');
             }, 3000);
@@ -163,13 +164,13 @@ class Level1 {
             this.waveIndex++;
             this.waveStartTime = this.levelTime;
             const nextWaveName = this.levelData.waves[this.waveIndex].name || `Wave ${this.waveIndex + 1}`;
-            console.log(`Starting ${nextWaveName}`);
+            logger.info(`Starting ${nextWaveName}`);
         }
     }
 
     forceNextWave() {
         if (!this.levelData) return;
-        console.log("DEBUG: Forcing next wave.");
+        logger.debug("DEBUG: Forcing next wave.");
         const enemies = this.game.collision.collisionGroups.enemies;
         enemies.forEach(enemy => {
             if (enemy.active) {
@@ -183,7 +184,7 @@ class Level1 {
         if (this.bossSpawned) return;
         this.showBossWarning = true;
         this.bossWarningTimer = 0;
-        console.log("BOSS APPROACHING!");
+        logger.info("BOSS APPROACHING!");
     }
 
     spawnBoss() {
@@ -228,7 +229,7 @@ class Level1 {
      * Cleanup the level when exiting
      */
     cleanup() {
-        console.log('Cleaning up Level1');
+        logger.info('Cleaning up Level1');
         this.levelData = null;
         this.background = null;
         this.logicalGrid = null;

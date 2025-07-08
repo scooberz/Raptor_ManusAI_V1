@@ -1,6 +1,7 @@
 import { Entity } from '../engine/entity.js';
 import { Explosion } from './explosion.js';
 import { Collectible } from './collectible.js';
+import { logger } from '../utils/logger.js';
 
 class Enemy extends Entity {
     constructor(game, x, y, type, spriteKey, health, scoreValue, collisionDamage) {
@@ -25,7 +26,7 @@ class Enemy extends Entity {
         if (this.sprite) {
             this.isReady = true;
         } else {
-            console.error(`Failed to load sprite with key "${spriteKey}" for enemy type "${this.type}".`);
+            logger.error(`Failed to load sprite with key "${spriteKey}" for enemy type "${this.type}".`);
             this.isReady = false;
         }
 
