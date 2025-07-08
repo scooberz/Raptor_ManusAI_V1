@@ -16,7 +16,7 @@ export class BackgroundManager {
 
         // Set initial positions for the two scrolling images
         this.y1 = 0;
-        this.y2 = -this.image.height;
+        this.y2 = -(this.image ? this.image.height : this.game.height);
     }
 
     update(deltaTime) {
@@ -27,11 +27,12 @@ export class BackgroundManager {
 
         // If an image has scrolled completely off the bottom of the screen,
         // wrap it back to the top.
+        const imageHeight = this.image ? this.image.height : this.game.height;
         if (this.y1 >= this.game.height) {
-            this.y1 = this.y2 - this.image.height;
+            this.y1 = this.y2 - imageHeight;
         }
         if (this.y2 >= this.game.height) {
-            this.y2 = this.y1 - this.image.height;
+            this.y2 = this.y1 - imageHeight;
         }
     }
 
@@ -43,9 +44,12 @@ export class BackgroundManager {
         // Clear the off-screen buffer
         this.bufferCtx.clearRect(0, 0, this.game.width, this.game.height);
 
-        // Draw the two background images onto the buffer
-        this.bufferCtx.drawImage(this.image, 0, this.y1);
-        this.bufferCtx.drawImage(this.image, 0, this.y2);
+        // Only draw images if we have a valid image
+        if (this.image) {
+            // Draw the two background images onto the buffer
+            this.bufferCtx.drawImage(this.image, 0, this.y1);
+            this.bufferCtx.drawImage(this.image, 0, this.y2);
+        }
 
         // Now, draw the entire buffer canvas to the main visible canvas in one go
         mainContext.drawImage(this.bufferCanvas, 0, 0);
@@ -56,6 +60,6 @@ export class BackgroundManager {
      */
     reset() {
         this.y1 = 0;
-        this.y2 = -this.image.height;
+        this.y2 = -(this.image ? this.image.height : this.game.height);
     }
 } 
