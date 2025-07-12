@@ -23,6 +23,7 @@ import { HangarState } from '../states/hangar.js';
 import { SupplyState } from '../states/supply.js';
 import ShopState from '../states/shop.js';
 import { CharacterSelectState } from '../states/characterSelect.js';
+import { EditorState } from '../states/EditorState.js';
 import { logger } from '../utils/logger.js';
 
 class Game {
@@ -89,7 +90,8 @@ class Game {
             hangar: new HangarState(this),
             supply: new SupplyState(this),
             shop: new ShopState(this),
-            characterSelect: new CharacterSelectState(this)
+            characterSelect: new CharacterSelectState(this),
+            editor: new EditorState(this)
         };
         this.currentState = null;
 

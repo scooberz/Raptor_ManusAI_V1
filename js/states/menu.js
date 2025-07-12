@@ -10,6 +10,7 @@ class MenuState {
         this.menuOptions = [
             { text: 'Start New Game', action: () => this.startNewGame() },
             { text: 'Load Game', action: () => this.loadGame() },
+            { text: 'Raptor Forge', action: () => this.openEditor() },
             { text: 'Readme', action: () => this.showReadme() },
             { text: 'Options', action: () => this.showOptionsMenu() }, // <-- Added Options button
             { text: 'Credits', action: () => this.showCredits() }
@@ -180,6 +181,14 @@ class MenuState {
         logger.info('Loading saved game');
         // TODO: Implement save/load functionality
         this.showLoadGameScreen();
+    }
+    
+    /**
+     * Open the Raptor Forge level editor
+     */
+    openEditor() {
+        console.log('Opening Raptor Forge level editor');
+        this.game.changeState('editor');
     }
     
     /**

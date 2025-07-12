@@ -1,26 +1,17 @@
 import { jest } from '@jest/globals';
 
+/**
+ * @deprecated Use createMockGame from game-test-helpers.js instead
+ * This file is kept for backward compatibility
+ */
+
+import { createMockGame as createMockGameHelper } from './game-test-helpers.js';
+
+/**
+ * Creates a mock game object for use in Jest tests.
+ * This provides a consistent base with all necessary mocked
+ * properties and methods that other classes might depend on.
+ */
 export function createMockGame() {
-  return {
-    entityManager: {
-      add: jest.fn(),
-      getEnemies: jest.fn(() => []),
-    },
-    collision: {
-      addToGroup: jest.fn(),
-      check: jest.fn(() => ({ collisions: [] })),
-    },
-    assets: {
-      get: jest.fn((asset) => {
-        if (asset.endsWith('json')) return {};
-        return { width: 10, height: 10 };
-      }),
-    },
-    input: {
-      isDown: jest.fn(() => false),
-    },
-    width: 800,
-    height: 600,
-    // Add any other game properties or methods that Player might need
-  };
+  return createMockGameHelper();
 }
