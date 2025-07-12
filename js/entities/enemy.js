@@ -42,6 +42,7 @@ class Enemy extends Entity {
         this.hitTime = 0;
         this.hitDuration = 100; // ms
         this.hit = false;
+        this.hasEnteredPlayableArea = false;
     }
 
     /**
@@ -119,16 +120,49 @@ class Enemy extends Entity {
         }
 
         // 5. Remove the enemy if it goes too far off-screen (bottom or sides of the screen)
+        let bounds = { left: 0, top: 0, right: this.game.width, bottom: this.game.height };
+        if (this.game.currentState && typeof this.game.currentState.getPlayableBounds === 'function') {
+            bounds = this.game.currentState.getPlayableBounds();
+        }
+        // Mark as entered if any part is inside the playable area
         if (
-            this.y > this.game.height + this.height ||
-            this.x < -this.width ||
-            this.x > this.game.width + this.width
+            this.x + this.width > bounds.left &&
+            this.x < bounds.right &&
+            this.y + this.height > bounds.top &&
+            this.y < bounds.bottom
+        ) {
+            this.hasEnteredPlayableArea = true;
+        }
+        // Despawn only if it has entered and is now fully outside
+        if (
+            this.hasEnteredPlayableArea &&
+            (this.x + this.width < bounds.left ||
+             this.x > bounds.right ||
+             this.y + this.height < bounds.top ||
+             this.y > bounds.bottom)
         ) {
             this.destroy();
+            return;
         }
-
         // 6. Call the base Entity's update method to apply physics (dx, dy).
         super.update(deltaTime);
+    }
+
+    render(context) {
+        let bounds = { left: 0, top: 0, right: this.game.width, bottom: this.game.height };
+        if (this.game.currentState && typeof this.game.currentState.getPlayableBounds === 'function') {
+            bounds = this.game.currentState.getPlayableBounds();
+        }
+        // Only render if at least partially inside the playable area
+        if (
+            this.x + this.width < bounds.left ||
+            this.x > bounds.right ||
+            this.y + this.height < bounds.top ||
+            this.y > bounds.bottom
+        ) {
+            return;
+        }
+        super.render(context);
     }
 
     /**

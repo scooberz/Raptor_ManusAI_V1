@@ -196,25 +196,55 @@ class Level1 {
         }
     }
 
+    // --- CONSTANTS FOR PLAYABLE AREA ---
+    static PLAYABLE_WIDTH = 960;
+    static PLAYABLE_HEIGHT = 720;
+
+    getPlayableOffset() {
+        // Center the playable area in the window
+        const offsetX = (this.game.width - Level1.PLAYABLE_WIDTH) / 2;
+        const offsetY = (this.game.height - Level1.PLAYABLE_HEIGHT) / 2;
+        return { offsetX, offsetY };
+    }
+
+    getPlayableBounds() {
+        const { offsetX, offsetY } = this.getPlayableOffset();
+        return {
+            left: offsetX,
+            top: offsetY,
+            right: offsetX + Level1.PLAYABLE_WIDTH,
+            bottom: offsetY + Level1.PLAYABLE_HEIGHT
+        };
+    }
+
     render(contexts) {
-        this.background.render(contexts.background);
+        const { offsetX, offsetY } = this.getPlayableOffset();
+        // Render the scrolling background centered
+        this.background.render(contexts.background, offsetX, offsetY, Level1.PLAYABLE_WIDTH, Level1.PLAYABLE_HEIGHT);
+        // Draw a border around the gameplay area
+        const ctx = contexts.background;
+        ctx.save();
+        ctx.lineWidth = 6;
+        ctx.strokeStyle = '#ffcc00';
+        ctx.strokeRect(offsetX, offsetY, Level1.PLAYABLE_WIDTH, Level1.PLAYABLE_HEIGHT);
+        ctx.restore();
         if (this.showBossWarning) {
-            const ctx = contexts.ui;
-            ctx.save();
-            ctx.font = 'bold 48px Arial';
-            ctx.fillStyle = 'yellow';
-            ctx.textAlign = 'center';
-            ctx.fillText('BOSS APPROACHING', this.game.width / 2, 180);
+            const ctxUI = contexts.ui;
+            ctxUI.save();
+            ctxUI.font = 'bold 48px Arial';
+            ctxUI.fillStyle = 'yellow';
+            ctxUI.textAlign = 'center';
+            ctxUI.fillText('BOSS APPROACHING', this.game.width / 2, offsetY + 180);
             const barWidth = 400; const barHeight = 20;
-            const barX = (this.game.width - barWidth) / 2; const barY = 40;
-            ctx.fillStyle = 'rgba(0,0,0,0.7)';
-            ctx.fillRect(barX, barY, barWidth, barHeight);
-            ctx.fillStyle = 'red';
-            ctx.fillRect(barX, barY, barWidth * this.bossHealthBarFill, barHeight);
-            ctx.strokeStyle = 'white';
-            ctx.lineWidth = 2;
-            ctx.strokeRect(barX, barY, barWidth, barHeight);
-            ctx.restore();
+            const barX = (this.game.width - barWidth) / 2; const barY = offsetY + 40;
+            ctxUI.fillStyle = 'rgba(0,0,0,0.7)';
+            ctxUI.fillRect(barX, barY, barWidth, barHeight);
+            ctxUI.fillStyle = 'red';
+            ctxUI.fillRect(barX, barY, barWidth * this.bossHealthBarFill, barHeight);
+            ctxUI.strokeStyle = 'white';
+            ctxUI.lineWidth = 2;
+            ctxUI.strokeRect(barX, barY, barWidth, barHeight);
+            ctxUI.restore();
         }
     }
     /**
@@ -245,6 +275,15 @@ class Level1 {
         this.bossWarningTimer = 0;
         this.bossHealthBarFill = 0;
         this.transitioning = false;
+    }
+
+    resize() {
+        if (this.background && typeof this.background.resize === 'function') {
+            this.background.resize();
+        }
+        if (this.logicalGrid && typeof this.logicalGrid.resize === 'function') {
+            this.logicalGrid.resize();
+        }
     }
 }
 

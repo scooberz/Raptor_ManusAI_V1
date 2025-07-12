@@ -38,17 +38,22 @@ export class BackgroundManager {
     /**
      * Draws the scrolling images to the off-screen buffer first,
      * then draws the buffer to the main visible canvas.
+     * @param {CanvasRenderingContext2D} mainContext
+     * @param {number} [x=0] - X offset to draw the background
+     * @param {number} [y=0] - Y offset to draw the background
+     * @param {number} [width=this.game.width] - Width of the background
+     * @param {number} [height=this.game.height] - Height of the background
      */
-    render(mainContext) {
+    render(mainContext, x = 0, y = 0, width = this.game.width, height = this.game.height) {
         // Clear the off-screen buffer
         this.bufferCtx.clearRect(0, 0, this.game.width, this.game.height);
 
         // Draw the two background images onto the buffer
-        this.bufferCtx.drawImage(this.image, 0, this.y1);
-        this.bufferCtx.drawImage(this.image, 0, this.y2);
+        this.bufferCtx.drawImage(this.image, 0, this.y1, this.game.width, this.image.height);
+        this.bufferCtx.drawImage(this.image, 0, this.y2, this.game.width, this.image.height);
 
-        // Now, draw the entire buffer canvas to the main visible canvas in one go
-        mainContext.drawImage(this.bufferCanvas, 0, 0);
+        // Now, draw the buffer canvas to the main visible canvas at the specified position and size
+        mainContext.drawImage(this.bufferCanvas, x, y, width, height);
     }
 
     /**
@@ -57,5 +62,10 @@ export class BackgroundManager {
     reset() {
         this.y1 = 0;
         this.y2 = -this.image.height;
+    }
+
+    resize() {
+        this.bufferCanvas.width = this.game.width;
+        this.bufferCanvas.height = this.game.height;
     }
 } 

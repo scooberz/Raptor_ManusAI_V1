@@ -30,7 +30,7 @@ class Game {
         // --- TIMING & FPS LOCK ---
         this.lastTime = 0;
         this.accumulator = 0;
-        this.timeStep = 1000 / 60; // This locks our logic to 60 FPS
+        this.timeStep = 1000 / 60;
         this.currentFPS = 0;
         this.debugMode = false; // Enable debug logging for the game loop
 
@@ -52,7 +52,7 @@ class Game {
         for (const key in this.layers) {
             const canvas = this.layers[key];
             const ctx = canvas.getContext('2d', { alpha: true });
-            
+
             ctx.globalCompositeOperation = 'source-over';
             ctx.imageSmoothingEnabled = true;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -70,7 +70,7 @@ class Game {
         this.assets = new AssetManager(this);
         // --- NEW: The AudioManager is now initialized with assets ---
         this.audio = new AudioManager(this.assets);
-        
+
         this.collision = new CollisionSystem(this);
         this.entityManager = new EntityManager(this);
         this.saveManager = new SaveManager(this);
@@ -97,7 +97,7 @@ class Game {
         (async () => {
             await this.changeState('boot');
         })();
-        
+
         // Start the main game loop
         requestAnimationFrame(this.gameLoop);
     }
@@ -108,44 +108,21 @@ class Game {
     resize() {
         const windowWidth = window.innerWidth;
         const windowHeight = window.innerHeight;
-        const minWidth = 800;
-        const minHeight = 600;
-        const targetAspectRatio = 16 / 9;
-        let gameWidth, gameHeight;
+        this.width = windowWidth;
+        this.height = windowHeight;
 
-        if (windowWidth / windowHeight > targetAspectRatio) {
-            gameHeight = Math.max(minHeight, windowHeight);
-            gameWidth = gameHeight * targetAspectRatio;
-        } else {
-            gameWidth = Math.max(minWidth, windowWidth);
-            gameHeight = gameWidth / targetAspectRatio;
-        }
-        
-        this.width = gameWidth;
-        this.height = gameHeight;
-        
-        const scaleX = windowWidth / gameWidth;
-        const scaleY = windowHeight / gameHeight;
-        const scale = Math.min(scaleX, scaleY);
-        
         for (const key in this.layers) {
             const canvas = this.layers[key];
-            canvas.width = gameWidth;
-            canvas.height = gameHeight;
-            
-            const scaledWidth = gameWidth * scale;
-            const scaledHeight = gameHeight * scale;
-            
-            canvas.style.width = `${scaledWidth}px`;
-            canvas.style.height = `${scaledHeight}px`;
+            canvas.width = windowWidth;
+            canvas.height = windowHeight;
+            canvas.style.width = windowWidth + 'px';
+            canvas.style.height = windowHeight + 'px';
             canvas.style.position = 'absolute';
-            canvas.style.left = `${(windowWidth - scaledWidth) / 2}px`;
-            canvas.style.top = `${(windowHeight - scaledHeight) / 2}px`;
-            
-            const ctx = this.contexts[key];
-            ctx.imageSmoothingEnabled = false;
+            canvas.style.left = '0';
+            canvas.style.top = '0';
+            canvas.style.transform = '';
         }
-        
+
         if (this.currentState && typeof this.currentState.resize === 'function') {
             this.currentState.resize();
         }
@@ -250,7 +227,7 @@ class Game {
      */
     async changeState(stateName) {
         logger.info(`Changing state from ${this.currentState ? this.currentState.constructor.name : 'null'} to ${stateName}`);
-        
+
         if (this.currentState && typeof this.currentState.exit === 'function') {
             logger.info(`Exiting current state: ${this.currentState.constructor.name}`);
             this.currentState.exit();

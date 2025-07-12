@@ -10,7 +10,7 @@ class ProceduralEnvironment {
         this.width = Math.random() * 100 + 50; // Increased width range: 50-150
         this.height = Math.random() * 120 + 60; // Increased height range: 60-180
         this.speed = speed;
-        
+
         // Layer determines color and speed, creating parallax
         if (layer === 'far') {
             // Darker, slower rocks in the distance
@@ -61,7 +61,7 @@ class ScrollingBackground {
         this.nearLayerObjects = [];  // Faster, lighter objects
         this.backgrounds = [];       // Original background images
         this.backgroundHeight = 0;
-        
+
         // Initialize the background elements
         this.init();
     }
@@ -74,7 +74,7 @@ class ScrollingBackground {
         const backgroundImage = this.game.assets.getImage('backgroundLevel1');
         if (backgroundImage) {
             this.backgroundHeight = backgroundImage.height;
-            
+
             // Create two background instances for seamless scrolling
             const bg1 = new Environment(
                 this.game,
@@ -84,7 +84,7 @@ class ScrollingBackground {
                 backgroundImage.height,
                 'background1'
             );
-            
+
             const bg2 = new Environment(
                 this.game,
                 0,
@@ -93,7 +93,7 @@ class ScrollingBackground {
                 backgroundImage.height,
                 'background1'
             );
-            
+
             this.backgrounds.push(bg1, bg2);
         }
 
@@ -105,7 +105,7 @@ class ScrollingBackground {
                 new ProceduralEnvironment(this.game, Math.random() * this.game.height, this.speed, 'far')
             );
         }
-        
+
         // Create objects for the "near" layer (foreground)
         for (let i = 0; i < objectCount; i++) {
             this.nearLayerObjects.push(
@@ -136,7 +136,7 @@ class ScrollingBackground {
         // Update original backgrounds
         this.backgrounds.forEach(bg => {
             bg.y += this.speed * (deltaTime / 1000);
-            
+
             // Reset position when off screen for seamless scrolling
             if (bg.y >= this.game.height) {
                 bg.y = -this.backgroundHeight + (bg.y - this.game.height);
@@ -153,28 +153,32 @@ class ScrollingBackground {
      * @param {CanvasRenderingContext2D} context - The canvas context to render to
      */
     render(context) {
-        // Get the background context from the game
         const bgContext = this.game.contexts.background;
-        
-        // Clear the background canvas
         bgContext.clearRect(0, 0, this.game.width, this.game.height);
 
-        // Render original background first
-        this.backgrounds.forEach(bg => {
-            bg.render(bgContext);
-        });
+        // --- START OF THE FIX ---
+        // This new logic ensures the main background image always stretches
+        // to the full width of the game screen, removing black bars.
+        const backgroundImage = this.game.assets.getImage('background1');
+        if (backgroundImage) {
+            this.backgrounds.forEach(bg => {
+                // We manually draw the image here instead of calling bg.render().
+                // This lets us force the width to match the current game width.
+                bgContext.drawImage(
+                    backgroundImage,
+                    bg.x,            // The original horizontal position (usually 0)
+                    bg.y,            // The calculated vertical position for scrolling
+                    this.game.width, // Force the draw width to fill the screen
+                    bg.height        // Keep the original height for the image
+                );
+            });
+        }
+        // --- END OF THE FIX ---
 
-        // Render the far layer on top
+        // Render the procedural layers on top
         this.farLayerObjects.forEach(obj => obj.render(bgContext));
-        
-        // Render the near layer last
         this.nearLayerObjects.forEach(obj => obj.render(bgContext));
     }
-
-    stop() {
-        this.isScrolling = false;
-    }
-
     /**
      * Update the scroll speed and keep global reference in sync
      * @param {number} newSpeed - The new scroll speed

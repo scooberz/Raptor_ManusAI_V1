@@ -11,6 +11,7 @@ class MenuState {
             { text: 'Start New Game', action: () => this.startNewGame() },
             { text: 'Load Game', action: () => this.loadGame() },
             { text: 'Readme', action: () => this.showReadme() },
+            { text: 'Options', action: () => this.showOptionsMenu() }, // <-- Added Options button
             { text: 'Credits', action: () => this.showCredits() }
         ];
         this.selectedOption = 0;
@@ -604,6 +605,144 @@ class MenuState {
         
         // Stop menu music
         // this.game.audio.stopMusic(); // Commented out - no audio assets defined yet
+    }
+
+    // Add this method at the end of the class, before the closing }
+    showOptionsMenu() {
+        const menuScreen = document.getElementById('menu-screen');
+        menuScreen.innerHTML = '';
+
+        // Create overlay container
+        const overlay = document.createElement('div');
+        overlay.style.position = 'absolute';
+        overlay.style.top = '0';
+        overlay.style.left = '0';
+        overlay.style.width = '100%';
+        overlay.style.height = '100%';
+        overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+        overlay.style.display = 'flex';
+        overlay.style.flexDirection = 'column';
+        overlay.style.alignItems = 'center';
+        overlay.style.justifyContent = 'center';
+        overlay.style.zIndex = '10';
+
+        // Title
+        const title = document.createElement('h2');
+        title.textContent = 'Select Resolution';
+        title.style.color = '#ffcc00';
+        title.style.marginBottom = '30px';
+        overlay.appendChild(title);
+
+        // Resolution options
+        const resolutions = [
+            { label: '960 x 540', width: 960, height: 540 },
+            { label: '1280 x 720', width: 1280, height: 720 },
+            { label: '1440 x 810', width: 1440, height: 810 }
+        ];
+        const currentWidth = this.game.width;
+        const currentHeight = this.game.height;
+        resolutions.forEach(res => {
+            const btn = document.createElement('button');
+            btn.textContent = res.label;
+            btn.style.margin = '10px';
+            btn.style.padding = '16px 40px';
+            btn.style.fontSize = '22px';
+            btn.style.backgroundColor = '#222';
+            btn.style.color = '#ffcc00';
+            btn.style.border = '2px solid #ffcc00';
+            btn.style.borderRadius = '8px';
+            btn.style.cursor = 'pointer';
+            btn.style.transition = 'background 0.2s, color 0.2s';
+            // Highlight the currently selected resolution
+            if (res.width === currentWidth && res.height === currentHeight) {
+                btn.style.backgroundColor = '#ffcc00';
+                btn.style.color = '#222';
+                btn.style.fontWeight = 'bold';
+                btn.style.boxShadow = '0 0 12px #ffcc00';
+            }
+            btn.addEventListener('mouseover', () => {
+                btn.style.backgroundColor = '#ffcc00';
+                btn.style.color = '#222';
+            });
+            btn.addEventListener('mouseout', () => {
+                if (res.width === this.game.width && res.height === this.game.height) {
+                    btn.style.backgroundColor = '#ffcc00';
+                    btn.style.color = '#222';
+                } else {
+                    btn.style.backgroundColor = '#222';
+                    btn.style.color = '#ffcc00';
+                }
+            });
+            btn.addEventListener('click', () => {
+                this.setGameResolution(res.width, res.height);
+                this.showOptionsMenu(); // Stay on options menu and update highlight
+            });
+            overlay.appendChild(btn);
+        });
+
+        // Back button
+        const backBtn = document.createElement('button');
+        backBtn.textContent = 'Back';
+        backBtn.style.marginTop = '40px';
+        backBtn.style.padding = '12px 32px';
+        backBtn.style.fontSize = '18px';
+        backBtn.style.backgroundColor = '#333';
+        backBtn.style.color = 'white';
+        backBtn.style.border = '1px solid #ffcc00';
+        backBtn.style.borderRadius = '6px';
+        backBtn.style.cursor = 'pointer';
+        backBtn.addEventListener('click', () => {
+            this.setupMenuScreen();
+        });
+        overlay.appendChild(backBtn);
+
+        // Pop Out button
+        const popOutBtn = document.createElement('button');
+        popOutBtn.textContent = 'Pop Out';
+        popOutBtn.style.marginTop = '20px';
+        popOutBtn.style.padding = '12px 32px';
+        popOutBtn.style.fontSize = '18px';
+        popOutBtn.style.backgroundColor = '#222';
+        popOutBtn.style.color = '#ffcc00';
+        popOutBtn.style.border = '2px solid #ffcc00';
+        popOutBtn.style.borderRadius = '6px';
+        popOutBtn.style.cursor = 'pointer';
+        popOutBtn.addEventListener('click', () => {
+            const width = this.game.width;
+            const height = this.game.height;
+            const features = `width=${width},height=${height},resizable=no,scrollbars=no,status=no,toolbar=no,menubar=no,location=no`;
+            const popup = window.open(window.location.pathname, 'RaptorGamePopup', features);
+            if (!popup || popup.closed || typeof popup.closed === 'undefined') {
+                alert('Popup was blocked! Please allow popups for this site.');
+            }
+        });
+        overlay.appendChild(popOutBtn);
+
+        menuScreen.appendChild(overlay);
+    }
+
+    setGameResolution(width, height) {
+        this.game.width = width;
+        this.game.height = height;
+        for (const key in this.game.layers) {
+            const canvas = this.game.layers[key];
+            canvas.width = width;
+            canvas.height = height;
+            canvas.style.width = width + 'px';
+            canvas.style.height = height + 'px';
+        }
+        // Re-center canvases
+        for (const key in this.game.layers) {
+            const canvas = this.game.layers[key];
+            canvas.style.position = 'absolute';
+            canvas.style.left = '50%';
+            canvas.style.top = '50%';
+            canvas.style.transform = 'translate(-50%, -50%)';
+        }
+        // Redraw current state if needed
+        if (this.game.currentState && typeof this.game.currentState.resize === 'function') {
+            this.game.currentState.resize();
+        }
     }
 }
 

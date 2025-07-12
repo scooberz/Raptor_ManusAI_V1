@@ -26,42 +26,69 @@ class EnemyFactory {
         // Diagnostic log before switch
         logger.debug(`FACTORY INPUT: Received request to create type: "${type}"`);
 
+        // --- Ensure enemy spawns outside the playable area ---
+        let bounds = { left: 0, top: 0, right: this.game.width, bottom: this.game.height };
+        if (level && typeof level.getPlayableBounds === 'function') {
+            bounds = level.getPlayableBounds();
+        }
+        let spawnX = spawn_x;
+        let spawnY = spawn_y;
+        // Determine intended entry direction from movementPattern or type
+        const pattern = overrides.movementPattern || type;
+        if (pattern && (pattern.includes('left') || pattern === 'swoop_from_left')) {
+            // Entering from left
+            spawnX = bounds.left - (Enemy.stats[type]?.width || 48);
+            spawnY = spawn_y;
+        } else if (pattern && (pattern.includes('right') || pattern === 'swoop_from_right')) {
+            // Entering from right
+            spawnX = bounds.right;
+            spawnY = spawn_y;
+        } else if (pattern && pattern.includes('bottom')) {
+            // Entering from bottom
+            spawnX = spawn_x;
+            spawnY = bounds.bottom;
+        } else {
+            // Default: entering from top
+            spawnX = spawn_x;
+            spawnY = bounds.top - (Enemy.stats[type]?.height || 48);
+        }
+
         switch (type) {
             case 'fighter':
-                enemy = new Enemy(this.game, spawn_x, spawn_y, 'fighter', 'enemyFighter', overrides.health, overrides.scoreValue);
+                enemy = new Enemy(this.game, spawnX, spawnY, 'fighter', 'enemyFighter', overrides.health, overrides.scoreValue);
                 break;
 
             case 'turret':
-                enemy = new Enemy(this.game, spawn_x, spawn_y, 'turret', 'enemyTurret', overrides.health, overrides.scoreValue);
+                enemy = new Enemy(this.game, spawnX, spawnY, 'turret', 'enemyTurret', overrides.health, overrides.scoreValue);
                 break;
 
             case 'bomber':
-                enemy = new Enemy(this.game, spawn_x, spawn_y, 'bomber', 'enemyBomber', overrides.health, overrides.scoreValue);
+                enemy = new Enemy(this.game, spawnX, spawnY, 'bomber', 'enemyBomber', overrides.health, overrides.scoreValue);
                 break;
 
             case 'boss1':
                 // We create the Boss1 instance. Its stats will be applied by the "Overrides" section.
-                enemy = new Boss1(this.game, spawn_x, spawn_y, 'bossLevel1');
+                enemy = new Boss1(this.game, spawnX, spawnY, 'bossLevel1');
                 break;
 
             case 'striker':
-                enemy = new Enemy(this.game, spawn_x, spawn_y, 'striker', 'enemyStriker', overrides.health, overrides.scoreValue);
+                enemy = new Enemy(this.game, spawnX, spawnY, 'striker', 'enemyStriker', overrides.health, overrides.scoreValue);
                 break;
 
             case 'cyclone':
-                enemy = new Enemy(this.game, spawn_x, spawn_y, 'cyclone', 'enemyCyclone', overrides.health, overrides.scoreValue);
+                enemy = new Enemy(this.game, spawnX, spawnY, 'cyclone', 'enemyCyclone', overrides.health, overrides.scoreValue);
                 break;
 
             case 'gnat':
-                enemy = new Enemy(this.game, spawn_x, spawn_y, 'gnat', 'enemyGnat', overrides.health, overrides.scoreValue);
+                enemy = new Enemy(this.game, spawnX, spawnY, 'gnat', 'enemyGnat', overrides.health, overrides.scoreValue);
                 break;
 
             case 'reaper':
-                enemy = new Enemy(this.game, spawn_x, spawn_y, 'reaper', 'enemyReaper', overrides.health, overrides.scoreValue);
+                enemy = new Enemy(this.game, spawnX, spawnY, 'reaper', 'enemyReaper', overrides.health, overrides.scoreValue);
                 break;
 
             case 'dart':
-                enemy = new Enemy(this.game, spawn_x, spawn_y, 'dart', 'enemyDart', overrides.health, overrides.scoreValue);
+                enemy = new Enemy(this.game, spawnX, spawnY, 'dart', 'enemyDart', overrides.health, overrides.scoreValue);
                 
                 // Set default swooping behavior for all dart enemies
                 if (!overrides.movementPattern) {
@@ -74,27 +101,27 @@ class EnemyFactory {
                 break;
 
             case 'goliath':
-                enemy = new Enemy(this.game, spawn_x, spawn_y, 'goliath', 'enemyGoliath', overrides.health, overrides.scoreValue);
+                enemy = new Enemy(this.game, spawnX, spawnY, 'goliath', 'enemyGoliath', overrides.health, overrides.scoreValue);
                 break;
 
             case 'cutter':
-                enemy = new Enemy(this.game, spawn_x, spawn_y, 'cutter', 'enemyCutter', overrides.health, overrides.scoreValue);
+                enemy = new Enemy(this.game, spawnX, spawnY, 'cutter', 'enemyCutter', overrides.health, overrides.scoreValue);
                 break;
 
             case 'mine':
-                enemy = new Enemy(this.game, spawn_x, spawn_y, 'mine', 'enemyMine', overrides.health, overrides.scoreValue);
+                enemy = new Enemy(this.game, spawnX, spawnY, 'mine', 'enemyMine', overrides.health, overrides.scoreValue);
                 break;
 
             case 'FUEL_TANK':
-                enemy = new DestructibleObject(this.game, spawn_x, spawn_y, 'FUEL_TANK', 'fuelTank');
+                enemy = new DestructibleObject(this.game, spawnX, spawnY, 'FUEL_TANK', 'fuelTank');
                 break;
 
             case 'BUNKER':
-                enemy = new DestructibleObject(this.game, spawn_x, spawn_y, 'BUNKER', 'bunker');
+                enemy = new DestructibleObject(this.game, spawnX, spawnY, 'BUNKER', 'bunker');
                 break;
 
             case 'RADAR_DISH':
-                enemy = new DestructibleObject(this.game, spawn_x, spawn_y, 'RADAR_DISH', 'radarDish');
+                enemy = new DestructibleObject(this.game, spawnX, spawnY, 'RADAR_DISH', 'radarDish');
                 break;
 
             default:

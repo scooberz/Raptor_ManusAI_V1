@@ -178,10 +178,14 @@ class Player extends Entity {
         }
 
         // Keep player within game boundaries
-        if (this.x < 0) this.x = 0;
-        if (this.x + this.width > this.game.width) this.x = this.game.width - this.width;
-        if (this.y < 0) this.y = 0;
-        if (this.y + this.height > this.game.height) this.y = this.game.height - this.height;
+        let bounds = { left: 0, top: 0, right: this.game.width, bottom: this.game.height };
+        if (this.game.currentState && typeof this.game.currentState.getPlayableBounds === 'function') {
+            bounds = this.game.currentState.getPlayableBounds();
+        }
+        if (this.x < bounds.left) this.x = bounds.left;
+        if (this.x + this.width > bounds.right) this.x = bounds.right - this.width;
+        if (this.y < bounds.top) this.y = bounds.top;
+        if (this.y + this.height > bounds.bottom) this.y = bounds.bottom - this.height;
     }
 
     /**
