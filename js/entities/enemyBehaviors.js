@@ -5,6 +5,44 @@
 import { Projectile } from './projectile.js';
 import { Missile } from './missile.js';
 import { logger } from '../utils/logger.js';
+function getPlayableBounds(enemy) {
+    if (enemy.level && typeof enemy.level.getPlayableBounds === 'function') {
+        return enemy.level.getPlayableBounds();
+    }
+    if (enemy.game.currentState && typeof enemy.game.currentState.getPlayableBounds === 'function') {
+        return enemy.game.currentState.getPlayableBounds();
+    }
+    return { left: 0, top: 0, right: enemy.game.width, bottom: enemy.game.height };
+}
+
+function getPlayableWidth(enemy) {
+    const bounds = getPlayableBounds(enemy);
+    return bounds.right - bounds.left;
+}
+
+function getPlayableHeight(enemy) {
+    const bounds = getPlayableBounds(enemy);
+    return bounds.bottom - bounds.top;
+}
+
+function getPlayableCenterX(enemy) {
+    const bounds = getPlayableBounds(enemy);
+    return bounds.left + (getPlayableWidth(enemy) / 2);
+}
+
+function isTouchingLeftBounds(enemy) {
+    const bounds = getPlayableBounds(enemy);
+    return enemy.x <= bounds.left;
+}
+
+function isTouchingRightBounds(enemy) {
+    const bounds = getPlayableBounds(enemy);
+    return enemy.x + enemy.width >= bounds.right;
+}
+
+function isTouchingHorizontalBounds(enemy) {
+    return isTouchingLeftBounds(enemy) || isTouchingRightBounds(enemy);
+}
 
 export const movementPatterns = {
     // Enemy just moves based on its default velocity (usually straight down)
@@ -121,7 +159,7 @@ export const movementPatterns = {
 
             // Calculate horizontal movement (arc)
             const arcProgress = Math.sin(elapsedTime * (Math.PI / 2));
-            if (state.initialX < enemy.game.width / 2) { // Coming from left
+            if (state.initialX < getPlayableCenterX(enemy)) { // Coming from left
                 enemy.x = state.initialX + arcProgress * state.swoopArcDistance;
             } else { // Coming from right
                 enemy.x = state.initialX - arcProgress * state.swoopArcDistance;
@@ -200,7 +238,7 @@ export const movementPatterns = {
     sweep: function(enemy, deltaTime) {
         // Initialize pattern state on the enemy if it doesn't exist
         if (enemy.patternState === undefined) {
-            const direction = (enemy.x < enemy.game.width / 2) ? 1 : -1; // 1 for right, -1 for left
+            const direction = (enemy.x < getPlayableCenterX(enemy)) ? 1 : -1; // 1 for right, -1 for left
             enemy.patternState = {
                 direction: direction,
                 speedX: enemy.overrides.speedX || 75
@@ -210,7 +248,7 @@ export const movementPatterns = {
         }
 
         // Reverse horizontal direction if the enemy hits the screen edges
-        if (enemy.x <= 0 || enemy.x + enemy.width >= enemy.game.width) {
+        if (isTouchingHorizontalBounds(enemy)) {
             enemy.patternState.direction *= -1;
             enemy.velocityX = enemy.patternState.speedX * enemy.patternState.direction;
         }
@@ -225,7 +263,7 @@ export const movementPatterns = {
                 phase: 'entering', // Phases: entering, patrolling, exiting
                 patrol_y: enemy.overrides.patrol_y || 150,
                 patrol_duration: enemy.overrides.patrol_duration_ms || 8000,
-                direction: (enemy.x < enemy.game.width / 2) ? 1 : -1
+                direction: (enemy.x < getPlayableCenterX(enemy)) ? 1 : -1
             };
         }
 
@@ -249,7 +287,7 @@ export const movementPatterns = {
                 state.patrol_duration -= deltaTime;
 
                 // Reverse direction at screen edges
-                if (enemy.x <= 0 || enemy.x + enemy.width >= enemy.game.width) {
+                if (isTouchingHorizontalBounds(enemy)) {
                     state.direction *= -1;
                 }
 
@@ -341,7 +379,7 @@ export const movementPatterns = {
         if (state.phase === 'converging') {
             // Once converging, it maintains its downward speed but adds horizontal speed
             // towards the center of the screen.
-            const targetX = enemy.game.width / 2;
+            const targetX = getPlayableCenterX(enemy);
             const dx = targetX - enemy.x;
             const convergeSpeed = enemy.overrides.converge_speed || 40;
             
@@ -357,7 +395,7 @@ export const movementPatterns = {
             enemy.patternState = {
                 phase: 'descending', // Phases: descending, veering
                 veer_y_trigger: enemy.overrides.veer_y || 450, // 3/4 down a 600px screen
-                initial_direction: (enemy.x < enemy.game.width / 2) ? 1 : -1 // 1 for right, -1 for left
+                initial_direction: (enemy.x < getPlayableCenterX(enemy)) ? 1 : -1 // 1 for right, -1 for left
             };
             enemy.velocityY = enemy.speed || 250; // Descend quickly
             enemy.velocityX = 0;
@@ -406,7 +444,7 @@ export const movementPatterns = {
     move_diagonal: function(enemy, deltaTime) {
         if (!enemy.patternState) {
             enemy.patternState = { initialized: true };
-            const direction = (enemy.x < enemy.game.width / 2) ? 1 : -1; // Determine direction based on start side
+            const direction = (enemy.x < getPlayableCenterX(enemy)) ? 1 : -1; // Determine direction based on start side
             enemy.velocityX = (enemy.speed || 200) * direction;
             enemy.velocityY = (enemy.speed || 200) * 0.75; // Make it move down slightly slower than sideways
         }
@@ -475,9 +513,9 @@ export const movementPatterns = {
         enemy.velocityX = speedX * state.direction;
 
         // Reverse direction at screen edges
-        if (enemy.x <= 0 && state.direction === -1) {
+        if (isTouchingLeftBounds(enemy) && state.direction === -1) {
             state.direction = 1;
-        } else if (enemy.x + enemy.width >= enemy.game.width && state.direction === 1) {
+        } else if (isTouchingRightBounds(enemy) && state.direction === 1) {
             state.direction = -1;
         }
     },
@@ -487,7 +525,7 @@ export const movementPatterns = {
         if (!enemy.patternState) {
             enemy.patternState = {
                 phase: 'strafing', // Phases: strafing, descending
-                target_x: enemy.overrides.target_x || (enemy.game.width / 2)
+                target_x: enemy.overrides.target_x || (getPlayableCenterX(enemy))
             };
             enemy.velocityY = enemy.speed || 180;
         }
@@ -524,14 +562,14 @@ export const movementPatterns = {
 
         switch (state.phase) {
             case 'strafing_out':
-                if (enemy.x <= 0 || enemy.x + enemy.width >= enemy.game.width) {
+                if (isTouchingHorizontalBounds(enemy)) {
                     state.phase = 'strafing_in';
                     state.direction *= -1; // Reverse direction
                 }
                 break;
             case 'strafing_in':
                 // Check if it has returned to the center
-                if ((state.direction === 1 && enemy.x >= enemy.game.width / 2) || (state.direction === -1 && enemy.x <= enemy.game.width / 2)) {
+                if ((state.direction === 1 && enemy.x >= getPlayableCenterX(enemy)) || (state.direction === -1 && enemy.x <= getPlayableCenterX(enemy))) {
                     state.phase = 'descending';
                 }
                 break;
@@ -579,7 +617,7 @@ export const movementPatterns = {
         if (state.phase === 'descending' && enemy.y >= state.diverge_y_trigger) {
             state.phase = 'diverging';
             // Determine direction based on which side of the screen it's on
-            const direction = (enemy.x < enemy.game.width / 2) ? -1 : 1;
+            const direction = (enemy.x < getPlayableCenterX(enemy)) ? -1 : 1;
             enemy.velocityX = (enemy.speed || 90) * direction;
         }
     },
@@ -589,9 +627,9 @@ export const movementPatterns = {
         if (!enemy.patternState) {
             enemy.patternState = { initialized: true };
             // Target the opposite side of the screen at a lower point
-            const targetX = enemy.game.width - enemy.x; 
-            const targetY = enemy.game.height * 0.6;
-            
+            const bounds = getPlayableBounds(enemy);
+            const targetX = bounds.left + bounds.right - enemy.x;
+            const targetY = bounds.top + getPlayableHeight(enemy) * 0.6;
             const dx = targetX - enemy.x;
             const dy = targetY - enemy.y;
             const distance = Math.sqrt(dx * dx + dy * dy);
@@ -609,7 +647,7 @@ export const movementPatterns = {
             enemy.patternState = {
                 phase: 'entering', // entering, patrolling, repositioning
                 phaseTimer: 3000, // Time until next phase change
-                targetX: enemy.game.width / 2,
+                targetX: getPlayableCenterX(enemy),
                 targetY: 100
             };
         }
@@ -626,7 +664,7 @@ export const movementPatterns = {
                 state.phase = 'repositioning';
                 state.phaseTimer = 2000; // Time to move to new spot
                 // Pick a new spot in the upper-middle of the screen
-                state.targetX = (enemy.game.width / 2) + (Math.random() - 0.5) * 300;
+                state.targetX = (getPlayableCenterX(enemy)) + (Math.random() - 0.5) * 300;
                 state.targetY = 100 + Math.random() * 150;
             }
         }
@@ -651,9 +689,9 @@ export const movementPatterns = {
             enemy.patternState = {
                 // Define 3 patrol points in the upper half of the screen
                 waypoints: [
-                    { x: enemy.game.width * 0.2, y: 120 },
-                    { x: enemy.game.width * 0.8, y: 120 },
-                    { x: enemy.game.width * 0.5, y: 180 }
+                    { x: getPlayableBounds(enemy).left + getPlayableWidth(enemy) * 0.2, y: getPlayableBounds(enemy).top + 120 },
+                    { x: getPlayableBounds(enemy).left + getPlayableWidth(enemy) * 0.8, y: getPlayableBounds(enemy).top + 120 },
+                    { x: getPlayableCenterX(enemy), y: getPlayableBounds(enemy).top + 180 }
                 ],
                 currentWaypointIndex: 0,
                 initialMove: true
@@ -1029,3 +1067,5 @@ export const firingPatterns = {
         }
     }
 }; 
+
+

@@ -13,157 +13,185 @@ class EnemyFactory {
         this.game = game;
     }
 
-    /**
-     * Creates an enemy of a specified type, adds it to the game's core systems,
-     * and then returns the created instance.
-     * @param {Object} enemyInfo - Object containing enemy type, position, and overrides
-     * @returns {Enemy|null} The created enemy instance, or null if the type is unknown.
-     */
     createEnemy(enemyInfo, level) {
         let enemy = null;
         const { type, spawn_x, spawn_y, overrides = {} } = enemyInfo;
-
-        // Diagnostic log before switch
         logger.debug(`FACTORY INPUT: Received request to create type: "${type}"`);
 
-        // --- Ensure enemy spawns outside the playable area ---
         let bounds = { left: 0, top: 0, right: this.game.width, bottom: this.game.height };
         if (level && typeof level.getPlayableBounds === 'function') {
             bounds = level.getPlayableBounds();
         }
-        let spawnX = spawn_x;
-        let spawnY = spawn_y;
-        // Determine intended entry direction from movementPattern or type
-        const pattern = overrides.movementPattern || type;
-        if (pattern && (pattern.includes('left') || pattern === 'swoop_from_left')) {
-            // Entering from left
-            spawnX = bounds.left - (Enemy.stats[type]?.width || 48);
-            spawnY = spawn_y;
-        } else if (pattern && (pattern.includes('right') || pattern === 'swoop_from_right')) {
-            // Entering from right
-            spawnX = bounds.right;
-            spawnY = spawn_y;
-        } else if (pattern && pattern.includes('bottom')) {
-            // Entering from bottom
-            spawnX = spawn_x;
-            spawnY = bounds.bottom;
-        } else {
-            // Default: entering from top
-            spawnX = spawn_x;
-            spawnY = bounds.top - (Enemy.stats[type]?.height || 48);
-        }
+
+        const translatedOverrides = this.translateOverrides(overrides, level, bounds);
+        const spawnPoint = this.resolveSpawnPoint(type, spawn_x, spawn_y, translatedOverrides, level, bounds);
+        const { x: spawnX, y: spawnY } = spawnPoint;
 
         switch (type) {
             case 'fighter':
-                enemy = new Enemy(this.game, spawnX, spawnY, 'fighter', 'enemyFighter', overrides.health, overrides.scoreValue);
+                enemy = new Enemy(this.game, spawnX, spawnY, 'fighter', 'enemyFighter', translatedOverrides.health, translatedOverrides.scoreValue);
                 break;
-
             case 'turret':
-                enemy = new Enemy(this.game, spawnX, spawnY, 'turret', 'enemyTurret', overrides.health, overrides.scoreValue);
+                enemy = new Enemy(this.game, spawnX, spawnY, 'turret', 'enemyTurret', translatedOverrides.health, translatedOverrides.scoreValue);
                 break;
-
             case 'bomber':
-                enemy = new Enemy(this.game, spawnX, spawnY, 'bomber', 'enemyBomber', overrides.health, overrides.scoreValue);
+                enemy = new Enemy(this.game, spawnX, spawnY, 'bomber', 'enemyBomber', translatedOverrides.health, translatedOverrides.scoreValue);
                 break;
-
             case 'boss1':
-                // We create the Boss1 instance. Its stats will be applied by the "Overrides" section.
                 enemy = new Boss1(this.game, spawnX, spawnY, 'bossLevel1');
                 break;
-
             case 'striker':
-                enemy = new Enemy(this.game, spawnX, spawnY, 'striker', 'enemyStriker', overrides.health, overrides.scoreValue);
+                enemy = new Enemy(this.game, spawnX, spawnY, 'striker', 'enemyStriker', translatedOverrides.health, translatedOverrides.scoreValue);
                 break;
-
             case 'cyclone':
-                enemy = new Enemy(this.game, spawnX, spawnY, 'cyclone', 'enemyCyclone', overrides.health, overrides.scoreValue);
+                enemy = new Enemy(this.game, spawnX, spawnY, 'cyclone', 'enemyCyclone', translatedOverrides.health, translatedOverrides.scoreValue);
                 break;
-
             case 'gnat':
-                enemy = new Enemy(this.game, spawnX, spawnY, 'gnat', 'enemyGnat', overrides.health, overrides.scoreValue);
+                enemy = new Enemy(this.game, spawnX, spawnY, 'gnat', 'enemyGnat', translatedOverrides.health, translatedOverrides.scoreValue);
                 break;
-
             case 'reaper':
-                enemy = new Enemy(this.game, spawnX, spawnY, 'reaper', 'enemyReaper', overrides.health, overrides.scoreValue);
+                enemy = new Enemy(this.game, spawnX, spawnY, 'reaper', 'enemyReaper', translatedOverrides.health, translatedOverrides.scoreValue);
                 break;
-
             case 'dart':
-                enemy = new Enemy(this.game, spawnX, spawnY, 'dart', 'enemyDart', overrides.health, overrides.scoreValue);
-                
-                // Set default swooping behavior for all dart enemies
-                if (!overrides.movementPattern) {
-                    // Randomly choose between left and right swooping
+                enemy = new Enemy(this.game, spawnX, spawnY, 'dart', 'enemyDart', translatedOverrides.health, translatedOverrides.scoreValue);
+                if (!translatedOverrides.movementPattern) {
                     const swoopDirection = Math.random() < 0.5 ? 'swoop_from_left' : 'swoop_from_right';
                     enemy.movementUpdate = movementPatterns[swoopDirection];
-                    enemy.velocityY = 400; // High speed by default
+                    enemy.velocityY = 400;
                     logger.debug(`Dart assigned ${swoopDirection} pattern`);
                 }
                 break;
-
             case 'goliath':
-                enemy = new Enemy(this.game, spawnX, spawnY, 'goliath', 'enemyGoliath', overrides.health, overrides.scoreValue);
+                enemy = new Enemy(this.game, spawnX, spawnY, 'goliath', 'enemyGoliath', translatedOverrides.health, translatedOverrides.scoreValue);
                 break;
-
             case 'cutter':
-                enemy = new Enemy(this.game, spawnX, spawnY, 'cutter', 'enemyCutter', overrides.health, overrides.scoreValue);
+                enemy = new Enemy(this.game, spawnX, spawnY, 'cutter', 'enemyCutter', translatedOverrides.health, translatedOverrides.scoreValue);
                 break;
-
             case 'mine':
-                enemy = new Enemy(this.game, spawnX, spawnY, 'mine', 'enemyMine', overrides.health, overrides.scoreValue);
+                enemy = new Enemy(this.game, spawnX, spawnY, 'mine', 'enemyMine', translatedOverrides.health, translatedOverrides.scoreValue);
                 break;
-
             case 'FUEL_TANK':
                 enemy = new DestructibleObject(this.game, spawnX, spawnY, 'FUEL_TANK', 'fuelTank');
                 break;
-
             case 'BUNKER':
                 enemy = new DestructibleObject(this.game, spawnX, spawnY, 'BUNKER', 'bunker');
                 break;
-
             case 'RADAR_DISH':
                 enemy = new DestructibleObject(this.game, spawnX, spawnY, 'RADAR_DISH', 'radarDish');
                 break;
-
             default:
                 logger.error(`Unknown enemy type requested: "${type}"`);
                 return null;
         }
 
-        // Diagnostic log after switch
-        if (enemy) { logger.debug(`FACTORY OUTPUT: Successfully created object with constructor: ${enemy.constructor.name}`); }
-
-        // --- Apply Overrides ---
         if (enemy) {
-            enemy.overrides = overrides;
-            // Apply simple stat overrides
-            if (overrides.health) {
-                enemy.health = overrides.health;
-                if (enemy.isBoss) enemy.maxHealth = overrides.health; // Keep boss healthbar in sync
-            }
-            if (overrides.fireRate) enemy.fireRate = overrides.fireRate;
-            if (overrides.velocityX) enemy.velocityX = overrides.velocityX;
-            if (overrides.velocityY) enemy.velocityY = overrides.velocityY;
-            if (overrides.scoreValue) enemy.scoreValue = overrides.scoreValue;
+            logger.debug(`FACTORY OUTPUT: Successfully created object with constructor: ${enemy.constructor.name}`);
+        }
 
-            // Assign behavior functions from the library
-            enemy.movementUpdate = movementPatterns[overrides.movementPattern] || movementPatterns['default'];
-            enemy.firingUpdate = firingPatterns[overrides.firingPattern] || firingPatterns['none'];
-            // If the enemy has been assigned a real firing pattern, enable its ability to fire.
-            if (overrides.firingPattern && overrides.firingPattern !== 'none') {
+        if (enemy) {
+            enemy.overrides = translatedOverrides;
+            if (translatedOverrides.health) {
+                enemy.health = translatedOverrides.health;
+                if (enemy.isBoss) enemy.maxHealth = translatedOverrides.health;
+            }
+            if (translatedOverrides.fireRate) enemy.fireRate = translatedOverrides.fireRate;
+            if (translatedOverrides.velocityX) enemy.velocityX = translatedOverrides.velocityX;
+            if (translatedOverrides.velocityY) enemy.velocityY = translatedOverrides.velocityY;
+            if (translatedOverrides.scoreValue) enemy.scoreValue = translatedOverrides.scoreValue;
+
+            enemy.movementUpdate = movementPatterns[translatedOverrides.movementPattern] || movementPatterns.default;
+            enemy.firingUpdate = firingPatterns[translatedOverrides.firingPattern] || firingPatterns.none;
+            if (translatedOverrides.firingPattern && translatedOverrides.firingPattern !== 'none') {
                 enemy.canFire = true;
             }
         }
 
-        // This is the critical step: Register the new enemy with the game's systems.
         if (enemy) {
             this.game.entityManager.add(enemy);
             this.game.collision.addToGroup(enemy, 'enemies');
-        }
-        // This block ensures the enemy knows which level it belongs to.
-        if (enemy) {
             enemy.level = level;
         }
+
         return enemy;
     }
+
+    resolveSpawnPoint(type, spawnX, spawnY, overrides, level, bounds) {
+        const width = Enemy.stats[type]?.width || 48;
+        const height = Enemy.stats[type]?.height || 48;
+        const playableWidth = bounds.right - bounds.left;
+        const translatedX = this.translateLevelX(spawnX, level, bounds);
+        const translatedY = this.translateLevelY(spawnY, level, bounds);
+        const pattern = overrides.movementPattern || type;
+
+        if (pattern && (pattern.includes('left') || pattern === 'swoop_from_left')) {
+            return { x: bounds.left - width, y: translatedY };
+        }
+
+        if (pattern && (pattern.includes('right') || pattern === 'swoop_from_right')) {
+            return { x: bounds.right, y: translatedY };
+        }
+
+        if (pattern === 'swoop_and_dash') {
+            if (spawnX < 0) {
+                return { x: bounds.left - width, y: translatedY };
+            }
+            if (spawnX > (level?.getDesignWidth?.() || 800) * 0.6) {
+                return { x: bounds.right, y: translatedY };
+            }
+        }
+
+        if (pattern && pattern.includes('bottom')) {
+            return { x: translatedX, y: bounds.bottom + height };
+        }
+
+        if (spawnX < 0) {
+            return { x: bounds.left + (spawnX / Math.max(playableWidth, 1)) * playableWidth, y: translatedY };
+        }
+
+        return { x: translatedX, y: translatedY };
+    }
+
+    translateOverrides(overrides, level, bounds) {
+        const translated = { ...overrides };
+        const hasTranslator = level && typeof level.translateLevelX === 'function' && typeof level.translateLevelY === 'function';
+        if (!hasTranslator) {
+            return translated;
+        }
+
+        if (translated.formation_point) {
+            translated.formation_point = {
+                x: level.translateLevelX(translated.formation_point.x),
+                y: level.translateLevelY(translated.formation_point.y)
+            };
+        }
+
+        if (translated.target_x !== undefined) {
+            translated.target_x = level.translateLevelX(translated.target_x);
+        }
+
+        const yKeys = ['trigger_y', 'split_y', 'diverge_y', 'patrol_y', 'veer_y'];
+        yKeys.forEach((key) => {
+            if (translated[key] !== undefined) {
+                translated[key] = level.translateLevelY(translated[key]);
+            }
+        });
+
+        return translated;
+    }
+
+    translateLevelX(value, level, bounds) {
+        if (level && typeof level.translateLevelX === 'function') {
+            return level.translateLevelX(value);
+        }
+        return bounds.left + value;
+    }
+
+    translateLevelY(value, level, bounds) {
+        if (level && typeof level.translateLevelY === 'function') {
+            return level.translateLevelY(value);
+        }
+        return bounds.top + value;
+    }
 }
+
 export { EnemyFactory };

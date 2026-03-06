@@ -3,7 +3,8 @@
 ## 1. High-Level Project Overview
 - **Project Name:** Project Raptor
 - **Concept:** A modern re-imagining of the classic 1994 DOS game *Raptor: Call of the Shadows*, built with a data-driven, modular JavaScript engine.
-- **Current Goal:** Begin development of the "Raptor Forge" visual level editor while maintaining the stability of the core game engine.
+- **Current Goal:** Stabilize the core game loop and bring Level 1 closer to a faithful DOS-style recreation before resuming editor-focused work.
+- **Active Fidelity Spec:** See `docs/FAITHFUL_RECREATION_SPEC.md` for the current screen-flow, layout, and gameplay targets.
 
 ## 2. Game Architecture
 - **Technology Stack:** HTML5, CSS3, JavaScript (ES6 Modules), Web Audio API, Node.js, Git.
@@ -101,3 +102,5 @@ This section outlines the workflow between the human "Director" (the user) and a
   - **Tier 1: Manual Edit (The Scalpel):** For small, single-file changes.
   - **Tier 2: Cursor AI (The Power Move):** For medium-to-large, well-defined tasks.
   - **Tier 3: ManusAI (The Architect'''s Gambit):** For massive, creative tasks.
+
+

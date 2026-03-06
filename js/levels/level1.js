@@ -183,7 +183,9 @@ class Level1 {
         }
     }
 
-    static PLAYABLE_WIDTH = 960;
+    static DESIGN_WIDTH = 800;
+    static DESIGN_HEIGHT = 720;
+    static PLAYABLE_WIDTH = 1024;
     static PLAYABLE_HEIGHT = 720;
 
     getPlayableOffset() {
@@ -200,6 +202,26 @@ class Level1 {
             right: offsetX + Level1.PLAYABLE_WIDTH,
             bottom: offsetY + Level1.PLAYABLE_HEIGHT
         };
+    }
+
+    getDesignWidth() {
+        return Level1.DESIGN_WIDTH;
+    }
+
+    getDesignHeight() {
+        return Level1.DESIGN_HEIGHT;
+    }
+
+    translateLevelX(localX) {
+        const { left } = this.getPlayableBounds();
+        const scaleX = Level1.PLAYABLE_WIDTH / Level1.DESIGN_WIDTH;
+        return left + (localX * scaleX);
+    }
+
+    translateLevelY(localY) {
+        const { top } = this.getPlayableBounds();
+        const scaleY = Level1.PLAYABLE_HEIGHT / Level1.DESIGN_HEIGHT;
+        return top + (localY * scaleY);
     }
 
     render(contexts) {
@@ -269,3 +291,5 @@ class Level1 {
 }
 
 export { Level1 };
+
+

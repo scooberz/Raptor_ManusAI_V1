@@ -9,6 +9,7 @@ class HangarState {
         this.game = game;
         this.background = null;
         this.completedLevel = 0;
+        this.showHotspotDebug = false;
     }
 
     enter(context = {}) {
@@ -26,30 +27,70 @@ class HangarState {
         return lastCompleted >= missionLevel ? `Replay Mission ${missionLevel}` : `Launch Mission ${missionLevel}`;
     }
 
+    createHotspot(label, position, onClick) {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.textContent = label;
+        button.style.position = 'absolute';
+        button.style.left = position.left;
+        button.style.top = position.top;
+        button.style.width = position.width;
+        button.style.height = position.height;
+        button.style.background = this.showHotspotDebug ? 'rgba(255, 204, 0, 0.12)' : 'transparent';
+        button.style.border = this.showHotspotDebug ? '2px dashed rgba(255, 204, 0, 0.45)' : '2px solid transparent';
+        button.style.borderRadius = '10px';
+        button.style.cursor = 'pointer';
+        button.style.display = 'flex';
+        button.style.alignItems = 'flex-end';
+        button.style.justifyContent = 'center';
+        button.style.paddingBottom = '10px';
+        button.style.color = '#ffcc00';
+        button.style.fontSize = '18px';
+        button.style.fontWeight = 'bold';
+        button.style.textShadow = '0 0 8px rgba(0, 0, 0, 0.9)';
+        button.style.transition = 'all 0.15s ease';
+
+        button.addEventListener('mouseover', () => {
+            button.style.borderColor = '#ffcc00';
+            button.style.background = 'rgba(255, 204, 0, 0.08)';
+        });
+        button.addEventListener('mouseout', () => {
+            button.style.borderColor = this.showHotspotDebug ? 'rgba(255, 204, 0, 0.45)' : 'transparent';
+            button.style.background = this.showHotspotDebug ? 'rgba(255, 204, 0, 0.12)' : 'transparent';
+        });
+        button.addEventListener('focus', () => {
+            button.style.borderColor = '#ffcc00';
+            button.style.background = 'rgba(255, 204, 0, 0.12)';
+        });
+        button.addEventListener('blur', () => {
+            button.style.borderColor = this.showHotspotDebug ? 'rgba(255, 204, 0, 0.45)' : 'transparent';
+            button.style.background = this.showHotspotDebug ? 'rgba(255, 204, 0, 0.12)' : 'transparent';
+        });
+        button.addEventListener('click', onClick);
+        return button;
+    }
+
     setupHangarScreen() {
         const playerData = this.game.playerData || this.game.getDefaultPlayerData();
         const hangarScreen = document.getElementById('hangar-screen');
         hangarScreen.innerHTML = '';
 
         const mainContainer = document.createElement('div');
-        mainContainer.style.display = 'flex';
-        mainContainer.style.flexDirection = 'column';
-        mainContainer.style.alignItems = 'center';
-        mainContainer.style.justifyContent = 'center';
+        mainContainer.style.position = 'relative';
         mainContainer.style.width = '100%';
         mainContainer.style.height = '100%';
-        mainContainer.style.position = 'relative';
         mainContainer.style.overflow = 'hidden';
+        mainContainer.style.backgroundColor = '#05070b';
 
         if (this.background) {
             const bgImg = document.createElement('img');
             bgImg.src = this.background.src;
+            bgImg.style.position = 'absolute';
+            bgImg.style.inset = '0';
             bgImg.style.width = '100%';
             bgImg.style.height = '100%';
             bgImg.style.objectFit = 'cover';
-            bgImg.style.position = 'absolute';
-            bgImg.style.top = '0';
-            bgImg.style.left = '0';
+            bgImg.style.objectPosition = 'center center';
             bgImg.style.zIndex = '1';
             mainContainer.appendChild(bgImg);
         }
@@ -57,98 +98,77 @@ class HangarState {
         const overlay = document.createElement('div');
         overlay.style.position = 'absolute';
         overlay.style.inset = '0';
-        overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.55)';
+        overlay.style.background = 'linear-gradient(180deg, rgba(0,0,0,0.22) 0%, rgba(0,0,0,0.12) 30%, rgba(0,0,0,0.38) 100%)';
         overlay.style.zIndex = '2';
         mainContainer.appendChild(overlay);
 
-        const content = document.createElement('div');
-        content.style.position = 'relative';
-        content.style.zIndex = '3';
-        content.style.display = 'grid';
-        content.style.gridTemplateColumns = 'minmax(280px, 360px) minmax(280px, 420px)';
-        content.style.gap = '32px';
-        content.style.alignItems = 'stretch';
-        content.style.width = 'min(1000px, 92vw)';
-        content.style.maxWidth = '1000px';
-
-        const pilotCard = document.createElement('div');
-        pilotCard.style.backgroundColor = 'rgba(0, 0, 0, 0.78)';
-        pilotCard.style.border = '2px solid rgba(255, 204, 0, 0.55)';
-        pilotCard.style.borderRadius = '10px';
-        pilotCard.style.padding = '28px';
-        pilotCard.style.color = 'white';
-        pilotCard.innerHTML = `
-            <div style="font-size: 36px; color: #ffcc00; margin-bottom: 20px;">HANGAR</div>
-            <div style="font-size: 28px; margin-bottom: 10px;">${playerData.name}</div>
-            <div style="font-size: 20px; color: #9fd7ff; margin-bottom: 24px;">Callsign: ${playerData.callsign}</div>
-            <div style="font-size: 18px; line-height: 1.8;">
+        const statsPanel = document.createElement('div');
+        statsPanel.style.position = 'absolute';
+        statsPanel.style.left = '3.5%';
+        statsPanel.style.top = '5%';
+        statsPanel.style.width = '22%';
+        statsPanel.style.minWidth = '240px';
+        statsPanel.style.padding = '16px 18px';
+        statsPanel.style.background = 'rgba(8, 10, 14, 0.78)';
+        statsPanel.style.border = '1px solid rgba(255, 204, 0, 0.35)';
+        statsPanel.style.borderRadius = '8px';
+        statsPanel.style.color = 'white';
+        statsPanel.style.zIndex = '3';
+        statsPanel.style.backdropFilter = 'blur(3px)';
+        statsPanel.innerHTML = `
+            <div style="font-size: 30px; color: #ffcc00; margin-bottom: 10px;">HANGAR</div>
+            <div style="font-size: 22px; margin-bottom: 4px;">${playerData.name}</div>
+            <div style="font-size: 16px; color: #9fd7ff; margin-bottom: 16px;">Callsign: ${playerData.callsign}</div>
+            <div style="font-size: 15px; line-height: 1.8;">
                 <div>Funds: $${playerData.money}</div>
                 <div>Score: ${playerData.score}</div>
                 <div>Hull: ${playerData.health}/${playerData.maxHealth || 100}</div>
                 <div>Megabombs: ${playerData.megabombs ?? 3}</div>
-                <div>Completed Missions: ${playerData.lastCompletedLevel || 0}</div>
+                <div>Cleared Missions: ${playerData.lastCompletedLevel || 0}</div>
             </div>
         `;
-
-        const actionCard = document.createElement('div');
-        actionCard.style.backgroundColor = 'rgba(0, 0, 0, 0.78)';
-        actionCard.style.border = '2px solid rgba(255, 255, 255, 0.24)';
-        actionCard.style.borderRadius = '10px';
-        actionCard.style.padding = '28px';
-        actionCard.style.color = 'white';
-        actionCard.style.display = 'flex';
-        actionCard.style.flexDirection = 'column';
-        actionCard.style.gap = '14px';
+        mainContainer.appendChild(statsPanel);
 
         const status = document.createElement('div');
-        status.style.fontSize = '20px';
-        status.style.lineHeight = '1.5';
-        status.style.minHeight = '72px';
-        status.style.color = this.completedLevel ? '#ffcc00' : '#d0d0d0';
+        status.style.position = 'absolute';
+        status.style.left = '50%';
+        status.style.top = '6%';
+        status.style.transform = 'translateX(-50%)';
+        status.style.padding = '10px 16px';
+        status.style.background = 'rgba(8, 10, 14, 0.72)';
+        status.style.border = '1px solid rgba(255, 255, 255, 0.18)';
+        status.style.borderRadius = '999px';
+        status.style.color = this.completedLevel ? '#ffcc00' : '#d7d7d7';
+        status.style.fontSize = '16px';
+        status.style.zIndex = '3';
         status.textContent = this.completedLevel
-            ? `Mission ${this.completedLevel} complete. The pilot has returned to base and the ship is ready for another sortie.`
-            : 'Choose your next sortie, visit the shop, or save progress before leaving the hangar.';
-        actionCard.appendChild(status);
+            ? `Mission ${this.completedLevel} complete. The ship is back in the hangar.`
+            : 'Select the next sortie from the hangar.';
+        mainContainer.appendChild(status);
 
-        const makeButton = (label, onClick) => {
-            const button = document.createElement('button');
-            button.textContent = label;
-            button.style.padding = '16px 20px';
-            button.style.fontSize = '22px';
-            button.style.backgroundColor = 'rgba(20, 20, 20, 0.92)';
-            button.style.color = 'white';
-            button.style.border = '2px solid rgba(255, 255, 255, 0.25)';
-            button.style.borderRadius = '8px';
-            button.style.cursor = 'pointer';
-            button.style.textAlign = 'left';
-            button.style.transition = 'all 0.15s ease';
-            button.addEventListener('mouseover', () => {
-                button.style.color = '#ffcc00';
-                button.style.borderColor = '#ffcc00';
-            });
-            button.addEventListener('mouseout', () => {
-                button.style.color = 'white';
-                button.style.borderColor = 'rgba(255, 255, 255, 0.25)';
-            });
-            button.addEventListener('click', onClick);
-            return button;
-        };
+        const hotspots = [
+            this.createHotspot(this.getMissionLabel(), { left: '7%', top: '54%', width: '24%', height: '24%' }, () => this.chooseNextMission()),
+            this.createHotspot("Harold's Shop", { left: '70%', top: '55%', width: '22%', height: '23%' }, () => this.openShop()),
+            this.createHotspot('Save Game', { left: '67%', top: '28%', width: '23%', height: '15%' }, () => this.saveGame()),
+            this.createHotspot('Main Menu', { left: '42%', top: '82%', width: '16%', height: '10%' }, () => this.exitToMenu())
+        ];
 
-        actionCard.appendChild(makeButton(this.getMissionLabel(), () => this.chooseNextMission()));
-        actionCard.appendChild(makeButton('Open Shop', () => this.openShop()));
-        actionCard.appendChild(makeButton('Save Game', () => this.saveGame()));
-        actionCard.appendChild(makeButton('Exit to Main Menu', () => this.exitToMenu()));
+        hotspots.forEach((hotspot) => mainContainer.appendChild(hotspot));
 
         const hint = document.createElement('div');
-        hint.style.marginTop = '8px';
-        hint.style.color = '#a6a6a6';
-        hint.style.fontSize = '14px';
+        hint.style.position = 'absolute';
+        hint.style.right = '18px';
+        hint.style.bottom = '16px';
+        hint.style.padding = '8px 12px';
+        hint.style.background = 'rgba(8, 10, 14, 0.72)';
+        hint.style.border = '1px solid rgba(255,255,255,0.12)';
+        hint.style.borderRadius = '6px';
+        hint.style.color = '#b7b7b7';
+        hint.style.fontSize = '13px';
+        hint.style.zIndex = '3';
         hint.textContent = 'Hotkeys: 1 launch, 2 shop, 3 save, 4 menu';
-        actionCard.appendChild(hint);
+        mainContainer.appendChild(hint);
 
-        content.appendChild(pilotCard);
-        content.appendChild(actionCard);
-        mainContainer.appendChild(content);
         hangarScreen.appendChild(mainContainer);
     }
 
