@@ -1,90 +1,65 @@
 /**
  * Player class
- * Represents the player's ship
+ * Represents the player's ship.
  */
 import { Entity } from '../engine/entity.js';
 import { Explosion } from './explosion.js';
-import { Projectile } from './projectile.js';
-import { Missile } from './missile.js';
 import { logger } from '../utils/logger.js';
 
 class Player extends Entity {
     constructor(game, x, y) {
         super(game, x, y, 64, 64);
-        this.layer = 'player'; // Define the rendering layer
+        this.layer = 'player';
 
-        // Player stats - will be synced with playerData if available
-        this.speed = 575; // Increased from 500 by 15%
-        this.health = 75; // Default starting health
+        this.speed = 575;
+        this.health = 75;
         this.maxHealth = 100;
-        this.shield = 0; // Shield for shop system
+        this.shield = 0;
         this.money = 0;
         this.score = 0;
         this.collisionDamage = 20;
 
-        // Weapon system
-        this.weaponOrder = ['MISSILE']; // Only missiles in the cycle
+        this.weaponOrder = ['MISSILE'];
         this.currentWeaponIndex = 0;
         this.currentWeapon = this.weaponOrder[this.currentWeaponIndex];
         this.weapons = {
-            'CANNON': { name: 'Autocannon', fireRate: 110, lastFired: 0, level: 1 }, // Slower fire rate
-            'MISSILE': { name: 'Missiles', fireRate: 715, lastFired: 0 } // 30% slower than before
+            CANNON: { name: 'Autocannon', fireRate: 110, lastFired: 0, level: 1 },
+            MISSILE: { name: 'Missiles', fireRate: 715, lastFired: 0 }
         };
+        this.unlockedWeapons = ['MISSILE'];
 
-        // Unlocked weapons for shop system
-        this.unlockedWeapons = ['MISSILE']; // Start with basic missiles unlocked
-
-        // Special weapons
         this.megabombs = 3;
         this.lastMegabombTime = 0;
-        this.megabombCooldown = 1000; // 1 second cooldown
+        this.megabombCooldown = 1000;
 
-        // Animation properties
-        this.sprite = null;
-        this.thrustSprite = null;
-        this.turnLeftSprite = null;
-        this.turnRightSprite = null;
-        this.frameX = 0;
-        this.frameY = 0;
-        this.maxFrames = 2;
-        this.frameTimer = 0;
-        this.frameInterval = 100;
+        this.turnThreshold = 0.3;
+        this.currentDirection = 0;
 
-        // Movement properties
-        this.turnThreshold = 0.3; // Threshold for showing turn sprites
-        this.currentDirection = 0; // -1 for left, 0 for straight, 1 for right
-
-        // Invulnerability after taking damage
         this.invulnerable = false;
         this.invulnerabilityTime = 0;
-        this.invulnerabilityDuration = 1000; // 1 second
+        this.invulnerabilityDuration = 1000;
         this.blinkInterval = 100;
         this.visible = true;
 
-        // Missile auto-fire toggle
         this.missileAutoFire = true;
-
-        // Sync with playerData if available
         this.syncWithPlayerData();
     }
 
-    /**
-     * Sync player stats with playerData
-     */
     syncWithPlayerData() {
-        if (this.game.playerData) {
-            this.health = this.game.playerData.health || 75;
-            this.money = this.game.playerData.money || 0;
-            this.score = this.game.playerData.score || 0;
-            this.shield = this.game.playerData.shield || 0;
-            this.unlockedWeapons = this.game.playerData.unlockedWeapons || ['MISSILE'];
-            logger.debug(`Player synced with playerData: health=${this.health}, money=${this.money}`);
+        if (!this.game.playerData) {
+            return;
         }
+
+        this.health = this.game.playerData.health ?? 75;
+        this.maxHealth = this.game.playerData.maxHealth ?? 100;
+        this.money = this.game.playerData.money ?? 0;
+        this.score = this.game.playerData.score ?? 0;
+        this.shield = this.game.playerData.shield ?? 0;
+        this.megabombs = this.game.playerData.megabombs ?? 3;
+        this.unlockedWeapons = this.game.playerData.unlockedWeapons || ['MISSILE'];
+        logger.debug(`Player synced with playerData: health=${this.health}, money=${this.money}`);
     }
 
-    /**
-     * Load player sprites
-     */
     loadSprites() {
         this.sprites = {
             base: this.game.assets.getImage('playerShipBase'),
@@ -93,118 +68,116 @@ class Player extends Entity {
             thrust: this.game.assets.getImage('playerShipThrust')
         };
 
-        // Check if all required sprites were successfully loaded.
         if (this.sprites.base && this.sprites.left && this.sprites.right) {
-            this.isReady = true; // <-- Set the flag to true only if assets are loaded
+            this.isReady = true;
         } else {
-            logger.error("Failed to load one or more player sprites. Player will not be rendered.");
+            logger.error('Failed to load one or more player sprites. Player will not be rendered.');
         }
     }
 
-    /**
-     * Update player state
-     * @param {number} deltaTime - Time since last update in milliseconds
-     */
     update(deltaTime) {
-        // Handle movement
         this.handleMovement();
-
-        // Handle weapons
         this.handleWeapons();
 
-        // Update invulnerability
         if (this.invulnerable) {
             this.invulnerabilityTime += deltaTime;
+            this.visible = this.invulnerabilityTime % this.blinkInterval < this.blinkInterval / 2;
 
-            // Blink effect
-            if (this.invulnerabilityTime % this.blinkInterval < this.blinkInterval / 2) {
-                this.visible = true;
-            } else {
-                this.visible = false;
-            }
-
-            // End invulnerability
             if (this.invulnerabilityTime >= this.invulnerabilityDuration) {
                 this.invulnerable = false;
                 this.visible = true;
             }
         }
 
-        // Update animation
-        this.updateAnimation(deltaTime);
-
         super.update(deltaTime);
+        this.clampToPlayableBounds();
     }
 
-    /**
-     * Handle player movement based on input
-     */
+
+    clampToPlayableBounds() {
+        const bounds = this.game.currentState && typeof this.game.currentState.getPlayableBounds === 'function'
+            ? this.game.currentState.getPlayableBounds()
+            : { left: 0, top: 0, right: this.game.width, bottom: this.game.height };
+
+        if (this.x < bounds.left) this.x = bounds.left;
+        if (this.x + this.width > bounds.right) this.x = bounds.right - this.width;
+        if (this.y < bounds.top) this.y = bounds.top;
+        if (this.y + this.height > bounds.bottom) this.y = bounds.bottom - this.height;
+    }
     handleMovement() {
-        // Get mouse position
-        const mousePos = this.game.input.getMousePosition();
+        const input = this.game.input;
+        const left = input.isKeyPressed('ArrowLeft') || input.isKeyPressed('a');
+        const right = input.isKeyPressed('ArrowRight') || input.isKeyPressed('d');
+        const up = input.isKeyPressed('ArrowUp') || input.isKeyPressed('w');
+        const down = input.isKeyPressed('ArrowDown') || input.isKeyPressed('s');
 
-        // Calculate direction to mouse
-        const targetX = mousePos.x - this.width / 2;
-        const targetY = mousePos.y - this.height / 2;
+        let moveX = 0;
+        let moveY = 0;
 
-        // Calculate distance to target
-        const dx = targetX - this.x;
-        const dy = targetY - this.y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
+        if (left) moveX -= 1;
+        if (right) moveX += 1;
+        if (up) moveY -= 1;
+        if (down) moveY += 1;
 
-        // Update turn direction
-        if (Math.abs(dx) > this.turnThreshold * this.width) {
-            this.currentDirection = dx > 0 ? 1 : -1;
+        const usingKeyboard = moveX !== 0 || moveY !== 0;
+        if (usingKeyboard) {
+            const length = Math.hypot(moveX, moveY) || 1;
+            this.velocityX = (moveX / length) * this.speed;
+            this.velocityY = (moveY / length) * this.speed;
+            this.currentDirection = moveX === 0 ? 0 : (moveX > 0 ? 1 : -1);
+        } else if (input.hasMouseMoved) {
+            const mousePos = input.getMousePosition();
+            const targetX = mousePos.x - this.width / 2;
+            const targetY = mousePos.y - this.height / 2;
+            const dx = targetX - this.x;
+            const dy = targetY - this.y;
+            const distance = Math.hypot(dx, dy);
+
+            if (Math.abs(dx) > this.turnThreshold * this.width) {
+                this.currentDirection = dx > 0 ? 1 : -1;
+            } else {
+                this.currentDirection = 0;
+            }
+
+            if (distance > 2) {
+                const moveSpeed = Math.min(this.speed * 1.75, distance * 3.5);
+                this.velocityX = (dx / distance) * moveSpeed;
+                this.velocityY = (dy / distance) * moveSpeed;
+            } else {
+                this.velocityX = 0;
+                this.velocityY = 0;
+            }
         } else {
+            this.velocityX = 0;
+            this.velocityY = 0;
             this.currentDirection = 0;
         }
 
-        // Only move if we're not at the target position
-        if (distance > 2) { // Reduced threshold for more precise movement
-            // Calculate movement speed based on distance
-            const moveSpeed = Math.min(this.speed * 1.75, distance * 3.5); // Increased responsiveness
+        const bounds = this.game.currentState && typeof this.game.currentState.getPlayableBounds === 'function'
+            ? this.game.currentState.getPlayableBounds()
+            : { left: 0, top: 0, right: this.game.width, bottom: this.game.height };
 
-            // Calculate normalized direction
-            const dirX = dx / distance;
-            const dirY = dy / distance;
-
-            // Set velocity based on direction and speed
-            this.velocityX = dirX * moveSpeed;
-            this.velocityY = dirY * moveSpeed;
-        } else {
-            // Stop moving when close to target
-            this.velocityX = 0;
-            this.velocityY = 0;
-        }
-
-        // Keep player within game boundaries
-        let bounds = { left: 0, top: 0, right: this.game.width, bottom: this.game.height };
-        if (this.game.currentState && typeof this.game.currentState.getPlayableBounds === 'function') {
-            bounds = this.game.currentState.getPlayableBounds();
-        }
         if (this.x < bounds.left) this.x = bounds.left;
         if (this.x + this.width > bounds.right) this.x = bounds.right - this.width;
         if (this.y < bounds.top) this.y = bounds.top;
         if (this.y + this.height > bounds.bottom) this.y = bounds.bottom - this.height;
     }
 
-    /**
-     * Handle player weapons based on input
-     */
     handleWeapons() {
+        const input = this.game.input;
         const now = Date.now();
+        const primaryPressed = input.isMouseButtonPressed('left') || input.isKeyPressed(' ') || input.isKeyPressed('Control');
+        const specialPressed = input.isKeyPressed('Shift');
 
-        // Primary weapon firing (machine gun) - left mouse button
-        if (this.game.input.isMouseButtonPressed('left')) { // Left mouse button
-            const cannon = this.weapons['CANNON'];
+        if (primaryPressed) {
+            const cannon = this.weapons.CANNON;
             if (now - cannon.lastFired >= cannon.fireRate) {
                 this.fireCannon();
                 cannon.lastFired = now;
             }
 
-            // Auto-fire missiles while holding left mouse button (only if enabled)
             if (this.missileAutoFire) {
-                const missile = this.weapons['MISSILE'];
+                const missile = this.weapons.MISSILE;
                 if (now - missile.lastFired >= missile.fireRate) {
                     this.fireMissile();
                     missile.lastFired = now;
@@ -212,14 +185,20 @@ class Player extends Entity {
             }
         }
 
-        // Right mouse button toggles missile auto-fire mode
-        if (this.game.input.wasMouseButtonJustPressed('right')) { // Right mouse button
+        if (specialPressed) {
+            const missile = this.weapons.MISSILE;
+            if (now - missile.lastFired >= missile.fireRate) {
+                this.fireMissile();
+                missile.lastFired = now;
+            }
+        }
+
+        if (input.wasKeyJustPressed('Alt') || input.wasMouseButtonJustPressed('middle')) {
             this.missileAutoFire = !this.missileAutoFire;
             logger.debug(`Missile auto-fire mode: ${this.missileAutoFire ? 'ON' : 'OFF'}`);
         }
 
-        // Megabomb
-        if (this.game.input.isKeyPressed('b')) {
+        if (input.wasKeyJustPressed('b')) {
             if (this.megabombs > 0 && now - this.lastMegabombTime > this.megabombCooldown) {
                 this.lastMegabombTime = now;
                 this.fireMegabomb();
@@ -227,95 +206,48 @@ class Player extends Entity {
         }
     }
 
-    /**
-     * Update player animation
-     * @param {number} deltaTime - Time since last update in milliseconds
-     */
-    updateAnimation(deltaTime) {
-        this.frameTimer += deltaTime;
-        if (this.frameTimer > this.frameInterval) {
-            this.frameTimer = 0;
-            this.frameX = (this.frameX + 1) % this.maxFrames;
-        }
-    }
-
-    /**
-   * Render the player
-   * @param {CanvasRenderingContext2D} context - The canvas context to render to
-   */
     render(context) {
-        if (!this.visible || !this.isReady) return;
-
-        // Draw the appropriate sprite based on movement direction
-        if (this.currentDirection === -1 && this.sprites.left) {
-            context.globalCompositeOperation = 'source-over';
-            context.drawImage(
-                this.sprites.left,
-                this.x,
-                this.y,
-                this.width,
-                this.height
-            );
-        } else if (this.currentDirection === 1 && this.sprites.right) {
-            context.globalCompositeOperation = 'source-over';
-            context.drawImage(
-                this.sprites.right,
-                this.x,
-                this.y,
-                this.width,
-                this.height
-            );
-        } else if (this.sprites.base) {
-            context.globalCompositeOperation = 'source-over';
-            context.drawImage(
-                this.sprites.base,
-                this.x,
-                this.y,
-                this.width,
-                this.height
-            );
+        if (!this.visible || !this.isReady) {
+            return;
         }
+
+        const sprite = this.currentDirection === -1 && this.sprites.left
+            ? this.sprites.left
+            : this.currentDirection === 1 && this.sprites.right
+                ? this.sprites.right
+                : this.sprites.base;
+
+        context.globalCompositeOperation = 'source-over';
+        context.drawImage(sprite, this.x, this.y, this.width, this.height);
     }
 
-    /**
-     * Fire the primary weapon (machine gun)
-     */
     fireCannon() {
-        // Keep all your existing constants for balance
         const bulletSpacing = 10;
         const bulletVelocityY = -1200;
         const bulletDamage = 3;
+        const bulletSprite = this.game.assets.getImage('playerBullet') || null;
 
-        // Fire Left Bullet
         const leftBullet = this.game.projectilePool.get();
         if (leftBullet) {
-            // Activate the bullet from the pool with its properties.
-            // Pass `null` for the sprite to make it draw the tiny rectangle (white pixel bullet).
-            leftBullet.activate(this.x + this.width / 2 - bulletSpacing, this.y, 0, bulletVelocityY, bulletDamage, 'player', null);
+            leftBullet.activate(this.x + this.width / 2 - bulletSpacing, this.y, 0, bulletVelocityY, bulletDamage, 'player', bulletSprite);
             this.game.entityManager.add(leftBullet);
             this.game.collision.addToGroup(leftBullet, 'playerProjectiles');
         }
 
-        // Fire Right Bullet
         const rightBullet = this.game.projectilePool.get();
         if (rightBullet) {
-            // Pass `null` for the sprite as well.
-            rightBullet.activate(this.x + this.width / 2 + bulletSpacing, this.y, 0, bulletVelocityY, bulletDamage, 'player', null);
+            rightBullet.activate(this.x + this.width / 2 + bulletSpacing, this.y, 0, bulletVelocityY, bulletDamage, 'player', bulletSprite);
             this.game.entityManager.add(rightBullet);
             this.game.collision.addToGroup(rightBullet, 'playerProjectiles');
         }
     }
 
-    /**
-     * Fire the secondary weapon (missiles)
-     */
     fireMissile() {
         const missileSpacing = 12;
         const missileDamage = 60;
         const initialVelocity = { x: 0, y: -50 };
-        const missileSprite = this.game.assets.getImage('MISSILE'); // Use the correct key
+        const missileSprite = this.game.assets.getImage('MISSILE');
 
-        // Fire Left Missile from the pool
         const leftMissile = this.game.missilePool.get();
         if (leftMissile) {
             leftMissile.activate(this.x + this.width / 2 - missileSpacing, this.y, missileDamage, 'player', initialVelocity, missileSprite);
@@ -323,7 +255,6 @@ class Player extends Entity {
             this.game.collision.addToGroup(leftMissile, 'playerProjectiles');
         }
 
-        // Fire Right Missile from the pool
         const rightMissile = this.game.missilePool.get();
         if (rightMissile) {
             rightMissile.activate(this.x + this.width / 2 + missileSpacing, this.y, missileDamage, 'player', initialVelocity, missileSprite);
@@ -332,57 +263,40 @@ class Player extends Entity {
         }
     }
 
-    /**
-     * Fire a megabomb
-     */
     fireMegabomb() {
-        if (this.megabombs > 0) {
-            this.megabombs--;
+        if (this.megabombs <= 0) {
+            return;
+        }
 
-            // Create explosion effect
-            const explosion = new Explosion(
-                this.game,
-                this.game.width / 2 - 128,
-                this.game.height / 2 - 128,
-                256,
-                256
-            );
-            this.game.entityManager.add(explosion);
+        this.megabombs--;
 
-            // Clear all enemies and enemy projectiles
-            const enemies = this.game.collision.collisionGroups.enemies;
-            const enemyProjectiles = this.game.collision.collisionGroups.enemyProjectiles;
+        const explosion = new Explosion(this.game, this.game.width / 2 - 128, this.game.height / 2 - 128, 256, 256);
+        this.game.entityManager.add(explosion);
 
-            // Damage all enemies
-            enemies.forEach(enemy => {
-                enemy.takeDamage(100); // Megabomb does massive damage
-            });
+        const enemies = this.game.collision.collisionGroups.enemies;
+        const enemyProjectiles = this.game.collision.collisionGroups.enemyProjectiles;
 
-            // Destroy all enemy projectiles
-            enemyProjectiles.forEach(projectile => {
-                projectile.destroy();
-            });
+        enemies.forEach(enemy => {
+            enemy.takeDamage(100);
+        });
 
-            // Clear enemy projectiles group
-            this.game.collision.collisionGroups.enemyProjectiles = [];
+        enemyProjectiles.forEach(projectile => {
+            projectile.destroy();
+        });
+        this.game.collision.collisionGroups.enemyProjectiles = [];
 
-            // Play sound effect
-            this.game.audio.playSound('megabomb');
+        this.game.audio.playSound('megabomb');
+        if (this.game.playerData) {
+            this.game.playerData.megabombs = this.megabombs;
         }
     }
 
-    /**
-     * Take damage
-     * @param {number} amount - Amount of damage to take
-     */
     takeDamage(amount) {
-        // Skip damage if invulnerable
-        if (this.invulnerable) return;
+        if (this.invulnerable) {
+            return;
+        }
 
-        // Apply damage directly to health
         this.health -= amount;
-
-        // Sync with playerData
         if (this.game.playerData) {
             this.game.playerData.health = this.health;
         }
@@ -390,90 +304,53 @@ class Player extends Entity {
         if (this.health <= 0) {
             this.health = 0;
             this.destroy();
-
-            // Create explosion
-            const explosion = new Explosion(
-                this.game,
-                this.x + this.width / 2 - 32,
-                this.y + this.height / 2 - 32,
-                64,
-                64
-            );
+            const explosion = new Explosion(this.game, this.x + this.width / 2 - 32, this.y + this.height / 2 - 32, 64, 64);
             this.game.entityManager.add(explosion);
-
-            // Game over
             this.game.changeState('gameover');
         } else {
-            // Start invulnerability period
             this.invulnerable = true;
             this.invulnerabilityTime = 0;
         }
 
-        // Play damage sound
         this.game.audio.playSound('playerDamage');
     }
 
-    /**
-     * Add health
-     * @param {number} amount - Amount of health to add
-     */
-        /**
-     * Add health
-     * @param {number} amount - Amount of health to add
-     */
     addHealth(amount) {
         this.health = Math.min(this.health + amount, this.maxHealth);
-        // Sync with playerData
         if (this.game.playerData) {
             this.game.playerData.health = this.health;
         }
     }
 
-    /**
-     * Collect a health pickup.
-     * @param {number} amount - The amount of health in the pickup.
-     */
     collectHealthPickup(amount) {
         this.addHealth(amount);
     }
 
-    /**
-     * Add money to the player
-     * @param {number} amount - Amount of money to add
-     */
     addMoney(amount) {
         this.money += amount;
-        // Sync with playerData
         if (this.game.playerData) {
             this.game.playerData.money = this.money;
         }
     }
 
-    /**
-     * Add score to the player
-     * @param {number} amount - Amount of score to add
-     */
     addScore(amount) {
         this.score += amount;
-        this.game.playerData.score = this.score;
+        if (this.game.playerData) {
+            this.game.playerData.score = this.score;
+        }
     }
 
-    /**
-     * Add megabomb
-     */
     addMegabomb() {
         this.megabombs++;
+        if (this.game.playerData) {
+            this.game.playerData.megabombs = this.megabombs;
+        }
     }
 
-    /**
-     * Upgrade primary weapon
-     */
     upgradePrimaryWeapon() {
-        const weapon = this.weapons['CANNON'];
+        const weapon = this.weapons.CANNON;
         if (weapon && weapon.level < 5) {
             weapon.level++;
-
-            // Adjust fireRate based on level
             weapon.fireRate = Math.max(100, 150 - (weapon.level - 1) * 25);
         }
     }

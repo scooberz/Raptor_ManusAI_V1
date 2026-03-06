@@ -183,6 +183,7 @@ class MenuState {
     }
     
     /**
+    /**
      * Show load game screen
      */
     showLoadGameScreen() {
@@ -201,33 +202,16 @@ class MenuState {
         loadContainer.style.borderRadius = '10px';
         loadContainer.style.border = '2px solid #ffcc00';
         
-        // Add title
         const title = document.createElement('h2');
         title.textContent = 'Load Game';
         title.style.color = '#ffcc00';
         title.style.marginBottom = '20px';
         loadContainer.appendChild(title);
         
-        // Check for saved game data
-        const savedData = localStorage.getItem('raptor_manus_save');
-        let playerData = null;
-        let hasValidSave = false;
+        const playerData = this.game.saveManager.loadGame();
+        const hasValidSave = !!(playerData && playerData.name && playerData.callsign);
         
-        if (savedData) {
-            try {
-                playerData = JSON.parse(savedData);
-                // Validate that we have the required fields
-                if (playerData && playerData.name && playerData.callsign) {
-                    hasValidSave = true;
-                }
-            } catch (error) {
-                logger.error('Error parsing saved data:', error);
-                hasValidSave = false;
-            }
-        }
-        
-        if (hasValidSave && playerData) {
-            // Add saved pilot info
+        if (hasValidSave) {
             const pilotInfo = document.createElement('div');
             pilotInfo.style.color = 'white';
             pilotInfo.style.fontSize = '18px';
@@ -236,12 +220,11 @@ class MenuState {
             pilotInfo.innerHTML = `
                 <strong>Saved Pilot:</strong><br>
                 ${playerData.name} (${playerData.callsign})<br>
-                Level: ${playerData.level || 1} | Credits: $${playerData.money || 0}<br>
+                Mission: ${playerData.level || 1} | Credits: $${playerData.money || 0}<br>
                 Score: ${playerData.score || 0}
             `;
             loadContainer.appendChild(pilotInfo);
             
-            // Add load button
             const loadButton = document.createElement('button');
             loadButton.textContent = 'Load Saved Game';
             loadButton.style.padding = '15px 30px';
@@ -253,12 +236,11 @@ class MenuState {
             loadButton.style.fontSize = '18px';
             loadButton.style.marginBottom = '20px';
             loadButton.addEventListener('click', () => {
-                this.game.playerData = playerData;
+                this.game.setPlayerData(playerData);
                 this.game.changeState('hangar');
             });
             loadContainer.appendChild(loadButton);
             
-            // Add delete button
             const deleteButton = document.createElement('button');
             deleteButton.textContent = 'Delete Save';
             deleteButton.style.padding = '10px 20px';
@@ -271,14 +253,12 @@ class MenuState {
             deleteButton.style.marginBottom = '20px';
             deleteButton.addEventListener('click', () => {
                 if (confirm('Are you sure you want to delete your saved game?')) {
-                    localStorage.removeItem('raptor_manus_save');
-                    this.showLoadGameScreen(); // Refresh the screen
+                    this.game.saveManager.deleteSaveGame();
+                    this.showLoadGameScreen();
                 }
             });
             loadContainer.appendChild(deleteButton);
-            
         } else {
-            // Add message for no save
             const message = document.createElement('div');
             message.style.color = 'white';
             message.style.fontSize = '18px';
@@ -287,7 +267,6 @@ class MenuState {
             message.innerHTML = '<strong>No Pilots Saved</strong><br><br>Use "Start New Game" to create a new pilot.';
             loadContainer.appendChild(message);
             
-            // Add disabled load button with tooltip
             const loadButton = document.createElement('button');
             loadButton.textContent = 'Load Saved Game';
             loadButton.style.padding = '15px 30px';
@@ -298,27 +277,10 @@ class MenuState {
             loadButton.style.cursor = 'not-allowed';
             loadButton.style.fontSize = '18px';
             loadButton.style.marginBottom = '20px';
-            loadButton.title = 'No saved pilot found';
             loadButton.disabled = true;
             loadContainer.appendChild(loadButton);
-            
-            // Add disabled delete button with tooltip
-            const deleteButton = document.createElement('button');
-            deleteButton.textContent = 'Delete Save';
-            deleteButton.style.padding = '10px 20px';
-            deleteButton.style.backgroundColor = '#666';
-            deleteButton.style.color = '#999';
-            deleteButton.style.border = 'none';
-            deleteButton.style.borderRadius = '5px';
-            deleteButton.style.cursor = 'not-allowed';
-            deleteButton.style.fontSize = '16px';
-            deleteButton.style.marginBottom = '20px';
-            deleteButton.title = 'No saved pilot to delete';
-            deleteButton.disabled = true;
-            loadContainer.appendChild(deleteButton);
         }
         
-        // Add back button
         const backButton = document.createElement('button');
         backButton.textContent = 'Back to Menu';
         backButton.style.padding = '10px 20px';
@@ -335,7 +297,6 @@ class MenuState {
         
         menuScreen.appendChild(loadContainer);
     }
-    
     /**
      * Show game readme
      */

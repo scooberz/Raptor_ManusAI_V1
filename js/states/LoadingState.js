@@ -6,71 +6,63 @@ export class LoadingState {
         this.loadingProgress = 0;
     }
 
-    /**
-     * The main entry point for the state. This will now reliably
-     * load all assets and then transition to the next state.
-     */
     async enter() {
-        logger.info("--- Running Final, Corrected LoadingState ---");
-        
-        // Set up progress callback
+        logger.info('Running LoadingState');
+
         this.game.assets.setProgressCallback((progress) => {
-            this.loadingProgress = progress / 100; // Convert percentage to 0-1 range
+            this.loadingProgress = progress / 100;
         });
-        
-        // Define all assets in the format expected by AssetManager
-        // Only include assets that haven't been loaded yet
+
         const allAssets = {
             images: {
-                // UI & Backgrounds (skip logo as it's already loaded in BootState)
-                'menuBackground': 'assets/images/ui/menu_background.png',
-                'hangarBackground': 'assets/images/ui/hangar_background.png',
-                'shopBackground': 'assets/images/ui/shop_background.png',
-                'characterSelectBackground': 'assets/images/ui/character_select_background.png',
-                'cutscenePanel1': 'assets/images/ui/Raptor intro cutscene 1.png',
-                'cutscenePanel2': 'assets/images/ui/Raptor intro cutscene 2.png',
-                'healthBar': 'assets/images/ui/health_bar.png',
-                'shieldBar': 'assets/images/ui/shield_bar.png',
-                // Player Assets
-                'playerShipBase': 'assets/images/player/player_ship_base.png',
-                'playerShipLeft': 'assets/images/player/player_ship_left.png',
-                'playerShipRight': 'assets/images/player/player_ship_right.png',
-                'playerShipThrust': 'assets/images/player/player_ship_thrust.png',
-                // Projectile Assets
-                'enemyBullet': 'assets/images/projectiles/enemy_projectile.png',
-                'MISSILE': 'assets/images/projectiles/player_missile.png',
-                'enemyMissile': 'assets/images/projectiles/enemyMissile.png',
-                // Enemy Assets
-                'enemyStriker': 'assets/images/enemies/striker.png',
-                'enemyCyclone': 'assets/images/enemies/cyclone.png',
-                'enemyGnat': 'assets/images/enemies/gnat.png',
-                'enemyReaper': 'assets/images/enemies/reaper.png',
-                'enemyDart': 'assets/images/enemies/dart.png',
-                'enemyGoliath': 'assets/images/enemies/goliath.png',
-                'enemyCutter': 'assets/images/enemies/cutter.png',
-                'enemyMine': 'assets/images/enemies/mine.png',
-                'enemyTurret': 'assets/images/enemies/enemy_turret.png',
-                'bossLevel1': 'assets/images/enemies/boss_level1.png',
-                // Environment & Backgrounds
-                'backgroundLevel1': 'assets/images/environment/background_level1.png',
-                'tileset_level1': 'assets/images/environment/tileset.png',
-                'fuelTank': 'assets/images/environment/FUEL_TANK.png',
-                'bunker': 'assets/images/environment/BUNKER.png',
-                'radarDish': 'assets/images/environment/RADAR_DISH.png',
-                // Effects & Collectibles
-                'explosion1': 'assets/images/explosions/explosion_1.png',
-                'shieldPickup': 'assets/images/collectibles/shield_pickup.png',
-                'megabombPickup': 'assets/images/collectibles/megabomb_pickup.png',
+                menuBackground: 'assets/images/ui/menu_background.png',
+                hangarBackground: 'assets/images/ui/hangar_background.png',
+                shopBackground: 'assets/images/ui/shop_background.png',
+                characterSelectBackground: 'assets/images/ui/character_select_background.png',
+                cutscenePanel1: 'assets/images/ui/Raptor intro cutscene 1.png',
+                cutscenePanel2: 'assets/images/ui/Raptor intro cutscene 2.png',
+                healthBar: 'assets/images/ui/health_bar.png',
+                shieldBar: 'assets/images/ui/shield_bar.png',
+                playerShipBase: 'assets/images/player/player_ship_base.png',
+                playerShipLeft: 'assets/images/player/player_ship_left.png',
+                playerShipRight: 'assets/images/player/player_ship_right.png',
+                playerShipThrust: 'assets/images/player/player_ship_thrust.png',
+                playerBullet: 'assets/images/projectiles/player_bullet.png',
+                enemyBullet: 'assets/images/projectiles/enemy_projectile.png',
+                MISSILE: 'assets/images/projectiles/player_missile.png',
+                enemyMissile: 'assets/images/projectiles/enemyMissile.png',
+                enemyFighter: 'assets/images/enemies/enemy_fighter.png',
+                enemyStriker: 'assets/images/enemies/striker.png',
+                enemyCyclone: 'assets/images/enemies/cyclone.png',
+                enemyGnat: 'assets/images/enemies/gnat.png',
+                enemyReaper: 'assets/images/enemies/reaper.png',
+                enemyDart: 'assets/images/enemies/dart.png',
+                enemyGoliath: 'assets/images/enemies/goliath.png',
+                enemyCutter: 'assets/images/enemies/cutter.png',
+                enemyMine: 'assets/images/enemies/mine.png',
+                enemyTurret: 'assets/images/enemies/enemy_turret.png',
+                bossLevel1: 'assets/images/enemies/boss_level1.png',
+                backgroundLevel1: 'assets/images/environment/background_level1.png',
+                backgroundLevel2: 'assets/images/environment/background_level2.png',
+                tileset_level1: 'assets/images/environment/tileset.png',
+                fuelTank: 'assets/images/environment/FUEL_TANK.png',
+                bunker: 'assets/images/environment/BUNKER.png',
+                radarDish: 'assets/images/environment/RADAR_DISH.png',
+                explosion1: 'assets/images/explosions/explosion_1.png',
+                explosion2: 'assets/images/explosions/explosion_2.png',
+                impactEffect: 'assets/images/explosions/explosion_2.png',
+                healthPickup: 'assets/images/collectibles/health_pickup.png',
+                shieldPickup: 'assets/images/collectibles/shield_pickup.png',
+                megabombPickup: 'assets/images/collectibles/megabomb_pickup.png'
             }
         };
-        
+
         try {
             await this.game.assets.loadAssets(allAssets);
-            logger.info("SUCCESS: All assets loaded. Transitioning state...");
+            logger.info('All visual assets loaded. Transitioning to intro cutscene.');
             this.game.changeState('introCutscene');
         } catch (error) {
-            logger.error("CRITICAL ERROR in LoadingState:", error);
-            // Even if loading fails, try to continue to the next state
+            logger.error('Critical error in LoadingState:', error);
             this.game.changeState('introCutscene');
         }
     }
@@ -92,4 +84,4 @@ export class LoadingState {
 
     update(deltaTime) {}
     exit() {}
-} 
+}

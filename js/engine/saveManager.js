@@ -1,43 +1,43 @@
 /**
  * SaveManager class
- * Handles saving and loading game progress using the browser's localStorage API.
- * This class manages the persistence of game state between sessions, including
- * player progress, stats, and game time.
+ * Handles saving and loading game progress using localStorage.
  */
 import { logger } from '../utils/logger.js';
+
 class SaveManager {
-    /**
-     * Create a new SaveManager instance
-     * @param {Game} game - Reference to the main game instance
-     */
     constructor(game) {
         this.game = game;
-        // Unique key for storing save data in localStorage
         this.saveKey = 'raptor_manus_save';
     }
 
-    /**
-     * Save the current game state to localStorage
-     * Saves essential game data including level, player stats, and game time
-     * @returns {boolean} True if save was successful, false otherwise
-     */
-    saveGame() {
+    buildSaveData() {
         const gameState = this.game.states.game;
-        if (!gameState) return false;
+        const baseData = this.game.normalizePlayerData(this.game.playerData || {});
+        const livePlayer = gameState?.player || this.game.player;
 
-        // Create save data object with essential game information
-        const saveData = {
-            level: gameState.level,
-            playerScore: gameState.player ? gameState.player.score : 0,
-            playerLives: gameState.player ? gameState.player.lives : 3,
-            playerHealth: gameState.player ? gameState.player.health : 100,
-            gameTime: gameState.gameTime,
-            timestamp: Date.now() // Store save timestamp for future reference
-        };
+        if (livePlayer) {
+            baseData.health = livePlayer.health;
+            baseData.maxHealth = livePlayer.maxHealth;
+            baseData.money = livePlayer.money;
+            baseData.score = livePlayer.score;
+            baseData.shield = livePlayer.shield;
+            baseData.megabombs = livePlayer.megabombs;
+            baseData.unlockedWeapons = [...new Set(livePlayer.unlockedWeapons || baseData.unlockedWeapons)];
+        }
 
+        if (gameState && !gameState.levelComplete) {
+            baseData.level = Math.max(1, gameState.level || baseData.level);
+        }
+
+        baseData.timestamp = Date.now();
+        return baseData;
+    }
+
+    saveGame() {
         try {
-            // Convert save data to JSON string and store in localStorage
+            const saveData = this.buildSaveData();
             localStorage.setItem(this.saveKey, JSON.stringify(saveData));
+            this.game.setPlayerData(saveData);
             logger.info('Game saved successfully');
             return true;
         } catch (error) {
@@ -46,35 +46,23 @@ class SaveManager {
         }
     }
 
-    /**
-     * Load the saved game state from localStorage
-     * @returns {Object|null} The saved game data or null if no save exists or if there was an error
-     */
     loadGame() {
         try {
             const saveData = localStorage.getItem(this.saveKey);
-            if (!saveData) return null;
-
-            // Parse the JSON string back into an object
-            return JSON.parse(saveData);
+            if (!saveData) {
+                return null;
+            }
+            return this.game.normalizePlayerData(JSON.parse(saveData));
         } catch (error) {
             logger.error('Error loading game:', error);
             return null;
         }
     }
 
-    /**
-     * Check if a saved game exists in localStorage
-     * @returns {boolean} True if a saved game exists, false otherwise
-     */
     hasSaveGame() {
         return localStorage.getItem(this.saveKey) !== null;
     }
 
-    /**
-     * Delete the saved game from localStorage
-     * @returns {boolean} True if deletion was successful, false otherwise
-     */
     deleteSaveGame() {
         try {
             localStorage.removeItem(this.saveKey);
@@ -86,31 +74,19 @@ class SaveManager {
         }
     }
 
-    /**
-     * Apply the loaded save data to the current game state
-     * This method restores the game to the state it was in when saved
-     * @param {Object} saveData - The saved game data to apply
-     */
     applySaveData(saveData) {
-        if (!saveData) return;
-
-        const gameState = this.game.states.game;
-        if (!gameState) return;
-
-        // Restore the level and initialize the game
-        gameState.level = saveData.level;
-        gameState.initializeGame();
-
-        // Restore player stats if player exists
-        if (gameState.player) {
-            gameState.player.score = saveData.playerScore;
-            gameState.player.lives = saveData.playerLives;
-            gameState.player.health = saveData.playerHealth;
+        if (!saveData) {
+            return null;
         }
 
-        // Restore game time
-        gameState.gameTime = saveData.gameTime;
+        const normalized = this.game.setPlayerData(saveData);
+        const gameState = this.game.states.game;
+        if (gameState) {
+            gameState.level = normalized.level;
+        }
+        return normalized;
     }
 }
 
-export { SaveManager }; 
+export { SaveManager };
+

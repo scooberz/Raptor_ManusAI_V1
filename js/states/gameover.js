@@ -171,7 +171,7 @@ class GameOverState {
     playAgain() {
         // Reset game state
         if (this.game.states.game) {
-            this.game.states.game.level = 1;
+            this.game.states.game.level = this.game.playerData?.level || 1;
         }
         
         // Change to game state
@@ -197,4 +197,5 @@ class GameOverState {
 }
 
 export { GameOverState };
+
 

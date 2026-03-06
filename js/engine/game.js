@@ -20,26 +20,23 @@ import { GameState } from '../states/gameState.js';
 import { PauseState } from '../states/pause.js';
 import { GameOverState } from '../states/gameover.js';
 import { HangarState } from '../states/hangar.js';
-import { SupplyState } from '../states/supply.js';
 import ShopState from '../states/shop.js';
 import { CharacterSelectState } from '../states/characterSelect.js';
 import { logger } from '../utils/logger.js';
 
 class Game {
     constructor() {
-        // --- TIMING & FPS LOCK ---
         this.lastTime = 0;
         this.accumulator = 0;
         this.timeStep = 1000 / 60;
         this.currentFPS = 0;
-        this.debugMode = false; // Enable debug logging for the game loop
+        this.debugMode = false;
 
-        // --- BIND THE GAME LOOP'S CONTEXT ---
         this.gameLoop = this.gameLoop.bind(this);
 
-        // Find all the canvas layers from the HTML
         this.layers = {
             background: document.getElementById('background-layer'),
+            environment: document.getElementById('environment-layer'),
             enemy: document.getElementById('enemy-layer'),
             projectile: document.getElementById('projectile-layer'),
             player: document.getElementById('player-layer'),
@@ -47,12 +44,10 @@ class Game {
             ui: document.getElementById('ui-layer')
         };
 
-        // Get the 2D rendering contexts for each layer
         this.contexts = {};
         for (const key in this.layers) {
             const canvas = this.layers[key];
             const ctx = canvas.getContext('2d', { alpha: true });
-
             ctx.globalCompositeOperation = 'source-over';
             ctx.imageSmoothingEnabled = true;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -62,22 +57,19 @@ class Game {
         this.resize();
         window.addEventListener('resize', () => this.resize());
 
-        this.playerData = { score: 0, money: 0 };
+        this.playerData = this.getDefaultPlayerData();
+        this.player = null;
+        this.mainScrollSpeed = 50;
 
-        // --- Core Engine Components ---
         this.input = new InputHandler();
-        // --- NEW: The AssetManager now correctly receives the game instance ---
         this.assets = new AssetManager(this);
-        // --- NEW: The AudioManager is now initialized with assets ---
         this.audio = new AudioManager(this.assets);
-
         this.collision = new CollisionSystem(this);
         this.entityManager = new EntityManager(this);
         this.saveManager = new SaveManager(this);
-        this.projectilePool = new ObjectPool(() => new Projectile(this), 50); // Creates a pool of 50 projectiles
-        this.missilePool = new ObjectPool(() => new Missile(this), 20); // Creates a pool of 20 missiles
+        this.projectilePool = new ObjectPool(() => new Projectile(this), 50);
+        this.missilePool = new ObjectPool(() => new Missile(this), 20);
 
-        // --- State Management ---
         this.states = {
             boot: new BootState(this),
             loading: new LoadingState(this),
@@ -87,24 +79,60 @@ class Game {
             pause: new PauseState(this),
             gameover: new GameOverState(this),
             hangar: new HangarState(this),
-            supply: new SupplyState(this),
             shop: new ShopState(this),
             characterSelect: new CharacterSelectState(this)
         };
         this.currentState = null;
 
-        // --- Start the Game ---
         (async () => {
             await this.changeState('boot');
         })();
 
-        // Start the main game loop
         requestAnimationFrame(this.gameLoop);
     }
 
-    /**
-     * Resize all canvas layers to match window size
-     */
+    getDefaultPlayerData() {
+        return {
+            name: 'Pilot',
+            callsign: 'RAPTOR',
+            money: 10000,
+            level: 1,
+            score: 0,
+            lives: 3,
+            health: 75,
+            maxHealth: 100,
+            shield: 0,
+            megabombs: 3,
+            unlockedWeapons: ['MISSILE'],
+            lastCompletedLevel: 0,
+            timestamp: Date.now()
+        };
+    }
+
+    normalizePlayerData(data = {}) {
+        const defaults = this.getDefaultPlayerData();
+        const merged = { ...defaults, ...data };
+        merged.level = Math.max(1, Number(merged.level) || 1);
+        merged.money = Number(merged.money) || 0;
+        merged.score = Number(merged.score) || 0;
+        merged.lives = Math.max(1, Number(merged.lives) || defaults.lives);
+        merged.maxHealth = Math.max(1, Number(merged.maxHealth) || defaults.maxHealth);
+        merged.health = Math.min(merged.maxHealth, Math.max(0, Number(merged.health) || defaults.health));
+        merged.shield = Math.max(0, Number(merged.shield) || 0);
+        merged.megabombs = Math.max(0, Number(merged.megabombs) || defaults.megabombs);
+        merged.lastCompletedLevel = Math.max(0, Number(merged.lastCompletedLevel) || 0);
+        merged.unlockedWeapons = Array.isArray(merged.unlockedWeapons) && merged.unlockedWeapons.length > 0
+            ? [...new Set(merged.unlockedWeapons)]
+            : [...defaults.unlockedWeapons];
+        merged.timestamp = Date.now();
+        return merged;
+    }
+
+    setPlayerData(data = {}) {
+        this.playerData = this.normalizePlayerData(data);
+        return this.playerData;
+    }
+
     resize() {
         const windowWidth = window.innerWidth;
         const windowHeight = window.innerHeight;
@@ -128,125 +156,102 @@ class Game {
         }
     }
 
-    /**
-     * Update the game logic with a fixed timestep
-     * @param {number} deltaTime - Fixed time step in milliseconds
-     */
     update(deltaTime) {
         if (this.currentState) {
             this.currentState.update(deltaTime);
         }
         this.input.update();
 
-        // Handle debug inputs
         if (this.input.skipWavePressed) {
-            logger.debug("DEBUG: Skip Wave Pressed!");
+            logger.debug('DEBUG: Skip Wave Pressed!');
             if (this.currentState && typeof this.currentState.skipWave === 'function') {
                 this.currentState.skipWave();
             }
         }
 
         if (this.input.restartLevelPressed) {
-            logger.debug("DEBUG: Restart Level Pressed!");
+            logger.debug('DEBUG: Restart Level Pressed!');
             if (this.currentState && typeof this.currentState.restartLevel === 'function') {
                 this.currentState.restartLevel();
             }
         }
 
         if (this.input.cycleLevelPressed) {
-            logger.debug("DEBUG: Cycle Level Pressed!");
+            logger.debug('DEBUG: Cycle Level Pressed!');
             this.cycleLevel();
         }
     }
 
-    /**
-     * Render the game as fast as possible
-     */
     render() {
-        // --- SYSTEMIC STATE RESET ---
         for (const key in this.contexts) {
             const ctx = this.contexts[key];
             ctx.globalCompositeOperation = 'source-over';
             ctx.clearRect(0, 0, this.width, this.height);
         }
-        // Now that all layers are clean and reset, proceed with rendering the current state.
+
         if (this.currentState) {
             this.currentState.render(this.contexts);
         }
     }
 
-    /**
-     * The main game loop, called for every frame
-     * @param {number} timestamp - The current time provided by the browser
-     */
     gameLoop(timestamp) {
-        // Fallback for the first frame to prevent a large deltaTime
         if (!this.lastTime) {
             this.lastTime = timestamp;
         }
 
         const deltaTime = timestamp - this.lastTime;
         this.lastTime = timestamp;
-
-        // For the debug overlay
-        this.currentFPS = Math.round(1000 / deltaTime);
-
+        this.currentFPS = Math.round(1000 / Math.max(deltaTime, 1));
         this.accumulator += deltaTime;
 
-        // Run the fixed-step update loop for game logic
         while (this.accumulator >= this.timeStep) {
             this.update(this.timeStep);
             this.accumulator -= this.timeStep;
         }
 
-        // Render graphics as fast as possible
         this.render();
-
-        // Request the next frame
         requestAnimationFrame(this.gameLoop);
     }
 
-    /**
-     * Cycles through game levels for debugging purposes.
-     * This method is intended for development and testing.
-     */
     cycleLevel() {
-        logger.debug("Attempting to cycle level...");
-        // Implement level cycling logic here
-        // For example, if you have a GameState that manages levels:
+        logger.debug('Attempting to cycle level...');
         if (this.currentState instanceof GameState) {
             this.currentState.cycleLevel();
         } else {
-            logger.debug("Cannot cycle level: Not in GameState.");
+            logger.debug('Cannot cycle level: Not in GameState.');
         }
     }
 
-    /**
-     * Change the current game state
-     * @param {string} stateName - The name of the state to switch to
-     */
-    async changeState(stateName) {
+    async changeState(stateName, context = {}) {
         logger.info(`Changing state from ${this.currentState ? this.currentState.constructor.name : 'null'} to ${stateName}`);
 
-        if (this.currentState && typeof this.currentState.exit === 'function') {
-            logger.info(`Exiting current state: ${this.currentState.constructor.name}`);
-            this.currentState.exit();
+        const previousState = this.currentState;
+        if (previousState && typeof previousState.exit === 'function') {
+            logger.info(`Exiting current state: ${previousState.constructor.name}`);
+            previousState.exit();
         }
 
         const newState = this.states[stateName];
-        if (newState) {
-            logger.info(`Found new state: ${stateName}, entering...`);
-            this.currentState = newState;
-            if (typeof this.currentState.enter === 'function') {
-                const result = this.currentState.enter();
-                if (result && typeof result.then === 'function') {
-                    await result;
-                }
-            }
-            logger.info(`Successfully entered state: ${stateName}`);
-        } else {
-            logger.error(`State "${stateName}" not found!`);
+        if (!newState) {
+            logger.error(`State \"${stateName}\" not found!`);
+            return;
         }
+
+        logger.info(`Found new state: ${stateName}, entering...`);
+        this.currentState = newState;
+
+        if (typeof this.currentState.enter === 'function') {
+            const result = this.currentState.enter({
+                ...context,
+                fromState: previousState,
+                fromStateName: previousState?.name || previousState?.constructor?.name || null
+            });
+            if (result && typeof result.then === 'function') {
+                await result;
+            }
+        }
+
+        logger.info(`Successfully entered state: ${stateName}`);
     }
 }
 

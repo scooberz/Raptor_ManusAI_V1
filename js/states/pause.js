@@ -279,13 +279,9 @@ class PauseState {
      * Return to the main menu
      */
     returnToMenu() {
-        // Remove the pause overlay
+        this.isPaused = false;
         this.removePauseOverlay();
-        
-        // Save game before returning to menu
         this.game.saveManager.saveGame();
-        
-        // Change to menu state
         this.game.changeState('menu');
     }
     
@@ -298,4 +294,5 @@ class PauseState {
 }
 
 export { PauseState };
+
 
