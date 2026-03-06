@@ -103,7 +103,7 @@ class Game {
             maxHealth: 100,
             shield: 0,
             megabombs: 3,
-            unlockedWeapons: ['MISSILE'],
+            unlockedWeapons: [],
             lastCompletedLevel: 0,
             timestamp: Date.now()
         };
@@ -256,3 +256,4 @@ class Game {
 }
 
 export { Game };
+

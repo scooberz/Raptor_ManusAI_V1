@@ -5,6 +5,7 @@
 import { EnemyFactory } from '../entities/enemyFactory.js';
 import { EnvironmentFactory } from '../entities/environmentFactory.js';
 import { BackgroundManager } from '../environment/BackgroundManager.js';
+import { Collectible } from '../entities/collectible.js';
 import { Tilemap } from '../environment/tilemap.js';
 import { logger } from '../utils/logger.js';
 
@@ -25,6 +26,7 @@ class Level1 {
         this.bossWarningDuration = 3000;
         this.bossHealthBarFill = 0;
         this.transitioning = false;
+        this.missilePickupSpawned = false;
         this.environmentFactory = null;
     }
 
@@ -55,6 +57,7 @@ class Level1 {
             this.bossWarningTimer = 0;
             this.bossHealthBarFill = 0;
             this.transitioning = false;
+            this.missilePickupSpawned = false;
 
             this.game.audio.playMusic('gameMusic1');
         } catch (error) {
@@ -148,6 +151,7 @@ class Level1 {
             this.waveStartTime = this.levelTime;
             const nextWaveName = this.levelData.waves[this.waveIndex].name || `Wave ${this.waveIndex + 1}`;
             logger.info(`Starting ${nextWaveName}`);
+            this.maybeSpawnMidMissionPickup();
         }
     }
 
@@ -224,6 +228,30 @@ class Level1 {
         return top + (localY * scaleY);
     }
 
+    maybeSpawnMidMissionPickup() {
+        if (this.missilePickupSpawned || !this.levelData) {
+            return;
+        }
+
+        const playerHasMissiles = this.game.player?.hasWeapon?.('MISSILE') || this.game.playerData?.unlockedWeapons?.includes('MISSILE');
+        if (playerHasMissiles) {
+            this.missilePickupSpawned = true;
+            return;
+        }
+
+        const unlockWaveIndex = Math.max(1, Math.floor(this.levelData.waves.length / 2));
+        if (this.waveIndex < unlockWaveIndex) {
+            return;
+        }
+
+        const bounds = this.getPlayableBounds();
+        const collectible = new Collectible(this.game, bounds.left + Level1.PLAYABLE_WIDTH / 2 - 15, bounds.top - 40, 30, 30, 'weapon', 'MISSILE');
+        this.game.entityManager.add(collectible);
+        this.game.collision.addToGroup(collectible, 'collectibles');
+        this.missilePickupSpawned = true;
+        logger.info('Missile pickup deployed in sector.');
+    }
+
     render(contexts) {
         const { offsetX, offsetY } = this.getPlayableOffset();
         this.background.render(contexts.background, offsetX, offsetY, Level1.PLAYABLE_WIDTH, Level1.PLAYABLE_HEIGHT);
@@ -291,5 +319,9 @@ class Level1 {
 }
 
 export { Level1 };
+
+
+
+
 
 

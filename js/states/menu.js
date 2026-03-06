@@ -17,6 +17,7 @@ class MenuState {
         this.selectedOption = 0;
         this.keyDelay = 200;
         this.lastKeyTime = 0;
+        this.menuOptionElements = [];
     }
     
     /**
@@ -46,6 +47,7 @@ class MenuState {
             // Play menu music
             // this.game.audio.playMusic('menuMusic'); // Commented out - no audio assets defined yet
             
+            this.selectedOption = 0;
             // Set up menu screen
             this.setupMenuScreen();
             logger.info('Menu screen setup complete');
@@ -60,6 +62,7 @@ class MenuState {
     setupMenuScreen() {
         const menuScreen = document.getElementById('menu-screen');
         menuScreen.innerHTML = '';
+        this.menuOptionElements = [];
         
         // Create main container
         const mainContainer = document.createElement('div');
@@ -112,11 +115,10 @@ class MenuState {
         // Add menu options with improved styling
         this.menuOptions.forEach((option, index) => {
             const optionElement = document.createElement('div');
-            
+
             optionElement.textContent = option.text;
             optionElement.style.color = 'white';
             optionElement.style.cursor = 'pointer';
-            
             optionElement.style.fontSize = '28px';
             optionElement.style.margin = '8px';
             optionElement.style.padding = '8px 20px';
@@ -125,24 +127,27 @@ class MenuState {
             optionElement.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
             optionElement.style.border = '1px solid rgba(255, 255, 255, 0.3)';
             optionElement.style.borderRadius = '6px';
-            
-            // Add hover effect
+
             optionElement.addEventListener('mouseover', () => {
-                optionElement.style.color = '#ffcc00';
-                optionElement.style.textShadow = '0 0 15px #ffcc00';
+                this.selectedOption = index;
+                this.highlightSelectedOption();
             });
-            
-            optionElement.addEventListener('mouseout', () => {
-                optionElement.style.color = 'white';
-                optionElement.style.textShadow = '2px 2px 4px rgba(0,0,0,0.8)';
+
+            optionElement.addEventListener('focus', () => {
+                this.selectedOption = index;
+                this.highlightSelectedOption();
             });
-            
-            // Add click handler
-            optionElement.addEventListener('click', option.action);
-            
+
+            optionElement.addEventListener('click', () => {
+                this.selectedOption = index;
+                this.highlightSelectedOption();
+                option.action();
+            });
+
+            this.menuOptionElements.push(optionElement);
             menuContainer.appendChild(optionElement);
         });
-        
+
         // Add instructions - positioned at top right
         const instructions = document.createElement('div');
         instructions.style.position = 'absolute';
@@ -163,6 +168,7 @@ class MenuState {
         // Assemble the layout
         mainContainer.appendChild(menuContainer);
         menuScreen.appendChild(mainContainer);
+        this.highlightSelectedOption();
     }
     
     /**
@@ -189,6 +195,7 @@ class MenuState {
     showLoadGameScreen() {
         const menuScreen = document.getElementById('menu-screen');
         menuScreen.innerHTML = '';
+        this.menuOptionElements = [];
         
         const loadContainer = document.createElement('div');
         loadContainer.style.display = 'flex';
@@ -303,6 +310,7 @@ class MenuState {
     showReadme() {
         const menuScreen = document.getElementById('menu-screen');
         menuScreen.innerHTML = '';
+        this.menuOptionElements = [];
         
         const readmeContainer = document.createElement('div');
         readmeContainer.style.display = 'flex';
@@ -418,6 +426,7 @@ class MenuState {
         // Create credits screen
         const menuScreen = document.getElementById('menu-screen');
         menuScreen.innerHTML = '';
+        this.menuOptionElements = [];
         
         const creditsContainer = document.createElement('div');
         creditsContainer.style.display = 'flex';
@@ -507,9 +516,15 @@ class MenuState {
      * Update the menu state
      * @param {number} deltaTime - Time since last update in milliseconds
      */
+    isMainMenuActive() {
+        return this.menuOptionElements.length === this.menuOptions.length && this.menuOptionElements.every(option => option.isConnected);
+    }
+
     update(deltaTime) {
-        // We no longer need the time-based delay check, because wasKeyJustPressed handles it.
-        
+        if (!this.isMainMenuActive()) {
+            return;
+        }
+
         if (this.game.input.wasKeyJustPressed('ArrowUp') || this.game.input.wasKeyJustPressed('w')) {
             this.selectedOption = (this.selectedOption - 1 + this.menuOptions.length) % this.menuOptions.length;
             this.highlightSelectedOption();
@@ -529,21 +544,19 @@ class MenuState {
      * Highlight the currently selected option for keyboard navigation
      */
     highlightSelectedOption() {
-        const menuScreen = document.getElementById('menu-screen');
-        const menuContainer = menuScreen.querySelector('div > div > div');
-        if (!menuContainer) return;
-        
-        const options = menuContainer.querySelectorAll('div');
-        
-        options.forEach((option, index) => {
-            if (option.textContent.includes('(')) return; // Skip loading text
-            
+        if (!this.menuOptionElements.length) return;
+
+        this.menuOptionElements.forEach((option, index) => {
             if (index === this.selectedOption) {
                 option.style.color = '#ffcc00';
                 option.style.textShadow = '0 0 15px #ffcc00';
+                option.style.borderColor = '#ffcc00';
+                option.style.transform = 'scale(1.03)';
             } else {
                 option.style.color = 'white';
                 option.style.textShadow = '2px 2px 4px rgba(0,0,0,0.8)';
+                option.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+                option.style.transform = 'scale(1)';
             }
         });
     }
@@ -572,6 +585,7 @@ class MenuState {
     showOptionsMenu() {
         const menuScreen = document.getElementById('menu-screen');
         menuScreen.innerHTML = '';
+        this.menuOptionElements = [];
 
         // Create overlay container
         const overlay = document.createElement('div');
@@ -708,3 +722,6 @@ class MenuState {
 }
 
 export { MenuState };
+
+
+

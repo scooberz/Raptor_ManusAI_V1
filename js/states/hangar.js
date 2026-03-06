@@ -30,43 +30,65 @@ class HangarState {
     createHotspot(label, position, onClick) {
         const button = document.createElement('button');
         button.type = 'button';
-        button.textContent = label;
         button.style.position = 'absolute';
         button.style.left = position.left;
         button.style.top = position.top;
         button.style.width = position.width;
         button.style.height = position.height;
-        button.style.background = this.showHotspotDebug ? 'rgba(255, 204, 0, 0.12)' : 'transparent';
-        button.style.border = this.showHotspotDebug ? '2px dashed rgba(255, 204, 0, 0.45)' : '2px solid transparent';
-        button.style.borderRadius = '10px';
+        button.style.background = this.showHotspotDebug ? 'rgba(255, 204, 0, 0.08)' : 'transparent';
+        button.style.border = this.showHotspotDebug ? '1px dashed rgba(255, 204, 0, 0.4)' : '1px solid transparent';
+        button.style.borderRadius = '12px';
         button.style.cursor = 'pointer';
         button.style.display = 'flex';
-        button.style.alignItems = 'flex-end';
+        button.style.alignItems = 'center';
         button.style.justifyContent = 'center';
-        button.style.paddingBottom = '10px';
-        button.style.color = '#ffcc00';
-        button.style.fontSize = '18px';
-        button.style.fontWeight = 'bold';
-        button.style.textShadow = '0 0 8px rgba(0, 0, 0, 0.9)';
-        button.style.transition = 'all 0.15s ease';
+        button.style.transition = 'transform 0.15s ease, filter 0.15s ease, background 0.15s ease';
+        button.style.zIndex = '4';
 
-        button.addEventListener('mouseover', () => {
-            button.style.borderColor = '#ffcc00';
-            button.style.background = 'rgba(255, 204, 0, 0.08)';
-        });
-        button.addEventListener('mouseout', () => {
-            button.style.borderColor = this.showHotspotDebug ? 'rgba(255, 204, 0, 0.45)' : 'transparent';
-            button.style.background = this.showHotspotDebug ? 'rgba(255, 204, 0, 0.12)' : 'transparent';
-        });
-        button.addEventListener('focus', () => {
-            button.style.borderColor = '#ffcc00';
-            button.style.background = 'rgba(255, 204, 0, 0.12)';
-        });
-        button.addEventListener('blur', () => {
-            button.style.borderColor = this.showHotspotDebug ? 'rgba(255, 204, 0, 0.45)' : 'transparent';
-            button.style.background = this.showHotspotDebug ? 'rgba(255, 204, 0, 0.12)' : 'transparent';
-        });
+        const badge = document.createElement('span');
+        badge.textContent = label;
+        badge.style.display = 'inline-flex';
+        badge.style.alignItems = 'center';
+        badge.style.justifyContent = 'center';
+        badge.style.padding = '9px 14px';
+        badge.style.background = 'rgba(7, 10, 16, 0.8)';
+        badge.style.border = '1px solid rgba(255, 204, 0, 0.45)';
+        badge.style.borderRadius = '999px';
+        badge.style.color = '#ffcc00';
+        badge.style.fontSize = '15px';
+        badge.style.fontWeight = 'bold';
+        badge.style.letterSpacing = '0.04em';
+        badge.style.textShadow = '0 0 10px rgba(0, 0, 0, 0.9)';
+        badge.style.boxShadow = '0 8px 20px rgba(0, 0, 0, 0.35)';
+        button.appendChild(badge);
+
+        const setIdleState = () => {
+            button.style.background = this.showHotspotDebug ? 'rgba(255, 204, 0, 0.08)' : 'transparent';
+            button.style.borderColor = this.showHotspotDebug ? 'rgba(255, 204, 0, 0.4)' : 'transparent';
+            button.style.transform = 'scale(1)';
+            button.style.filter = 'brightness(1)';
+            badge.style.background = 'rgba(7, 10, 16, 0.8)';
+            badge.style.borderColor = 'rgba(255, 204, 0, 0.45)';
+            badge.style.color = '#ffcc00';
+        };
+
+        const setHoverState = () => {
+            button.style.background = 'rgba(255, 204, 0, 0.06)';
+            button.style.borderColor = 'rgba(255, 204, 0, 0.3)';
+            button.style.transform = 'scale(1.02)';
+            button.style.filter = 'brightness(1.06)';
+            badge.style.background = 'rgba(22, 18, 7, 0.9)';
+            badge.style.borderColor = '#ffcc00';
+            badge.style.color = '#fff3b0';
+        };
+
+        button.addEventListener('mouseover', setHoverState);
+        button.addEventListener('mouseout', setIdleState);
+        button.addEventListener('focus', setHoverState);
+        button.addEventListener('blur', setIdleState);
         button.addEventListener('click', onClick);
+        setIdleState();
+
         return button;
     }
 
@@ -98,28 +120,27 @@ class HangarState {
         const overlay = document.createElement('div');
         overlay.style.position = 'absolute';
         overlay.style.inset = '0';
-        overlay.style.background = 'linear-gradient(180deg, rgba(0,0,0,0.22) 0%, rgba(0,0,0,0.12) 30%, rgba(0,0,0,0.38) 100%)';
+        overlay.style.background = 'linear-gradient(180deg, rgba(0,0,0,0.18) 0%, rgba(0,0,0,0.08) 28%, rgba(0,0,0,0.3) 100%)';
         overlay.style.zIndex = '2';
         mainContainer.appendChild(overlay);
 
         const statsPanel = document.createElement('div');
         statsPanel.style.position = 'absolute';
         statsPanel.style.left = '3.5%';
-        statsPanel.style.top = '5%';
-        statsPanel.style.width = '22%';
-        statsPanel.style.minWidth = '240px';
-        statsPanel.style.padding = '16px 18px';
+        statsPanel.style.top = '5.5%';
+        statsPanel.style.width = '20%';
+        statsPanel.style.minWidth = '230px';
+        statsPanel.style.padding = '14px 16px';
         statsPanel.style.background = 'rgba(8, 10, 14, 0.78)';
-        statsPanel.style.border = '1px solid rgba(255, 204, 0, 0.35)';
+        statsPanel.style.border = '1px solid rgba(255, 204, 0, 0.28)';
         statsPanel.style.borderRadius = '8px';
         statsPanel.style.color = 'white';
         statsPanel.style.zIndex = '3';
-        statsPanel.style.backdropFilter = 'blur(3px)';
         statsPanel.innerHTML = `
-            <div style="font-size: 30px; color: #ffcc00; margin-bottom: 10px;">HANGAR</div>
+            <div style="font-size: 28px; color: #ffcc00; margin-bottom: 10px;">HANGAR</div>
             <div style="font-size: 22px; margin-bottom: 4px;">${playerData.name}</div>
-            <div style="font-size: 16px; color: #9fd7ff; margin-bottom: 16px;">Callsign: ${playerData.callsign}</div>
-            <div style="font-size: 15px; line-height: 1.8;">
+            <div style="font-size: 15px; color: #9fd7ff; margin-bottom: 12px;">Callsign: ${playerData.callsign}</div>
+            <div style="font-size: 14px; line-height: 1.7;">
                 <div>Funds: $${playerData.money}</div>
                 <div>Score: ${playerData.score}</div>
                 <div>Hull: ${playerData.health}/${playerData.maxHealth || 100}</div>
@@ -134,12 +155,12 @@ class HangarState {
         status.style.left = '50%';
         status.style.top = '6%';
         status.style.transform = 'translateX(-50%)';
-        status.style.padding = '10px 16px';
+        status.style.padding = '9px 15px';
         status.style.background = 'rgba(8, 10, 14, 0.72)';
-        status.style.border = '1px solid rgba(255, 255, 255, 0.18)';
+        status.style.border = '1px solid rgba(255, 255, 255, 0.16)';
         status.style.borderRadius = '999px';
         status.style.color = this.completedLevel ? '#ffcc00' : '#d7d7d7';
-        status.style.fontSize = '16px';
+        status.style.fontSize = '15px';
         status.style.zIndex = '3';
         status.textContent = this.completedLevel
             ? `Mission ${this.completedLevel} complete. The ship is back in the hangar.`
@@ -147,10 +168,10 @@ class HangarState {
         mainContainer.appendChild(status);
 
         const hotspots = [
-            this.createHotspot(this.getMissionLabel(), { left: '7%', top: '54%', width: '24%', height: '24%' }, () => this.chooseNextMission()),
-            this.createHotspot("Harold's Shop", { left: '70%', top: '55%', width: '22%', height: '23%' }, () => this.openShop()),
-            this.createHotspot('Save Game', { left: '67%', top: '28%', width: '23%', height: '15%' }, () => this.saveGame()),
-            this.createHotspot('Main Menu', { left: '42%', top: '82%', width: '16%', height: '10%' }, () => this.exitToMenu())
+            this.createHotspot(this.getMissionLabel(), { left: '6%', top: '57%', width: '20%', height: '14%' }, () => this.chooseNextMission()),
+            this.createHotspot("Harold's Shop", { left: '76%', top: '59%', width: '14%', height: '10%' }, () => this.openShop()),
+            this.createHotspot('Save Game', { left: '73%', top: '26%', width: '17%', height: '9%' }, () => this.saveGame()),
+            this.createHotspot('Main Menu', { left: '42%', top: '88%', width: '16%', height: '6%' }, () => this.exitToMenu())
         ];
 
         hotspots.forEach((hotspot) => mainContainer.appendChild(hotspot));

@@ -22,7 +22,9 @@ export class Projectile extends Entity {
         this.velocityY = velocityY;
         this.damage = damage;
         this.owner = owner;
-        this.sprite = sprite; // This can be an image object or null
+        this.sprite = sprite;
+        this.width = owner === 'player' ? 12 : 8;
+        this.height = owner === 'player' ? 24 : 16;
         this.active = true;
     }
 

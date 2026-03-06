@@ -42,7 +42,9 @@ class Collectible extends Entity {
                 this.sprite = this.game.assets.getImage('megabombPickup');
                 break;
             case 'weapon':
-                // Different weapon pickups would have different sprites
+                this.sprite = this.value === 'MISSILE'
+                    ? this.game.assets.getImage('MISSILE')
+                    : this.game.assets.getImage('playerBullet');
                 break;
             case 'money':
                 // Money pickup sprite
@@ -186,8 +188,11 @@ class Collectible extends Entity {
                 player.addMegabomb();
                 break;
             case 'weapon':
-                // Handle weapon upgrade
-                player.upgradePrimaryWeapon();
+                if (typeof this.value === 'string' && this.value) {
+                    player.unlockWeapon(this.value);
+                } else {
+                    player.upgradePrimaryWeapon();
+                }
                 break;
             case 'money':
                 player.addMoney(this.value);
@@ -200,4 +205,5 @@ class Collectible extends Entity {
 }
 
 export { Collectible };
+
 

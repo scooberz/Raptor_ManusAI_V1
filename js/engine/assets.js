@@ -18,6 +18,37 @@ class AssetManager {
         this.assetList = { images: {}, audio: {}, data: {} };
     }
 
+    processImage(key, image) {
+        if (key !== 'playerBullet') {
+            return image;
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = image.naturalWidth || image.width;
+        canvas.height = image.naturalHeight || image.height;
+        const ctx = canvas.getContext('2d', { alpha: true });
+        ctx.drawImage(image, 0, 0);
+
+        try {
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const pixels = imageData.data;
+            for (let i = 0; i < pixels.length; i += 4) {
+                const red = pixels[i];
+                const green = pixels[i + 1];
+                const blue = pixels[i + 2];
+                const alpha = pixels[i + 3];
+                if (alpha > 0 && red >= 245 && green >= 245 && blue >= 245) {
+                    pixels[i + 3] = 0;
+                }
+            }
+            ctx.putImageData(imageData, 0, 0);
+            return canvas;
+        } catch (error) {
+            logger.warn('Unable to post-process image for transparency:', key, error);
+            return image;
+        }
+    }
+
     loadImage(key, src) {
         if (this.images[key]) {
             logger.debug(`Image ${key} already loaded, skipping`);
@@ -32,7 +63,7 @@ class AssetManager {
             image.crossOrigin = 'anonymous';
 
             image.onload = () => {
-                this.images[key] = image;
+                this.images[key] = this.processImage(key, image);
                 this.loadedAssets++;
                 this.notifyProgress();
                 resolve(image);
@@ -192,3 +223,4 @@ class AssetManager {
 }
 
 export { AssetManager };
+

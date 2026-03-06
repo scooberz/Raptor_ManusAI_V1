@@ -254,7 +254,7 @@ class CharacterSelectState {
             maxHealth: 100,
             shield: 0,
             megabombs: 3,
-            unlockedWeapons: ['MISSILE'],
+            unlockedWeapons: [],
             lastCompletedLevel: 0
         });
 
@@ -289,3 +289,4 @@ class CharacterSelectState {
 }
 
 export { CharacterSelectState };
+

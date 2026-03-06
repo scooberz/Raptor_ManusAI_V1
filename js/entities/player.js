@@ -19,14 +19,14 @@ class Player extends Entity {
         this.score = 0;
         this.collisionDamage = 20;
 
-        this.weaponOrder = ['MISSILE'];
-        this.currentWeaponIndex = 0;
-        this.currentWeapon = this.weaponOrder[this.currentWeaponIndex];
+        this.weaponOrder = [];
+        this.currentWeaponIndex = -1;
+        this.currentWeapon = null;
         this.weapons = {
             CANNON: { name: 'Autocannon', fireRate: 110, lastFired: 0, level: 1 },
             MISSILE: { name: 'Missiles', fireRate: 715, lastFired: 0 }
         };
-        this.unlockedWeapons = ['MISSILE'];
+        this.unlockedWeapons = [];
 
         this.megabombs = 3;
         this.lastMegabombTime = 0;
@@ -41,7 +41,7 @@ class Player extends Entity {
         this.blinkInterval = 100;
         this.visible = true;
 
-        this.missileAutoFire = true;
+        this.missileAutoFire = false;
         this.syncWithPlayerData();
     }
 
@@ -56,7 +56,13 @@ class Player extends Entity {
         this.score = this.game.playerData.score ?? 0;
         this.shield = this.game.playerData.shield ?? 0;
         this.megabombs = this.game.playerData.megabombs ?? 3;
-        this.unlockedWeapons = this.game.playerData.unlockedWeapons || ['MISSILE'];
+        this.unlockedWeapons = Array.isArray(this.game.playerData.unlockedWeapons)
+            ? [...new Set(this.game.playerData.unlockedWeapons)]
+            : [];
+        this.weaponOrder = [...this.unlockedWeapons];
+        this.currentWeaponIndex = this.weaponOrder.length > 0 ? 0 : -1;
+        this.currentWeapon = this.currentWeaponIndex >= 0 ? this.weaponOrder[this.currentWeaponIndex] : null;
+        this.missileAutoFire = this.hasWeapon('MISSILE') ? this.missileAutoFire : false;
         logger.debug(`Player synced with playerData: health=${this.health}, money=${this.money}`);
     }
 
@@ -93,7 +99,6 @@ class Player extends Entity {
         this.clampToPlayableBounds();
     }
 
-
     clampToPlayableBounds() {
         const bounds = this.game.currentState && typeof this.game.currentState.getPlayableBounds === 'function'
             ? this.game.currentState.getPlayableBounds()
@@ -104,6 +109,7 @@ class Player extends Entity {
         if (this.y < bounds.top) this.y = bounds.top;
         if (this.y + this.height > bounds.bottom) this.y = bounds.bottom - this.height;
     }
+
     handleMovement() {
         const input = this.game.input;
         const left = input.isKeyPressed('ArrowLeft') || input.isKeyPressed('a');
@@ -153,14 +159,7 @@ class Player extends Entity {
             this.currentDirection = 0;
         }
 
-        const bounds = this.game.currentState && typeof this.game.currentState.getPlayableBounds === 'function'
-            ? this.game.currentState.getPlayableBounds()
-            : { left: 0, top: 0, right: this.game.width, bottom: this.game.height };
-
-        if (this.x < bounds.left) this.x = bounds.left;
-        if (this.x + this.width > bounds.right) this.x = bounds.right - this.width;
-        if (this.y < bounds.top) this.y = bounds.top;
-        if (this.y + this.height > bounds.bottom) this.y = bounds.bottom - this.height;
+        this.clampToPlayableBounds();
     }
 
     handleWeapons() {
@@ -168,6 +167,7 @@ class Player extends Entity {
         const now = Date.now();
         const primaryPressed = input.isMouseButtonPressed('left') || input.isKeyPressed(' ') || input.isKeyPressed('Control');
         const specialPressed = input.isKeyPressed('Shift');
+        const hasMissiles = this.hasWeapon('MISSILE');
 
         if (primaryPressed) {
             const cannon = this.weapons.CANNON;
@@ -176,7 +176,7 @@ class Player extends Entity {
                 cannon.lastFired = now;
             }
 
-            if (this.missileAutoFire) {
+            if (hasMissiles && this.missileAutoFire) {
                 const missile = this.weapons.MISSILE;
                 if (now - missile.lastFired >= missile.fireRate) {
                     this.fireMissile();
@@ -185,7 +185,7 @@ class Player extends Entity {
             }
         }
 
-        if (specialPressed) {
+        if (specialPressed && hasMissiles) {
             const missile = this.weapons.MISSILE;
             if (now - missile.lastFired >= missile.fireRate) {
                 this.fireMissile();
@@ -193,7 +193,7 @@ class Player extends Entity {
             }
         }
 
-        if (input.wasKeyJustPressed('Alt') || input.wasMouseButtonJustPressed('middle')) {
+        if ((input.wasKeyJustPressed('Alt') || input.wasMouseButtonJustPressed('middle')) && hasMissiles) {
             this.missileAutoFire = !this.missileAutoFire;
             logger.debug(`Missile auto-fire mode: ${this.missileAutoFire ? 'ON' : 'OFF'}`);
         }
@@ -243,6 +243,10 @@ class Player extends Entity {
     }
 
     fireMissile() {
+        if (!this.hasWeapon('MISSILE')) {
+            return;
+        }
+
         const missileSpacing = 12;
         const missileDamage = 60;
         const initialVelocity = { x: 0, y: -50 };
@@ -347,6 +351,29 @@ class Player extends Entity {
         }
     }
 
+    hasWeapon(weaponId) {
+        return this.unlockedWeapons.includes(weaponId);
+    }
+
+    unlockWeapon(weaponId) {
+        if (!weaponId || this.hasWeapon(weaponId)) {
+            return;
+        }
+
+        this.unlockedWeapons.push(weaponId);
+        this.weaponOrder = [...this.unlockedWeapons];
+        if (this.currentWeaponIndex < 0) {
+            this.currentWeaponIndex = 0;
+            this.currentWeapon = this.weaponOrder[0] || null;
+        }
+        if (weaponId === 'MISSILE') {
+            this.missileAutoFire = false;
+        }
+        if (this.game.playerData) {
+            this.game.playerData.unlockedWeapons = [...this.unlockedWeapons];
+        }
+    }
+
     upgradePrimaryWeapon() {
         const weapon = this.weapons.CANNON;
         if (weapon && weapon.level < 5) {
@@ -357,4 +384,3 @@ class Player extends Entity {
 }
 
 export { Player };
-
