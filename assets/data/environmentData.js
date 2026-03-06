@@ -1,22 +1,24 @@
 /**
- * Environment Data - Database of destructible environmental objects
- * Defines properties for all destructible ground-based objects in the game
+ * Environment Data - Database of destructible environmental objects.
+ * These definitions intentionally reuse the existing spritework while allowing
+ * sector-specific value, durability, and presentation differences.
  */
 
 export const environmentData = {
-    'FUEL_TANK': {
+    FUEL_TANK: {
         id: 'FUEL_TANK',
         name: 'Fuel Tank',
         spriteAsset: 'fuelTank',
         width: 48,
         height: 48,
         health: 25,
-        explosionSize: 'large', // 'small', 'medium', 'large'
+        explosionSize: 'large',
         scoreValue: 50,
-        description: 'Volatile fuel storage tank - explodes dramatically when destroyed'
+        moneyValue: 40,
+        chainExplosions: 2,
+        description: 'Volatile fuel storage tank.'
     },
-    
-    'RADAR_DISH': {
+    RADAR_DISH: {
         id: 'RADAR_DISH',
         name: 'Radar Dish',
         spriteAsset: 'radarDish',
@@ -25,10 +27,10 @@ export const environmentData = {
         health: 75,
         explosionSize: 'medium',
         scoreValue: 150,
-        description: 'Communications radar array - high value target'
+        moneyValue: 90,
+        description: 'Communications radar array.'
     },
-    
-    'BUNKER': {
+    BUNKER: {
         id: 'BUNKER',
         name: 'Concrete Bunker',
         spriteAsset: 'bunker',
@@ -37,129 +39,121 @@ export const environmentData = {
         health: 150,
         explosionSize: 'large',
         scoreValue: 200,
-        description: 'Heavily fortified bunker - requires sustained fire to destroy'
+        moneyValue: 125,
+        description: 'Heavily fortified bunker.'
     },
-    
-    'SILO': {
-        id: 'SILO',
-        name: 'Missile Silo',
-        spriteAsset: 'silo_sprite',
+    COASTAL_RADAR: {
+        id: 'COASTAL_RADAR',
+        name: 'Coastal Radar',
+        spriteAsset: 'radarDish',
         width: 56,
-        height: 72,
-        health: 100,
-        explosionSize: 'large',
-        scoreValue: 300,
-        description: 'Strategic missile launch facility - extremely valuable target'
-    },
-    
-    'TURRET_BASE': {
-        id: 'TURRET_BASE',
-        name: 'Anti-Aircraft Turret',
-        spriteAsset: 'turret_base_sprite',
-        width: 40,
-        height: 40,
+        height: 56,
         health: 60,
         explosionSize: 'medium',
-        scoreValue: 100,
-        description: 'Automated defense turret - destroy before it targets you'
+        scoreValue: 120,
+        moneyValue: 85,
+        description: 'Smaller shoreline radar station.'
     },
-    
-    'POWER_STATION': {
-        id: 'POWER_STATION',
-        name: 'Power Generator',
-        spriteAsset: 'power_station_sprite',
-        width: 72,
-        height: 48,
-        health: 80,
+    SHORE_BUNKER: {
+        id: 'SHORE_BUNKER',
+        name: 'Shore Bunker',
+        spriteAsset: 'bunker',
+        width: 84,
+        height: 58,
+        health: 165,
         explosionSize: 'large',
-        scoreValue: 175,
-        description: 'Critical power infrastructure - causes chain explosions'
+        scoreValue: 180,
+        moneyValue: 130,
+        description: 'Coastal emplacement guarding the shoreline.'
     },
-    
-    'WAREHOUSE': {
-        id: 'WAREHOUSE',
-        name: 'Supply Warehouse',
-        spriteAsset: 'warehouse_sprite',
-        width: 96,
-        height: 64,
-        health: 120,
-        explosionSize: 'medium',
-        scoreValue: 125,
-        description: 'Large storage facility - may contain valuable supplies'
-    },
-    
-    'COMM_TOWER': {
-        id: 'COMM_TOWER',
-        name: 'Communication Tower',
-        spriteAsset: 'comm_tower_sprite',
-        width: 32,
-        height: 80,
+    FUEL_DEPOT: {
+        id: 'FUEL_DEPOT',
+        name: 'Fuel Depot',
+        spriteAsset: 'fuelTank',
+        width: 52,
+        height: 52,
         health: 40,
-        explosionSize: 'small',
-        scoreValue: 75,
-        description: 'Tall communication antenna - easy target but low health'
-    },
-    
-    'HANGAR': {
-        id: 'HANGAR',
-        name: 'Aircraft Hangar',
-        spriteAsset: 'hangar_sprite',
-        width: 120,
-        height: 80,
-        health: 200,
         explosionSize: 'large',
-        scoreValue: 250,
-        description: 'Large aircraft storage facility - heavily armored'
+        scoreValue: 95,
+        moneyValue: 140,
+        chainExplosions: 3,
+        description: 'Large volatile fuel storage.'
     },
-    
-    'SMALL_BUILDING': {
-        id: 'SMALL_BUILDING',
-        name: 'Small Building',
-        spriteAsset: 'small_building_sprite',
-        width: 40,
-        height: 32,
-        health: 30,
-        explosionSize: 'small',
-        scoreValue: 25,
-        description: 'Basic structure - quick to destroy'
+    BRIDGE_TURRET: {
+        id: 'BRIDGE_TURRET',
+        name: 'Bridge Guard Bunker',
+        spriteAsset: 'bunker',
+        width: 68,
+        height: 50,
+        health: 125,
+        explosionSize: 'medium',
+        scoreValue: 145,
+        moneyValue: 100,
+        description: 'Bridge defense hardpoint.'
+    },
+    REFINERY_TANK: {
+        id: 'REFINERY_TANK',
+        name: 'Refinery Tank',
+        spriteAsset: 'fuelTank',
+        width: 56,
+        height: 56,
+        health: 55,
+        explosionSize: 'large',
+        scoreValue: 125,
+        moneyValue: 165,
+        chainExplosions: 4,
+        description: 'Chemical processing tank with volatile contents.'
+    },
+    REFINERY_RADAR: {
+        id: 'REFINERY_RADAR',
+        name: 'Refinery Control Radar',
+        spriteAsset: 'radarDish',
+        width: 60,
+        height: 60,
+        health: 80,
+        explosionSize: 'medium',
+        scoreValue: 160,
+        moneyValue: 110,
+        description: 'Industrial command radar.'
+    },
+    HARDENED_BUNKER: {
+        id: 'HARDENED_BUNKER',
+        name: 'Hardened Bunker',
+        spriteAsset: 'bunker',
+        width: 92,
+        height: 64,
+        health: 230,
+        explosionSize: 'large',
+        scoreValue: 260,
+        moneyValue: 180,
+        description: 'Heavy final-approach bunker.'
+    },
+    COMMAND_RADAR: {
+        id: 'COMMAND_RADAR',
+        name: 'Command Radar',
+        spriteAsset: 'radarDish',
+        width: 72,
+        height: 72,
+        health: 110,
+        explosionSize: 'large',
+        scoreValue: 210,
+        moneyValue: 150,
+        description: 'High-value command-and-control radar.'
     }
 };
 
-/**
- * Helper function to get environment object data by ID
- * @param {string} id - The environment object ID
- * @returns {Object|null} Environment object data or null if not found
- */
 export function getEnvironmentData(id) {
     return environmentData[id] || null;
 }
 
-/**
- * Helper function to get all environment object IDs
- * @returns {Array<string>} Array of all environment object IDs
- */
 export function getAllEnvironmentIds() {
     return Object.keys(environmentData);
 }
 
-/**
- * Helper function to get environment objects by explosion size
- * @param {string} size - Explosion size ('small', 'medium', 'large')
- * @returns {Array<Object>} Array of environment objects with matching explosion size
- */
 export function getEnvironmentsByExplosionSize(size) {
-    return Object.values(environmentData).filter(env => env.explosionSize === size);
+    return Object.values(environmentData).filter((env) => env.explosionSize === size);
 }
 
-/**
- * Helper function to get environment objects by health range
- * @param {number} minHealth - Minimum health value
- * @param {number} maxHealth - Maximum health value
- * @returns {Array<Object>} Array of environment objects within health range
- */
 export function getEnvironmentsByHealthRange(minHealth, maxHealth) {
-    return Object.values(environmentData).filter(env => 
-        env.health >= minHealth && env.health <= maxHealth
-    );
+    return Object.values(environmentData).filter((env) => env.health >= minHealth && env.health <= maxHealth);
 }
-

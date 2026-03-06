@@ -1,6 +1,6 @@
 /**
  * DestructibleObject class
- * Represents static destructible environmental objects
+ * Represents scrolling destructible environmental objects.
  */
 import { Entity } from '../engine/entity.js';
 import { Explosion } from './explosion.js';
@@ -9,27 +9,31 @@ import { getEnvironmentData } from '../../assets/data/environmentData.js';
 import { logger } from '../utils/logger.js';
 
 class DestructibleObject extends Entity {
-    constructor(game, x, y, environmentType, spriteKey) {
-        // Get environment data
+    constructor(game, x, y, environmentType, options = {}) {
+        const normalizedOptions = typeof options === 'string' ? { spriteKey: options } : (options || {});
         const envData = getEnvironmentData(environmentType);
         if (!envData) {
             throw new Error(`Unknown environment type: ${environmentType}`);
         }
-        
-        super(game, x, y, envData.width, envData.height);
-        
-        // Set the layer for rendering
+
+        const width = normalizedOptions.width ?? envData.width;
+        const height = normalizedOptions.height ?? envData.height;
+        super(game, x, y, width, height);
+
         this.layer = 'environment';
-        
-        // Environment properties
         this.environmentType = environmentType;
         this.environmentData = envData;
-        this.maxHealth = envData.health;
+        this.maxHealth = normalizedOptions.health ?? envData.health;
         this.health = this.maxHealth;
-        this.scoreValue = envData.scoreValue;
-        this.explosionSize = envData.explosionSize;
-        
-        // Load sprite and set ready state
+        this.scoreValue = normalizedOptions.scoreValue ?? envData.scoreValue;
+        this.moneyValue = normalizedOptions.moneyValue ?? envData.moneyValue ?? 0;
+        this.explosionSize = normalizedOptions.explosionSize ?? envData.explosionSize;
+        this.chainExplosions = normalizedOptions.chainExplosions ?? envData.chainExplosions ?? 0;
+        this.sectionId = normalizedOptions.sectionId || null;
+        this.isLandmark = Boolean(normalizedOptions.landmark);
+        this.tint = normalizedOptions.tint || null;
+
+        const spriteKey = normalizedOptions.spriteKey || envData.spriteAsset;
         this.sprite = this.game.assets.getImage(spriteKey);
         if (this.sprite) {
             this.isReady = true;
@@ -37,116 +41,67 @@ class DestructibleObject extends Entity {
             logger.error(`Failed to load sprite with key "${spriteKey}" for environment object: ${environmentType}.`);
             this.isReady = false;
         }
-        
-        // Static object - no movement
+
         this.velocityX = 0;
         this.velocityY = 0;
-        
-        // Collision properties
         this.collisionGroup = 'environment';
         this.canTakeDamage = true;
-        
-        // Visual properties
         this.damaged = false;
-        this.damageThreshold = this.maxHealth * 0.5; // Show damage at 50% health
+        this.damageThreshold = this.maxHealth * 0.5;
     }
-    
-    /**
-     * Update the destructible object
-     * @param {number} deltaTime - Time since last update in milliseconds
-     */
+
     update(deltaTime) {
-        // Move the object down the screen at the same speed as the background
         if (this.game.mainScrollSpeed) {
             this.y += this.game.mainScrollSpeed * (deltaTime / 1000);
         }
 
-        // Call the parent Entity's update method to handle being active, etc.
         super.update(deltaTime);
 
-        // Remove if it goes off the bottom of the screen
         if (this.y > this.game.height + this.height) {
             this.destroy();
         }
-        
-        // Check if object should show damage
+
         if (this.health <= this.damageThreshold && !this.damaged) {
             this.damaged = true;
         }
     }
-    
-    /**
-     * Take damage from projectiles or other sources
-     * @param {number} damage - Amount of damage to take
-     * @param {Entity} sourceProjectile - The projectile that caused the damage (optional)
-     */
+
     takeDamage(damage, sourceProjectile = null) {
         if (!this.canTakeDamage || !this.active) {
             return false;
         }
-        
+
         this.health -= damage;
-        
-        // Create impact effect at projectile position
+
         if (sourceProjectile && this.game.currentState && this.game.currentState.effectManager) {
             this.game.currentState.effectManager.add(new ImpactEffect(this.game, sourceProjectile.x, sourceProjectile.y));
         }
-        
-        // Check if destroyed
+
         if (this.health <= 0) {
             this.destroyObject();
             return true;
         }
-        
+
         return false;
     }
-    
-    /**
-     * Create a small impact effect when hit
-     */
-    createImpactEffect() {
-        // Create small sparks or debris effect
-        const centerX = this.x + this.width / 2;
-        const centerY = this.y + this.height / 2;
-        
-        // Add small explosion effect at impact point
-        const smallExplosion = new Explosion(
-            this.game,
-            centerX - 16,
-            centerY - 16,
-            32,
-            32
-        );
-        
-        this.game.entityManager.add(smallExplosion);
-    }
-    
-    /**
-     * Destroy the object and create explosion
-     */
+
     destroyObject() {
-        // Add score to player
-        if (this.game.currentState && this.game.currentState.player) {
-            this.game.currentState.player.addScore(this.scoreValue);
+        const player = this.game.currentState?.player || this.game.player;
+        if (player) {
+            player.addScore(this.scoreValue);
+            player.addMoney(this.moneyValue);
         }
-        
-        // Create explosion based on size
+
         this.createExplosion();
-        
-        // Mark for destruction
         this.destroy();
     }
-    
-    /**
-     * Create explosion effect based on object's explosion size
-     */
+
     createExplosion() {
         const centerX = this.x + this.width / 2;
         const centerY = this.y + this.height / 2;
-        
-        let explosionWidth, explosionHeight;
-        
-        // Determine explosion size
+
+        let explosionWidth = 64;
+        let explosionHeight = 64;
         switch (this.explosionSize) {
             case 'small':
                 explosionWidth = 48;
@@ -161,11 +116,9 @@ class DestructibleObject extends Entity {
                 explosionHeight = 120;
                 break;
             default:
-                explosionWidth = 64;
-                explosionHeight = 64;
+                break;
         }
-        
-        // Create main explosion
+
         const explosion = new Explosion(
             this.game,
             centerX - explosionWidth / 2,
@@ -173,182 +126,121 @@ class DestructibleObject extends Entity {
             explosionWidth,
             explosionHeight
         );
-        
         this.game.entityManager.add(explosion);
-        
-        // For large explosions, create additional smaller explosions
-        if (this.explosionSize === 'large') {
-            this.createSecondaryExplosions(centerX, centerY);
+
+        if (this.explosionSize === 'large' || this.chainExplosions > 0) {
+            this.createSecondaryExplosions(centerX, centerY, Math.max(3, this.chainExplosions));
         }
     }
-    
-    /**
-     * Create secondary explosions for large objects
-     * @param {number} centerX - Center X position
-     * @param {number} centerY - Center Y position
-     */
-    createSecondaryExplosions(centerX, centerY) {
-        const numSecondary = 3;
+
+    createSecondaryExplosions(centerX, centerY, count) {
         const radius = 40;
-        
-        for (let i = 0; i < numSecondary; i++) {
-            const angle = (i / numSecondary) * Math.PI * 2;
+        for (let i = 0; i < count; i++) {
+            const angle = (i / count) * Math.PI * 2;
             const offsetX = Math.cos(angle) * radius;
             const offsetY = Math.sin(angle) * radius;
-            
             setTimeout(() => {
                 if (this.game.entityManager) {
-                    const secondaryExplosion = new Explosion(
-                        this.game,
-                        centerX + offsetX - 24,
-                        centerY + offsetY - 24,
-                        48,
-                        48
-                    );
+                    const secondaryExplosion = new Explosion(this.game, centerX + offsetX - 24, centerY + offsetY - 24, 48, 48);
                     this.game.entityManager.add(secondaryExplosion);
                 }
-            }, i * 150); // Stagger the secondary explosions
+            }, i * 120);
         }
     }
-    
-    /**
-     * Render the destructible object
-     * @param {CanvasRenderingContext2D} context - The canvas context to render to
-     */
+
     render(context) {
         if (this.sprite) {
-            // Apply damage tinting if damaged
+            context.save();
             if (this.damaged) {
-                context.save();
-                context.globalAlpha = 0.8;
-                context.filter = 'sepia(100%) hue-rotate(0deg) saturate(200%)';
+                context.globalAlpha = 0.82;
+                context.filter = 'sepia(100%) hue-rotate(-20deg) saturate(180%)';
             }
-            
-            context.drawImage(
-                this.sprite,
-                0,
-                0,
-                this.sprite.width,
-                this.sprite.height,
-                Math.floor(this.x),
-                Math.floor(this.y),
-                this.width,
-                this.height
-            );
-            
-            if (this.damaged) {
-                context.restore();
+
+            context.drawImage(this.sprite, Math.floor(this.x), Math.floor(this.y), this.width, this.height);
+
+            if (this.tint) {
+                context.globalCompositeOperation = 'multiply';
+                context.fillStyle = this.tint;
+                context.globalAlpha = 0.18;
+                context.fillRect(Math.floor(this.x), Math.floor(this.y), this.width, this.height);
             }
+
+            if (this.isLandmark) {
+                context.globalCompositeOperation = 'screen';
+                context.globalAlpha = 0.22;
+                context.strokeStyle = '#ffcc66';
+                context.lineWidth = 2;
+                context.strokeRect(Math.floor(this.x), Math.floor(this.y), this.width, this.height);
+            }
+            context.restore();
         } else {
-            // Render placeholder based on environment type
             this.renderPlaceholder(context);
         }
-        
-        // Render health bar for debugging (optional)
+
         if (this.game.debug) {
             this.renderHealthBar(context);
         }
     }
-    
-    /**
-     * Render a placeholder when sprite is not available
-     * @param {CanvasRenderingContext2D} context - The canvas context to render to
-     */
+
     renderPlaceholder(context) {
-        // Choose color based on environment type
-        let color = '#666666'; // Default gray
-        
+        let color = '#666666';
         switch (this.environmentType) {
             case 'FUEL_TANK':
-                color = '#FF6600'; // Orange
+            case 'FUEL_DEPOT':
+            case 'REFINERY_TANK':
+                color = '#FF6600';
                 break;
             case 'RADAR_DISH':
-                color = '#0066FF'; // Blue
+            case 'COASTAL_RADAR':
+            case 'REFINERY_RADAR':
+            case 'COMMAND_RADAR':
+                color = '#0066FF';
                 break;
             case 'BUNKER':
-                color = '#444444'; // Dark gray
-                break;
-            case 'SILO':
-                color = '#FF0000'; // Red
-                break;
-            case 'TURRET_BASE':
-                color = '#FFFF00'; // Yellow
-                break;
-            case 'POWER_STATION':
-                color = '#00FF00'; // Green
+            case 'SHORE_BUNKER':
+            case 'BRIDGE_TURRET':
+            case 'HARDENED_BUNKER':
+                color = '#444444';
                 break;
             default:
-                color = '#666666'; // Gray
+                break;
         }
-        
-        // Apply damage tinting
+
+        context.save();
         if (this.damaged) {
-            context.save();
             context.globalAlpha = 0.7;
         }
-        
-        // Draw main shape
         context.fillStyle = color;
         context.fillRect(Math.floor(this.x), Math.floor(this.y), this.width, this.height);
-        
-        // Draw border
         context.strokeStyle = '#000000';
         context.lineWidth = 2;
         context.strokeRect(Math.floor(this.x), Math.floor(this.y), this.width, this.height);
-        
-        // Draw type indicator
         context.fillStyle = '#FFFFFF';
         context.font = '10px Arial';
         context.textAlign = 'center';
-        context.fillText(
-            this.environmentType.substring(0, 4),
-            Math.floor(this.x + this.width / 2),
-            Math.floor(this.y + this.height / 2 + 3)
-        );
-        
-        if (this.damaged) {
-            context.restore();
-        }
+        context.fillText(this.environmentType.substring(0, 4), Math.floor(this.x + this.width / 2), Math.floor(this.y + this.height / 2 + 3));
+        context.restore();
     }
-    
-    /**
-     * Render health bar for debugging
-     * @param {CanvasRenderingContext2D} context - The canvas context to render to
-     */
+
     renderHealthBar(context) {
         const barWidth = this.width;
         const barHeight = 4;
         const barX = this.x;
         const barY = this.y - 8;
-        
-        // Background
         context.fillStyle = '#FF0000';
         context.fillRect(barX, barY, barWidth, barHeight);
-        
-        // Health
         const healthPercent = this.health / this.maxHealth;
         context.fillStyle = '#00FF00';
         context.fillRect(barX, barY, barWidth * healthPercent, barHeight);
-        
-        // Border
         context.strokeStyle = '#000000';
         context.lineWidth = 1;
         context.strokeRect(barX, barY, barWidth, barHeight);
     }
-    
-    /**
-     * Check if this object is off screen (override to prevent removal)
-     * @returns {boolean} Always false for static objects
-     */
+
     isOffScreen() {
-        // Static environment objects should never be removed for being off screen
         return false;
     }
-    
-    /**
-     * Get information about this destructible object
-     * @returns {Object} Object information
-     */
+
     getInfo() {
         return {
             type: this.environmentType,
@@ -356,11 +248,13 @@ class DestructibleObject extends Entity {
             health: this.health,
             maxHealth: this.maxHealth,
             scoreValue: this.scoreValue,
+            moneyValue: this.moneyValue,
             explosionSize: this.explosionSize,
-            damaged: this.damaged
+            damaged: this.damaged,
+            sectionId: this.sectionId,
+            isLandmark: this.isLandmark
         };
     }
 }
 
 export { DestructibleObject };
-
