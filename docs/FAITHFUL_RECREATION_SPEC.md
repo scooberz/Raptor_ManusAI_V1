@@ -59,7 +59,7 @@ The repo now ships:
 Current compromise:
 - only one full player sprite set exists today, so alternate airframes currently use sprite fallback plus tinting
 - most bespoke landmark identity still comes from reused sprites with new sizing, placement, tint, and reward data rather than fully unique art
-- the presentation pass is materially stronger now, but landing/game-over and final typography polish still need another pass
+- the presentation pass is materially stronger now, but final typography polish and bespoke art framing still need another pass
 - authored music and sampled SFX are still missing; the repo currently relies on procedural fallback audio
 - Level 2 is still not the active fidelity target
 
@@ -166,8 +166,18 @@ Target:
 - route and ending hooks should be present for later story expansion
 
 Current state:
-- implemented structurally
-- final cinematic polish still pending
+- landing debrief now matches the DOS terminal treatment used by the rest of the campaign flow
+- final cinematic art polish is still pending
+
+### 9. Game Over / Final Score
+Target:
+- end-of-run should feel like a contract ledger, not a generic web modal
+- show final contract score, subtotal, difficulty multiplier, and campaign totals
+- preserve keyboard-first terminal navigation
+
+Current state:
+- game-over now uses the same DOS terminal language as the other campaign screens
+- final art polish and victory-route content still need expansion
 
 ## Environment, Terrain, and Scrolling Background
 This remains one of the most important fidelity categories.
@@ -281,7 +291,7 @@ Current policy:
 - [partial] procedural fallback audio now covers menu/UI navigation, mission ambience, pickups, damage, explosions, and boss warning cues
 - [done] explosion tiers and chain-reaction feedback are visually stronger and size-aware
 - [partial] environment regions now have stronger atmosphere plus a visible geometry layer, but still need bespoke tile and sprite variation
-- [partial] HUD, briefing, landing, hangar, and shop now share a stronger terminal-style visual language
+- [done] HUD, briefing, landing, hangar, shop, and game-over now share a stronger terminal-style visual language
 - [next] replace the fallback sound bed with authored music and bespoke sampled weapon / UI effects when assets exist
 
 ### Phase F: Campaign Expansion
@@ -358,7 +368,7 @@ Current policy:
 ## Remaining Gaps Against Spec
 Highest-value remaining gaps after the current pass:
 - authored sampled audio and music still need to replace the procedural fallback sound bed
-- landing/game-over screens and final typography framing still need a stronger period-authentic DOS presentation pass
+- final typography framing and bespoke art treatment still need another polish pass
 - Level 1 landmark identity is stronger, but many high-value ground targets still reuse the same base sprites instead of bespoke art
 - ground targets are more region-specific now, but some placements still ride on wave timing rather than tile-authored geography
 - alternate airframes have meaningful stat hooks, but still need dedicated sprite sets, events, and endings
@@ -378,6 +388,9 @@ The next pass is successful when:
 - Level 1 waves feel authored around landmarks instead of generic timing lanes
 - airframe choice affects run feel in a way the player can notice immediately
 - the cash economy creates meaningful between-mission decisions
+
+
+
 
 
 

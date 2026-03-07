@@ -1,6 +1,6 @@
 /**
  * GameOverState class
- * Handles the game over state
+ * Handles the game over and final contract summary screen.
  */
 import { logger } from '../utils/logger.js';
 
@@ -11,12 +11,11 @@ class GameOverState {
         this.scoreBreakdown = null;
         this.victory = false;
         this.menuOptions = [
-            { text: 'Play Again', action: () => this.playAgain() },
-            { text: 'Return to Menu', action: () => this.returnToMenu() }
+            { text: 'Play Again', meta: 'Restart the current contract level', action: () => this.playAgain() },
+            { text: 'Return to Menu', meta: 'Exit to the root terminal', action: () => this.returnToMenu() }
         ];
         this.selectedOption = 0;
-        this.keyDelay = 200;
-        this.lastKeyTime = 0;
+        this.optionElements = [];
     }
 
     enter() {
@@ -27,122 +26,179 @@ class GameOverState {
         const partialResult = gameState?.missionStats ? gameState.buildMissionResult(false) : null;
         this.scoreBreakdown = this.game.calculateCampaignScore(this.game.playerData, partialResult);
         this.finalScore = this.scoreBreakdown.total;
-
-        if (this.game.states.game && this.game.states.game.level > 2) {
-            this.victory = true;
-        }
-
+        this.victory = Boolean(this.game.playerData?.endingFlags?.campaignComplete);
+        this.selectedOption = 0;
         this.setupGameOverScreen();
     }
 
     setupGameOverScreen() {
         const gameOverScreen = document.getElementById('game-over-screen');
         gameOverScreen.innerHTML = '';
+        this.optionElements = [];
 
-        const container = document.createElement('div');
-        container.style.display = 'flex';
-        container.style.flexDirection = 'column';
-        container.style.alignItems = 'center';
-        container.style.justifyContent = 'center';
-        container.style.width = '100%';
-        container.style.height = '100%';
-        container.style.backgroundColor = 'rgba(0, 0, 0, 0.88)';
+        const background = this.game.assets.getImage('menuBackground') || this.game.assets.getImage('hangarBackground');
 
-        const title = document.createElement('h1');
-        title.textContent = this.victory ? 'Victory!' : 'Game Over';
-        title.style.color = this.victory ? '#ffcc00' : '#ff3333';
-        title.style.fontSize = '48px';
-        title.style.marginBottom = '20px';
-        container.appendChild(title);
+        const shell = document.createElement('div');
+        shell.className = 'dos-shell';
+        shell.style.background = this.victory
+            ? 'radial-gradient(circle at top, rgba(80, 62, 16, 0.38), rgba(4, 8, 12, 0.98) 72%)'
+            : 'radial-gradient(circle at top, rgba(68, 18, 18, 0.32), rgba(4, 8, 12, 0.98) 72%)';
 
-        const message = document.createElement('p');
-        message.textContent = this.victory
-            ? 'Congratulations! You have completed all levels!'
-            : 'Your ship has been destroyed!';
-        message.style.color = 'white';
-        message.style.fontSize = '24px';
-        message.style.marginBottom = '24px';
-        container.appendChild(message);
-
-        const score = document.createElement('p');
-        score.textContent = `Final Contract Score: ${this.finalScore}`;
-        score.style.color = '#ffcc00';
-        score.style.fontSize = '36px';
-        score.style.marginBottom = '18px';
-        container.appendChild(score);
-
-        if (this.scoreBreakdown) {
-            const breakdown = document.createElement('div');
-            breakdown.style.color = '#dce5ee';
-            breakdown.style.fontSize = '18px';
-            breakdown.style.lineHeight = '1.8';
-            breakdown.style.marginBottom = '30px';
-            breakdown.style.textAlign = 'center';
-            breakdown.innerHTML = `
-                Contract Value: ${this.scoreBreakdown.subtotal}<br>
-                Missions Counted: ${this.scoreBreakdown.resultsCount}<br>
-                Difficulty: ${this.scoreBreakdown.difficulty.displayName} x${this.scoreBreakdown.difficulty.scoreMultiplier.toFixed(2)}
-            `;
-            container.appendChild(breakdown);
+        if (background) {
+            const bg = document.createElement('img');
+            bg.className = 'dos-bg-image';
+            bg.src = background.src;
+            bg.style.filter = this.victory ? 'brightness(0.2) saturate(0.82)' : 'brightness(0.16) saturate(0.68)';
+            shell.appendChild(bg);
         }
 
+        const overlay = document.createElement('div');
+        overlay.className = 'dos-overlay';
+        shell.appendChild(overlay);
+
+        const layout = document.createElement('div');
+        layout.className = 'dos-screen-layout';
+        layout.style.display = 'flex';
+        layout.style.alignItems = 'center';
+        layout.style.justifyContent = 'center';
+        layout.style.height = '100%';
+
+        const frame = document.createElement('div');
+        frame.className = `dos-frame compact ${this.victory ? 'alt' : ''}`;
+        frame.style.width = 'min(980px, 88%)';
+        frame.style.padding = '22px';
+
+        const title = this.victory ? 'Contract Complete' : 'Aircraft Lost';
+        const subtitle = this.victory
+            ? 'Campaign route closed. Final contract score archived.'
+            : 'The current sortie has ended. Contract score archived.';
+
+        frame.innerHTML = `
+            <div class="dos-kicker">${this.victory ? 'Victory Archive' : 'Failure Debrief'} // Contract Ledger</div>
+            <div class="dos-title" style="margin:8px 0 6px; color:${this.victory ? '#ffcc00' : '#ff6b5f'};">${title}</div>
+            <div class="dos-subtitle">${subtitle}</div>
+        `;
+
+        const summaryGrid = document.createElement('div');
+        summaryGrid.className = 'dos-grid-3';
+        summaryGrid.style.marginTop = '18px';
+
+        const metrics = [
+            { label: 'Final Contract Score', value: `${this.finalScore}`, color: '#ffcc00' },
+            { label: 'Contract Value', value: `${this.scoreBreakdown?.subtotal || 0}`, color: '#dce5ee' },
+            { label: 'Difficulty', value: `${this.scoreBreakdown?.difficulty?.displayName || 'Rookie'} x${(this.scoreBreakdown?.difficulty?.scoreMultiplier || 1).toFixed(2)}`, color: '#8fd7ff' }
+        ];
+
+        metrics.forEach((metric) => {
+            const panel = document.createElement('div');
+            panel.className = 'dos-panel section';
+            panel.innerHTML = `
+                <div class="dos-label">${metric.label}</div>
+                <div style="font: bold 24px var(--dos-font); color:${metric.color}; margin-top:8px;">${metric.value}</div>
+            `;
+            summaryGrid.appendChild(panel);
+        });
+        frame.appendChild(summaryGrid);
+
+        const detailGrid = document.createElement('div');
+        detailGrid.className = 'dos-grid-2';
+        detailGrid.style.marginTop = '18px';
+
+        const performancePanel = document.createElement('div');
+        performancePanel.className = 'dos-panel section';
+        performancePanel.innerHTML = `
+            <div class="dos-label">Campaign Totals</div>
+            <div class="dos-copy" style="margin-top:10px; line-height:1.8;">
+                Missions Counted ${this.scoreBreakdown?.resultsCount || 0}<br>
+                Missions Cleared ${this.scoreBreakdown?.completedMissions || 0}<br>
+                Pilot ${this.game.playerData?.callsign || 'RAPTOR'}<br>
+                Airframe ${this.game.getPlayerShipProfile(this.game.playerData?.shipId).displayName}
+            </div>
+        `;
+        detailGrid.appendChild(performancePanel);
+
+        const verdictPanel = document.createElement('div');
+        verdictPanel.className = 'dos-panel section';
+        verdictPanel.innerHTML = `
+            <div class="dos-label">Final Verdict</div>
+            <div class="dos-copy" style="margin-top:10px; line-height:1.8;">
+                ${this.victory ? 'Contract completed with route archive preserved.' : 'Sortie failed before contract completion.'}<br>
+                ${this.victory ? 'Proceed to the root terminal for a new run or future route branch.' : 'Restart the current contract or return to the root terminal.'}
+            </div>
+        `;
+        detailGrid.appendChild(verdictPanel);
+        frame.appendChild(detailGrid);
+
+        const optionsPanel = document.createElement('div');
+        optionsPanel.className = 'dos-panel section';
+        optionsPanel.style.marginTop = '18px';
+        optionsPanel.innerHTML = '<div class="dos-label">Terminal Actions</div>';
+
+        const optionList = document.createElement('div');
+        optionList.className = 'dos-terminal-list';
+        optionList.style.marginTop = '12px';
         this.menuOptions.forEach((option, index) => {
-            const optionElement = document.createElement('div');
-            optionElement.textContent = option.text;
-            optionElement.style.color = index === this.selectedOption ? '#ffcc00' : 'white';
-            optionElement.style.fontSize = '24px';
-            optionElement.style.margin = '10px';
-            optionElement.style.cursor = 'pointer';
-            optionElement.style.textShadow = index === this.selectedOption ? '0 0 10px #ffcc00' : 'none';
-            optionElement.addEventListener('mouseover', () => {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = `dos-list-button${index === this.selectedOption ? ' selected' : ''}`;
+            button.innerHTML = `<span class="title">${option.text}</span><span class="meta">${option.meta}</span>`;
+            button.addEventListener('mouseover', () => {
+                if (this.selectedOption !== index) {
+                    this.game.audio.playSound('uiMove');
+                }
                 this.selectedOption = index;
                 this.updateMenuSelection();
             });
-            optionElement.addEventListener('click', option.action);
-            container.appendChild(optionElement);
+            button.addEventListener('focus', () => {
+                if (this.selectedOption !== index) {
+                    this.game.audio.playSound('uiMove');
+                }
+                this.selectedOption = index;
+                this.updateMenuSelection();
+            });
+            button.addEventListener('click', () => {
+                this.game.audio.playSound('uiConfirm');
+                option.action();
+            });
+            this.optionElements.push(button);
+            optionList.appendChild(button);
         });
+        optionsPanel.appendChild(optionList);
+        frame.appendChild(optionsPanel);
 
-        const instructions = document.createElement('div');
-        instructions.style.position = 'absolute';
-        instructions.style.bottom = '20px';
-        instructions.style.color = '#aaa';
-        instructions.style.fontSize = '16px';
-        instructions.textContent = 'Use Arrow Keys to navigate, Enter to select';
-        container.appendChild(instructions);
+        const footer = document.createElement('div');
+        footer.style.marginTop = '16px';
+        footer.className = 'dos-footer-hint';
+        footer.textContent = 'Arrow Keys select // Enter confirm';
+        frame.appendChild(footer);
 
-        gameOverScreen.appendChild(container);
+        layout.appendChild(frame);
+        shell.appendChild(layout);
+        gameOverScreen.appendChild(shell);
     }
 
     updateMenuSelection() {
-        const gameOverScreen = document.getElementById('game-over-screen');
-        const options = gameOverScreen.querySelectorAll('div > div:not(:last-child)');
-
-        options.forEach((option, index) => {
-            option.style.color = index === this.selectedOption ? '#ffcc00' : 'white';
-            option.style.textShadow = index === this.selectedOption ? '0 0 10px #ffcc00' : 'none';
+        this.optionElements.forEach((option, index) => {
+            option.classList.toggle('selected', index === this.selectedOption);
         });
     }
 
     update() {
-        const now = Date.now();
+        if (this.game.input.wasKeyJustPressed('ArrowUp') || this.game.input.wasKeyJustPressed('w')) {
+            this.selectedOption = (this.selectedOption - 1 + this.menuOptions.length) % this.menuOptions.length;
+            this.game.audio.playSound('uiMove');
+            this.updateMenuSelection();
+        }
 
-        if (now - this.lastKeyTime > this.keyDelay) {
-            if (this.game.input.isKeyPressed('ArrowUp') || this.game.input.isKeyPressed('w')) {
-                this.selectedOption = (this.selectedOption - 1 + this.menuOptions.length) % this.menuOptions.length;
-                this.updateMenuSelection();
-                this.lastKeyTime = now;
-            }
+        if (this.game.input.wasKeyJustPressed('ArrowDown') || this.game.input.wasKeyJustPressed('s')) {
+            this.selectedOption = (this.selectedOption + 1) % this.menuOptions.length;
+            this.game.audio.playSound('uiMove');
+            this.updateMenuSelection();
+        }
 
-            if (this.game.input.isKeyPressed('ArrowDown') || this.game.input.isKeyPressed('s')) {
-                this.selectedOption = (this.selectedOption + 1) % this.menuOptions.length;
-                this.updateMenuSelection();
-                this.lastKeyTime = now;
-            }
-
-            if (this.game.input.isKeyPressed('Enter') || this.game.input.isKeyPressed(' ')) {
-                this.menuOptions[this.selectedOption].action();
-                this.lastKeyTime = now;
-            }
+        if (this.game.input.wasKeyJustPressed('Enter') || this.game.input.wasKeyJustPressed(' ')) {
+            this.game.audio.playSound('uiConfirm');
+            this.menuOptions[this.selectedOption].action();
         }
     }
 

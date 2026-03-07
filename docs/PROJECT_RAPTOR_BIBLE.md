@@ -21,7 +21,7 @@
 - **Typography:** Functional, readable UI fonts. Final fidelity pass should move further toward a period-appropriate DOS instrumentation look.
 - **Sprite & Asset Design:** Clear silhouettes, consistent scale, readable projectiles, layered background identity, and destructible environment targets that make sense for the terrain.
 - **Environment Design:** Smooth scrolling, destructible structures, section-based visual identity, a visible environment geometry layer, region-specific ground targets, and landmark-driven reward routing that makes the player read the ground as well as the air.
-- **UI & HUD:** Compact, readable, and cash-first during active play. Score is only surfaced in debrief/final screens and is calculated from cash, kills, completion, and the selected difficulty multiplier. Menu, hangar, shop, and briefing now share a stronger DOS terminal language, with landing/game-over still open for final polish.
+- **UI & HUD:** Compact, readable, and cash-first during active play. Score is only surfaced in debrief/final screens and is calculated from cash, kills, completion, and the selected difficulty multiplier. Menu, hangar, shop, briefing, landing, and game-over now share a stronger DOS terminal language, with only final typography and bespoke art framing still open for polish.
 
 ## 4. Game Mechanics & Flow
 - **Gameplay:** Vertical scrolling shoot 'em up. Player controls a fighter jet, battling enemies on ground and in the air. Level 1 now uses named regional encounter beats, short inter-wave breathers, and a phased telegraphed boss encounter before landing/debrief.
@@ -50,6 +50,7 @@
 - Prefer explicit state-flow fixes and data-shape fixes over cosmetic patches that hide architectural problems.
 - Update the design docs when implementation meaningfully changes the active target.
 - Verify syntax and runtime-critical paths before pushing.
+
 
 
 

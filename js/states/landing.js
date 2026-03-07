@@ -30,66 +30,59 @@ class LandingState {
         const difficulty = this.game.getDifficultyProfile(result.difficulty || this.game.playerData?.difficulty);
         const ship = this.game.getPlayerShipProfile(result.shipId || this.game.playerData?.shipId);
         const background = this.game.assets.getImage('hangarBackground');
+        const routeLabel = (result.sectionsVisited || []).join(' / ') || 'Bravo Sector';
 
-        const wrapper = document.createElement('div');
-        wrapper.style.position = 'relative';
-        wrapper.style.width = '100%';
-        wrapper.style.height = '100%';
-        wrapper.style.display = 'flex';
-        wrapper.style.alignItems = 'center';
-        wrapper.style.justifyContent = 'center';
-        wrapper.style.overflow = 'hidden';
-        wrapper.style.background = 'radial-gradient(circle at center, rgba(30,44,52,0.4), rgba(4,8,12,0.98) 70%)';
+        const shell = document.createElement('div');
+        shell.className = 'dos-shell';
+        shell.style.background = 'radial-gradient(circle at center, rgba(30,44,52,0.4), rgba(4,8,12,0.98) 70%)';
 
         if (background) {
             const bg = document.createElement('img');
+            bg.className = 'dos-bg-image';
             bg.src = background.src;
-            bg.style.position = 'absolute';
-            bg.style.inset = '0';
-            bg.style.width = '100%';
-            bg.style.height = '100%';
-            bg.style.objectFit = 'cover';
             bg.style.filter = 'brightness(0.26) contrast(1.05)';
-            wrapper.appendChild(bg);
+            shell.appendChild(bg);
         }
 
-        const scan = document.createElement('div');
-        scan.style.position = 'absolute';
-        scan.style.inset = '0';
-        scan.style.background = 'repeating-linear-gradient(180deg, rgba(255,255,255,0.05) 0, rgba(255,255,255,0.05) 1px, transparent 1px, transparent 6px)';
-        scan.style.opacity = '0.15';
-        wrapper.appendChild(scan);
+        const overlay = document.createElement('div');
+        overlay.className = 'dos-overlay';
+        shell.appendChild(overlay);
+
+        const layout = document.createElement('div');
+        layout.className = 'dos-screen-layout';
+        layout.style.display = 'flex';
+        layout.style.alignItems = 'center';
+        layout.style.justifyContent = 'center';
+        layout.style.height = '100%';
 
         const frame = document.createElement('div');
-        frame.style.position = 'relative';
-        frame.style.zIndex = '2';
-        frame.style.width = 'min(960px, 88%)';
+        frame.className = 'dos-frame compact';
+        frame.style.width = 'min(980px, 88%)';
         frame.style.padding = '22px';
-        frame.style.border = '2px solid rgba(255, 204, 0, 0.34)';
-        frame.style.background = 'rgba(6, 11, 18, 0.9)';
-        frame.style.boxShadow = '0 28px 90px rgba(0,0,0,0.45)';
 
-        const routeLabel = (result.sectionsVisited || []).join(' / ') || 'Bravo Sector';
-
-        frame.innerHTML = `
-            <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:16px; margin-bottom:18px;">
-                <div>
-                    <div style="font: 13px Consolas, monospace; color: #8fb6d8; letter-spacing: 0.16em; margin-bottom: 10px;">LANDING DEBRIEF // CONTRACT FILED</div>
-                    <div style="font: bold 40px Consolas, monospace; color: #ffcc00; margin-bottom: 6px;">Mission ${this.completedLevel} Complete</div>
-                    <div style="font: 16px Consolas, monospace; color: #dce5ee;">${result.missionTitle || 'Bravo Sector'} // ${difficulty.displayName} // ${ship.displayName}</div>
-                </div>
-                <div style="min-width:240px; border:1px solid rgba(143,182,216,0.22); padding:12px 14px; background:rgba(2,8,14,0.72); font:14px Consolas, monospace; color:#d4dde8; line-height:1.7;">
+        const header = document.createElement('div');
+        header.className = 'dos-grid-2';
+        header.style.alignItems = 'start';
+        header.innerHTML = `
+            <div>
+                <div class="dos-kicker">Landing Debrief // Contract Filed</div>
+                <div class="dos-title" style="margin:8px 0 6px;">Mission ${this.completedLevel} Complete</div>
+                <div class="dos-subtitle">${result.missionTitle || 'Bravo Sector'} // ${difficulty.displayName} // ${ship.displayName}</div>
+            </div>
+            <div class="dos-panel section">
+                <div class="dos-label">Route Archive</div>
+                <div class="dos-copy" style="margin-top:10px; line-height:1.8;">
                     Craft Route ${ship.storyTrack}<br>
                     Ending Seed ${ship.endingKey}<br>
                     Sector Route ${routeLabel}
                 </div>
             </div>
         `;
+        frame.appendChild(header);
 
-        const grid = document.createElement('div');
-        grid.style.display = 'grid';
-        grid.style.gridTemplateColumns = 'repeat(3, minmax(0, 1fr))';
-        grid.style.gap = '14px';
+        const metricsGrid = document.createElement('div');
+        metricsGrid.className = 'dos-grid-3';
+        metricsGrid.style.marginTop = '18px';
 
         const cards = [
             { label: 'Cash Earned', value: `$${result.moneyEarned ?? 0}`, color: '#ffffff' },
@@ -102,27 +95,40 @@ class LandingState {
 
         cards.forEach((card) => {
             const el = document.createElement('div');
-            el.style.padding = '14px';
-            el.style.border = '1px solid rgba(255,255,255,0.08)';
-            el.style.background = 'rgba(3, 9, 14, 0.76)';
+            el.className = 'dos-panel section';
             el.innerHTML = `
-                <div style="font: 12px Consolas, monospace; color: #8fb6d8; letter-spacing: 0.12em; margin-bottom: 8px;">${card.label}</div>
-                <div style="font: bold 24px Consolas, monospace; color: ${card.color};">${card.value}</div>
+                <div class="dos-label">${card.label}</div>
+                <div style="font: bold 24px var(--dos-font); color:${card.color}; margin-top:8px;">${card.value}</div>
             `;
-            grid.appendChild(el);
+            metricsGrid.appendChild(el);
         });
-        frame.appendChild(grid);
+        frame.appendChild(metricsGrid);
 
-        const narrative = document.createElement('div');
-        narrative.style.marginTop = '18px';
-        narrative.style.padding = '14px 16px';
-        narrative.style.border = '1px solid rgba(255,255,255,0.08)';
-        narrative.style.background = 'rgba(3, 9, 14, 0.72)';
-        narrative.innerHTML = `
-            <div style="font: bold 16px Consolas, monospace; color: #ffcc00; margin-bottom: 10px;">POST-SORTIE NOTES</div>
-            <div style="font: 15px Consolas, monospace; color: #d4dde8; line-height: 1.8;">${result.landingText || 'Return to base for repair, rearm, and contract review.'}</div>
+        const narrativeGrid = document.createElement('div');
+        narrativeGrid.className = 'dos-grid-2';
+        narrativeGrid.style.marginTop = '18px';
+
+        const notesPanel = document.createElement('div');
+        notesPanel.className = 'dos-panel section';
+        notesPanel.innerHTML = `
+            <div class="dos-label">Post-Sortie Notes</div>
+            <div class="dos-copy" style="margin-top:10px;">${result.landingText || 'Return to base for repair, rearm, and contract review.'}</div>
         `;
-        frame.appendChild(narrative);
+        narrativeGrid.appendChild(notesPanel);
+
+        const outcomePanel = document.createElement('div');
+        outcomePanel.className = 'dos-panel section';
+        outcomePanel.innerHTML = `
+            <div class="dos-label">Contract Summary</div>
+            <div class="dos-copy" style="margin-top:10px; line-height:1.8;">
+                Completion Status FILED<br>
+                Cash Transfer VERIFIED<br>
+                Repair Cycle PENDING<br>
+                Next Destination HANGAR
+            </div>
+        `;
+        narrativeGrid.appendChild(outcomePanel);
+        frame.appendChild(narrativeGrid);
 
         const footer = document.createElement('div');
         footer.style.marginTop = '16px';
@@ -135,36 +141,31 @@ class LandingState {
         countdownRow.style.gap = '12px';
 
         const countdown = document.createElement('div');
-        countdown.style.font = '14px Consolas, monospace';
-        countdown.style.color = '#dce5ee';
+        countdown.className = 'dos-subtitle';
         this.countdownElement = countdown;
 
         const progressFrame = document.createElement('div');
+        progressFrame.className = 'dos-progress';
         progressFrame.style.flex = '1';
-        progressFrame.style.height = '12px';
-        progressFrame.style.background = 'rgba(10, 18, 26, 0.9)';
-        progressFrame.style.border = '1px solid rgba(143,182,216,0.22)';
         const progress = document.createElement('div');
-        progress.style.height = '100%';
-        progress.style.width = '0%';
-        progress.style.background = 'linear-gradient(90deg, rgba(143,215,255,0.5), rgba(255,204,0,0.8))';
+        progress.className = 'dos-progress-bar';
         this.progressElement = progress;
         progressFrame.appendChild(progress);
         countdownRow.appendChild(countdown);
         countdownRow.appendChild(progressFrame);
 
         const hint = document.createElement('div');
-        hint.style.font = '13px Consolas, monospace';
-        hint.style.color = '#92a6ba';
+        hint.className = 'dos-footer-hint';
         hint.style.marginTop = '10px';
-        hint.textContent = 'ENTER/SPACE: return to hangar // ESC: skip';
+        hint.textContent = 'Enter/Space returns to hangar // Esc skips';
 
         footer.appendChild(countdownRow);
         footer.appendChild(hint);
         frame.appendChild(footer);
 
-        wrapper.appendChild(frame);
-        screen.appendChild(wrapper);
+        layout.appendChild(frame);
+        shell.appendChild(layout);
+        screen.appendChild(shell);
         this.updateCountdownDisplay();
     }
 
@@ -175,7 +176,7 @@ class LandingState {
         const elapsed = performance.now() - this.enteredAt;
         const remainingSeconds = Math.max(0, Math.ceil((this.autoReturnDelay - elapsed) / 1000));
         const progress = Math.min(1, elapsed / this.autoReturnDelay);
-        this.countdownElement.textContent = `HANGAR RETURN T-${remainingSeconds}s`;
+        this.countdownElement.textContent = `Hangar Return T-${remainingSeconds}s`;
         this.progressElement.style.width = `${Math.round(progress * 100)}%`;
     }
 
