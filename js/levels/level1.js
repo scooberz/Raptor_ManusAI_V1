@@ -18,64 +18,64 @@ const LEVEL1_TERRAIN_SECTIONS = [
 ];
 
 const LEVEL1_ENVIRONMENT_PLAN = {
-    wave_01_striker_assault: [
+    wave_01_coastal_pickett: [
         { type: 'COASTAL_RADAR', x: 110, y: -140, delay: 0 },
         { type: 'SHORE_BUNKER', x: 620, y: -240, delay: 1200 },
         { type: 'FUEL_TANK', x: 235, y: -360, delay: 2800 },
         { type: 'COASTAL_RADAR', x: 540, y: -500, delay: 5200 },
         { type: 'FUEL_DEPOT', x: 150, y: -620, delay: 7200, landmark: true }
     ],
-    wave_02_cyclone_and_gnats: [
+    wave_02_harbor_intercept: [
         { type: 'SHORE_BUNKER', x: 120, y: -120, delay: 400 },
         { type: 'FUEL_TANK', x: 650, y: -240, delay: 1800 },
         { type: 'COASTAL_RADAR', x: 300, y: -420, delay: 4200 },
         { type: 'FUEL_DEPOT', x: 560, y: -620, delay: 7600 }
     ],
-    wave_03_reaper_crossfire: [
+    wave_03_warehouse_crossing: [
         { type: 'SHORE_BUNKER', x: 140, y: -130, delay: 200 },
         { type: 'FUEL_DEPOT', x: 320, y: -260, delay: 1600 },
         { type: 'COASTAL_RADAR', x: 610, y: -410, delay: 3200 },
         { type: 'FUEL_DEPOT', x: 500, y: -640, delay: 7000, landmark: true }
     ],
-    wave_04_striker_zigzag_and_darts: [
+    wave_04_factory_choke: [
         { type: 'SHORE_BUNKER', x: 80, y: -180, delay: 600 },
         { type: 'FUEL_DEPOT', x: 240, y: -340, delay: 2200 },
         { type: 'COASTAL_RADAR', x: 650, y: -520, delay: 4800 },
         { type: 'BRIDGE_TURRET', x: 400, y: -690, delay: 8400 }
     ],
-    wave_05_goliath_and_gnats: [
+    wave_05_bridge_lockdown: [
         { type: 'BRIDGE_TURRET', x: 110, y: -160, delay: 0, landmark: true },
         { type: 'BRIDGE_TURRET', x: 620, y: -160, delay: 0, landmark: true },
         { type: 'FUEL_DEPOT', x: 365, y: -360, delay: 2800 },
         { type: 'BRIDGE_TURRET', x: 240, y: -560, delay: 6200 },
         { type: 'BRIDGE_TURRET', x: 490, y: -560, delay: 6200 }
     ],
-    wave_06_minefield: [
+    wave_06_bridge_mine_run: [
         { type: 'BRIDGE_TURRET', x: 150, y: -180, delay: 500 },
         { type: 'REFINERY_TANK', x: 380, y: -320, delay: 2100, landmark: true },
         { type: 'REFINERY_TANK', x: 520, y: -460, delay: 3600 },
         { type: 'REFINERY_RADAR', x: 230, y: -640, delay: 5600 }
     ],
-    wave_07_grand_assault: [
+    wave_07_refinery_strike: [
         { type: 'REFINERY_TANK', x: 150, y: -180, delay: 200 },
         { type: 'REFINERY_TANK', x: 310, y: -240, delay: 1200 },
         { type: 'REFINERY_TANK', x: 490, y: -300, delay: 2200 },
         { type: 'REFINERY_RADAR', x: 650, y: -420, delay: 4200 },
         { type: 'FUEL_DEPOT', x: 380, y: -620, delay: 7600, landmark: true }
     ],
-    wave_08_crossfire: [
+    wave_08_refinery_crossfire: [
         { type: 'REFINERY_TANK', x: 120, y: -200, delay: 400 },
         { type: 'REFINERY_RADAR', x: 300, y: -320, delay: 1900 },
         { type: 'REFINERY_TANK', x: 610, y: -520, delay: 4600 },
         { type: 'FUEL_DEPOT', x: 450, y: -700, delay: 7000 }
     ],
-    wave_09_heavy_hitters: [
+    wave_09_outer_wall: [
         { type: 'HARDENED_BUNKER', x: 100, y: -160, delay: 200, landmark: true },
         { type: 'COMMAND_RADAR', x: 610, y: -240, delay: 1600 },
         { type: 'HARDENED_BUNKER', x: 330, y: -420, delay: 3600 },
         { type: 'FUEL_DEPOT', x: 520, y: -640, delay: 6200 }
     ],
-    wave_10_final_swarm: [
+    wave_10_command_approach: [
         { type: 'COMMAND_RADAR', x: 180, y: -180, delay: 300 },
         { type: 'HARDENED_BUNKER', x: 560, y: -320, delay: 2200, landmark: true },
         { type: 'HARDENED_BUNKER', x: 280, y: -520, delay: 4800 },
@@ -107,6 +107,7 @@ class Level1 {
         this.sectionBannerTimer = 0;
         this.sectionBannerDuration = 2200;
         this.sectionBannerText = '';
+        this.pendingWaveTransition = null;
     }
 
     async init() {
@@ -138,6 +139,7 @@ class Level1 {
             this.bossHealthBarFill = 0;
             this.transitioning = false;
             this.missilePickupSpawned = false;
+            this.pendingWaveTransition = null;
             this.applyTerrainForWave(0, true);
 
             this.game.audio.playMusic('gameMusic1');
@@ -209,6 +211,8 @@ class Level1 {
                 this.showBossWarning = false;
                 this.spawnBoss();
             }
+        } else if (this.pendingWaveTransition) {
+            this.updatePendingWaveTransition(deltaTime);
         } else if (!this.bossSpawned) {
             this.updateWave(deltaTime);
         }
@@ -249,12 +253,45 @@ class Level1 {
         const allEnemiesCleared = this.game.collision.collisionGroups.enemies.length === 0;
         if (allEnemiesSpawned && allEnemiesCleared && waveTime > 1000) {
             const nextWave = this.levelData.waves[this.waveIndex + 1];
-            if (nextWave && nextWave.isBossWave) {
-                this.triggerBossWarning();
-            } else {
-                this.advanceToNextWave();
+            if (nextWave?.isBossWave) {
+                this.queueWaveTransition('boss_warning', nextWave.delay_after_previous_wave_ms || 2800, this.waveIndex + 1);
+            } else if (nextWave) {
+                this.queueWaveTransition('advance', nextWave.delay_after_previous_wave_ms || 1500, this.waveIndex + 1);
             }
         }
+    }
+
+    updatePendingWaveTransition(deltaTime) {
+        if (!this.pendingWaveTransition) {
+            return;
+        }
+
+        this.pendingWaveTransition.timer -= deltaTime;
+        if (this.pendingWaveTransition.timer > 0) {
+            return;
+        }
+
+        const { type, targetWaveIndex } = this.pendingWaveTransition;
+        this.pendingWaveTransition = null;
+
+        if (type === 'boss_warning') {
+            this.triggerBossWarning(targetWaveIndex);
+            return;
+        }
+
+        this.advanceToNextWave(targetWaveIndex);
+    }
+
+    queueWaveTransition(type, timer, targetWaveIndex) {
+        if (this.pendingWaveTransition) {
+            return;
+        }
+
+        this.pendingWaveTransition = {
+            type,
+            timer: Math.max(600, timer || 0),
+            targetWaveIndex
+        };
     }
 
     spawnEnemy(enemyData) {
@@ -265,9 +302,11 @@ class Level1 {
         this.environmentFactory.createEnvironmentObject(envData, this);
     }
 
-    advanceToNextWave() {
-        if (this.waveIndex < this.levelData.waves.length - 1) {
-            this.waveIndex++;
+    advanceToNextWave(targetWaveIndex = this.waveIndex + 1) {
+        this.pendingWaveTransition = null;
+
+        if (targetWaveIndex < this.levelData.waves.length) {
+            this.waveIndex = targetWaveIndex;
             this.waveStartTime = this.levelTime;
             const nextWave = this.levelData.waves[this.waveIndex];
             const nextWaveName = nextWave.name || nextWave.wave_id || `Wave ${this.waveIndex + 1}`;
@@ -283,26 +322,38 @@ class Level1 {
         }
 
         logger.debug('DEBUG: Forcing next wave.');
+        this.pendingWaveTransition = null;
         const enemies = this.game.collision.collisionGroups.enemies;
         enemies.forEach((enemy) => {
             if (enemy.active) {
                 enemy.destroy();
             }
         });
-        this.advanceToNextWave();
+
+        const nextWave = this.levelData.waves[this.waveIndex + 1];
+        if (nextWave?.isBossWave) {
+            this.triggerBossWarning(this.waveIndex + 1);
+        } else {
+            this.advanceToNextWave();
+        }
     }
 
-    triggerBossWarning() {
+    triggerBossWarning(targetWaveIndex = this.levelData.waves.findIndex((wave) => wave.isBossWave || wave.wave_id === 'wave_11_boss_finale')) {
         if (this.bossSpawned) {
             return;
         }
+
+        this.waveIndex = Math.max(targetWaveIndex, this.waveIndex);
+        this.pendingWaveTransition = null;
+        const bossWave = this.levelData.waves[this.waveIndex];
+        this.bossWarningDuration = bossWave?.boss_warning_duration_ms || 3000;
         this.showBossWarning = true;
         this.bossWarningTimer = 0;
         logger.info('BOSS APPROACHING!');
     }
 
     spawnBoss() {
-        const bossWave = this.levelData.waves.find((wave) => wave.isBossWave || wave.wave_id === 'wave_11_boss_finale');
+        const bossWave = this.levelData.waves[this.waveIndex] || this.levelData.waves.find((wave) => wave.isBossWave || wave.wave_id === 'wave_11_boss_finale');
         if (bossWave && bossWave.enemies.length > 0) {
             this.spawnEnemy(bossWave.enemies[0]);
             this.bossSpawned = true;
@@ -348,6 +399,36 @@ class Level1 {
         const { top } = this.getPlayableBounds();
         const scaleY = Level1.PLAYABLE_HEIGHT / Level1.DESIGN_HEIGHT;
         return top + (localY * scaleY);
+    }
+
+    getCurrentWave() {
+        return this.levelData?.waves?.[this.waveIndex] || null;
+    }
+
+    getCurrentWaveLabel() {
+        const wave = this.getCurrentWave();
+        if (!wave) {
+            return 'Wave 1';
+        }
+
+        return wave.name || `Wave ${Math.min(this.waveIndex + 1, this.levelData.waves.length)}`;
+    }
+
+    getCurrentThreatLabel() {
+        const wave = this.getCurrentWave();
+        if (this.bossSpawned) {
+            return wave?.threatLabel || 'Flagship Engaged';
+        }
+        if (this.showBossWarning) {
+            return 'Boss Approaching';
+        }
+        if (this.pendingWaveTransition?.type === 'boss_warning') {
+            return 'Command Carrier Inbound';
+        }
+        if (this.pendingWaveTransition?.type === 'advance') {
+            return 'Airspace Secured';
+        }
+        return wave?.threatLabel || 'Contract Airspace';
     }
 
     maybeSpawnMidMissionPickup() {
@@ -485,6 +566,7 @@ class Level1 {
         this.currentTerrainSection = null;
         this.sectionBannerTimer = 0;
         this.sectionBannerText = '';
+        this.pendingWaveTransition = null;
     }
 
     resize() {
@@ -498,5 +580,3 @@ class Level1 {
 }
 
 export { Level1 };
-
-

@@ -3,7 +3,7 @@
 ## 1. High-Level Project Overview
 - **Project Name:** Project Raptor
 - **Concept:** A modern re-imagining of the classic 1994 DOS game *Raptor: Call of the Shadows*, built with a data-driven, modular JavaScript engine.
-- **Current Goal:** Stabilize the campaign framing, Level 1 environment identity, Harold's Emporium economy loop, and end-of-run score model so the game plays like a faithful DOS-style contract run instead of a prototype shooter.
+- **Current Goal:** Stabilize the campaign framing, Level 1 environment identity, Level 1 combat composition, Harold's Emporium economy loop, and end-of-run score model so the game plays like a faithful DOS-style contract run instead of a prototype shooter.
 - **Active Fidelity Spec:** See `docs/FAITHFUL_RECREATION_SPEC.md` for the current screen-flow, layout, and gameplay targets.
 
 ## 2. Game Architecture
@@ -24,7 +24,7 @@
 - **UI & HUD:** Compact, readable, and cash-first during active play. Score is only surfaced in debrief/final screens and is calculated from cash, kills, completion, and the selected difficulty multiplier.
 
 ## 4. Game Mechanics & Flow
-- **Gameplay:** Vertical scrolling shoot 'em up. Player controls a fighter jet, battling enemies on ground and in the air. Levels end with a boss or mission-complete encounter.
+- **Gameplay:** Vertical scrolling shoot 'em up. Player controls a fighter jet, battling enemies on ground and in the air. Level 1 now uses named regional encounter beats, short inter-wave breathers, and a phased telegraphed boss encounter before landing/debrief.
 - **Difficulty Levels:** Training, Rookie, Veteran, Elite.
 - **Core Systems:**
   - **Money System:** Destroying enemies and ground targets earns money for upgrades.

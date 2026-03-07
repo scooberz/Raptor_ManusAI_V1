@@ -68,8 +68,8 @@ export class HUD {
         context.fillStyle = '#dbe6ef';
         context.font = `14px ${this.fontFamily}`;
         const sectionLabel = level?.currentTerrainSection?.title || 'Sector Sweep';
-        const waveLabel = level ? `Wave ${Math.min((level.waveIndex || 0) + 1, 11)}` : 'Wave 1';
-        const threatLabel = level?.bossSpawned ? 'Flagship Engaged' : level?.showBossWarning ? 'Boss Approaching' : 'Contract Airspace';
+        const waveLabel = level?.getCurrentWaveLabel?.() || 'Wave 1';
+        const threatLabel = level?.getCurrentThreatLabel?.() || 'Contract Airspace';
         context.fillText(sectionLabel, panelX + 14, panelY + 34);
         context.fillText(`${waveLabel} | ${threatLabel}`, panelX + 14, panelY + 54);
     }

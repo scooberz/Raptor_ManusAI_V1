@@ -51,6 +51,7 @@ The repo now ships:
 - multi-airframe architecture with per-ship stats, route seeds, and ending/event scaffolding
 - Harold''s Emporium categories with repairs, systems, secondaries, and consumables
 - end-of-run contract scoring built from cash, kills, and completion with the difficulty multiplier applied at the end
+- a rewritten Level 1 combat script with named waves, short inter-wave breathers, section-aware threat labels, and a phased telegraphed boss finale
 
 Current compromise:
 - only one full player sprite set exists today, so alternate airframes currently use sprite fallback plus tinting
@@ -264,10 +265,11 @@ Current policy:
 - [done] boss health indicator, targeting HUD, threat computer, hull/shield upgrades, and missile support are purchasable
 
 ### Phase D: Level 1 Combat Composition
-- [partial] Level 1 terrain sections and landmark-driven background variation exist
-- [next] rebuild Level 1 wave choreography around landmarks
-- [next] expand destructible target families with more bespoke art and behavior
-- [next] integrate region-specific enemy behavior more tightly
+- [done] Level 1 terrain sections and landmark-driven background variation exist
+- [done] Level 1 wave choreography is now rebuilt around named regional beats and landmark timing
+- [done] boss arrival, phased attacks, and telegraphed pacing are implemented for the Level 1 finale
+- [partial] expand destructible target families with more bespoke art and behavior
+- [partial] integrate region-specific enemy behavior more tightly with bespoke enemy art and audio
 
 ### Phase E: Presentation and Audio
 - [next] audio pass for menu, UI, weapons, explosions, and boss stings
@@ -308,11 +310,11 @@ Current policy:
 - [next] alternate secondaries need a proper slot/toggle/loadout architecture for later expansion
 
 ### Waves / Bosses
-- [partial] enemy formations enter more cleanly than before
-- [next] each wave needs a stronger tactical identity
-- [partial] boss arrival is staged
-- [next] boss attacks need better telegraphing and pacing
-- [next] combined air/ground pressure should escalate more deliberately over the mission
+- [done] enemy formations enter more cleanly than before
+- [done] each Level 1 wave now has a named tactical identity tied to a terrain section
+- [done] boss arrival is staged with a lead-in warning and longer pre-boss breather
+- [done] boss attacks now use visible telegraphs and phased pacing
+- [partial] combined air/ground pressure escalates more deliberately, but still needs bespoke target art and audio cues
 
 ### Environment / Terrain
 - [done] scrolling background changes identity during the mission
