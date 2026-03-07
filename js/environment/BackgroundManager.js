@@ -220,6 +220,22 @@ export class BackgroundManager {
             ctx.stroke();
         }
 
+        ctx.fillStyle = 'rgba(86, 80, 72, 0.18)';
+        for (let y = (-drift * 0.72) % 210; y < height + 120; y += 156) {
+            ctx.fillRect(width * 0.12, y + 18, width * 0.18, 28);
+            ctx.fillRect(width * 0.54, y + 12, width * 0.22, 34);
+        }
+
+        ctx.strokeStyle = 'rgba(164, 132, 94, 0.18)';
+        ctx.lineWidth = 5;
+        for (let y = (-drift * 1.2) % 240; y < height + 100; y += 130) {
+            ctx.beginPath();
+            ctx.moveTo(width * 0.2, y + 20);
+            ctx.lineTo(width * 0.25, y + 52);
+            ctx.lineTo(width * 0.3, y + 20);
+            ctx.stroke();
+        }
+
         ctx.fillStyle = 'rgba(128, 118, 90, 0.16)';
         for (let x = width * 0.16; x < width * 0.9; x += 180) {
             ctx.fillRect(x, ((-drift * 0.65) % height), 14, height);
@@ -255,6 +271,16 @@ export class BackgroundManager {
             ctx.fillRect(width * 0.485, y + 8, 28, 118);
         }
 
+        ctx.strokeStyle = 'rgba(196, 182, 148, 0.16)';
+        ctx.lineWidth = 2;
+        for (let y = (-drift * 0.95) % 220; y < height + 100; y += 180) {
+            ctx.beginPath();
+            ctx.moveTo(width * 0.23, y + 20);
+            ctx.lineTo(width * 0.49, y + 8);
+            ctx.lineTo(width * 0.77, y + 20);
+            ctx.stroke();
+        }
+
         ctx.fillStyle = 'rgba(12, 40, 58, 0.18)';
         ctx.fillRect(0, 0, bridgeLeft - 8, height);
         ctx.fillRect(bridgeLeft + bridgeWidth + 8, 0, width, height);
@@ -284,6 +310,17 @@ export class BackgroundManager {
                 ctx.fill();
                 ctx.fillRect(x - 10, y + 24, 20, 30);
             }
+        }
+
+        ctx.strokeStyle = 'rgba(122, 178, 166, 0.16)';
+        ctx.lineWidth = 3;
+        for (let y = (-drift * 0.85) % 170; y < height + 120; y += 110) {
+            ctx.beginPath();
+            ctx.moveTo(width * 0.18, y + 24);
+            ctx.lineTo(width * 0.34, y + 24);
+            ctx.lineTo(width * 0.34, y + 78);
+            ctx.lineTo(width * 0.62, y + 78);
+            ctx.stroke();
         }
 
         ctx.fillStyle = 'rgba(255, 164, 74, 0.08)';
@@ -335,3 +372,5 @@ export class BackgroundManager {
         this.bufferCanvas.height = this.game.height;
     }
 }
+
+

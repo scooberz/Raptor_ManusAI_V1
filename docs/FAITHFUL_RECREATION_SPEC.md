@@ -46,7 +46,7 @@ The repo now ships:
 - four-step campaign framing: pilot -> difficulty -> hangar -> briefing -> mission -> landing -> hangar
 - persistent difficulty, airframe, primary weapon level, systems, secondaries, and mission results in pilot saves
 - hangar hotspots aligned to the background art
-- Level 1 terrain sections with cash-bearing destructible ground targets
+- Level 1 terrain sections with cash-bearing destructible ground targets and broader region-specific landmark families (dock storage, warehouses, bridge nodes, chemical vats, control towers, generators)
 - a cash-first flight HUD that prioritizes hull, shield state, weapons, and megabombs over live score
 - multi-airframe architecture with per-ship stats, route seeds, and ending/event scaffolding
 - Harold''s Emporium categories with repairs, systems, secondaries, and consumables
@@ -58,7 +58,9 @@ The repo now ships:
 
 Current compromise:
 - only one full player sprite set exists today, so alternate airframes currently use sprite fallback plus tinting
+- most bespoke landmark identity still comes from reused sprites with new sizing, placement, tint, and reward data rather than fully unique art
 - the shop structure is much stronger now, but its presentation still needs more DOS-authentic visual polish
+- authored music and sampled SFX are still missing; the repo currently relies on procedural fallback audio
 - Level 2 is still not the active fidelity target
 
 ## Core Fidelity Goals
@@ -271,13 +273,13 @@ Current policy:
 - [done] Level 1 terrain sections and landmark-driven background variation exist
 - [done] Level 1 wave choreography is now rebuilt around named regional beats and landmark timing
 - [done] boss arrival, phased attacks, and telegraphed pacing are implemented for the Level 1 finale
-- [partial] expand destructible target families with more bespoke art and behavior
+- [partial] destructible target families are broader and more region-specific now, but still rely on reused art and need more bespoke behavior/audio
 - [partial] integrate region-specific enemy behavior more tightly with bespoke enemy art and audio
 
 ### Phase E: Presentation and Audio
 - [partial] procedural fallback audio now covers menu/UI navigation, mission ambience, pickups, damage, explosions, and boss warning cues
 - [done] explosion tiers and chain-reaction feedback are visually stronger and size-aware
-- [partial] environment regions now have stronger distinct atmosphere and overlay language, but still need more bespoke art variation
+- [partial] environment regions now have stronger atmosphere plus more distinct landmark families, but still need bespoke tile and sprite variation
 - [partial] HUD, briefing, landing, hangar, and shop now share a stronger terminal-style visual language
 - [next] replace the fallback sound bed with authored music and bespoke sampled weapon / UI effects when assets exist
 
@@ -323,11 +325,11 @@ Current policy:
 
 ### Environment / Terrain
 - [done] scrolling background changes identity during the mission
-- [partial] each region has distinct landmark structures
-- [partial] destructible objects broadly match the visible terrain beneath them
+- [partial] each region now has clearer landmark structures and reward tiers, but some visual reuse is still obvious
+- [partial] destructible objects more consistently match the visible terrain beneath them, but true tile-authored placement is still incomplete
 - [done] water, shore, bridge, refinery, and military sections feel different
 - [done] each region now has stronger atmospheric tinting and overlay language in motion
-- [partial] the mission is less visually same-ey, but still needs more bespoke landmarks and tile variation
+- [partial] the mission is materially less same-ey because of new landmark families and region-specific placement, but still needs bespoke landmarks and tile variation
 
 ### Economy / Debrief
 - [partial] ground destruction meaningfully affects cash
@@ -352,6 +354,16 @@ Current policy:
 - [partial] route and ending hooks exist architecturally but not yet in authored content
 - [next] dedicated sprite sets are needed for non-default jets
 
+## Remaining Gaps Against Spec
+Highest-value remaining gaps after the current pass:
+- authored sampled audio and music still need to replace the procedural fallback sound bed
+- main menu, hangar, shop, and briefing screens still need a stronger period-authentic DOS presentation pass
+- Level 1 landmark identity is stronger, but many high-value ground targets still reuse the same base sprites instead of bespoke art
+- ground targets are more region-specific now, but some placements still ride on wave timing rather than tile-authored geography
+- alternate airframes have meaningful stat hooks, but still need dedicated sprite sets, events, and endings
+- Level 2 and later sectors are still outside the active fidelity target
+
+
 ## Non-Goals For The Next Pass
 - full 27-level campaign support
 - exact asset-perfect recreation of every DOS screen
@@ -365,6 +377,11 @@ The next pass is successful when:
 - Level 1 waves feel authored around landmarks instead of generic timing lanes
 - airframe choice affects run feel in a way the player can notice immediately
 - the cash economy creates meaningful between-mission decisions
+
+
+
+
+
 
 
 

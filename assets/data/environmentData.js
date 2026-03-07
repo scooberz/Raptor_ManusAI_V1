@@ -79,6 +79,55 @@ export const environmentData = {
         chainExplosions: 3,
         description: 'Large volatile fuel storage.'
     },
+    DOCK_STORAGE: {
+        id: 'DOCK_STORAGE',
+        name: 'Dock Storage Yard',
+        spriteAsset: 'bunker',
+        width: 96,
+        height: 56,
+        health: 170,
+        explosionSize: 'medium',
+        scoreValue: 190,
+        moneyValue: 120,
+        description: 'Low industrial storage block near the docks.'
+    },
+    HARBOR_FUEL_LINE: {
+        id: 'HARBOR_FUEL_LINE',
+        name: 'Harbor Fuel Line',
+        spriteAsset: 'fuelTank',
+        width: 42,
+        height: 60,
+        health: 38,
+        explosionSize: 'medium',
+        scoreValue: 90,
+        moneyValue: 110,
+        chainExplosions: 2,
+        description: 'Pipeline-fed harbor storage tank.'
+    },
+    WAREHOUSE_BLOCK: {
+        id: 'WAREHOUSE_BLOCK',
+        name: 'Warehouse Block',
+        spriteAsset: 'bunker',
+        width: 108,
+        height: 62,
+        health: 185,
+        explosionSize: 'large',
+        scoreValue: 210,
+        moneyValue: 145,
+        description: 'Heavy warehouse roofline overlooking the shoreline.'
+    },
+    COMM_ARRAY: {
+        id: 'COMM_ARRAY',
+        name: 'Communications Array',
+        spriteAsset: 'radarDish',
+        width: 74,
+        height: 74,
+        health: 100,
+        explosionSize: 'medium',
+        scoreValue: 190,
+        moneyValue: 135,
+        description: 'Large relay array for coastal command traffic.'
+    },
     BRIDGE_TURRET: {
         id: 'BRIDGE_TURRET',
         name: 'Bridge Guard Bunker',
@@ -90,6 +139,30 @@ export const environmentData = {
         scoreValue: 145,
         moneyValue: 100,
         description: 'Bridge defense hardpoint.'
+    },
+    BRIDGE_NODE: {
+        id: 'BRIDGE_NODE',
+        name: 'Bridge Support Node',
+        spriteAsset: 'bunker',
+        width: 88,
+        height: 58,
+        health: 175,
+        explosionSize: 'large',
+        scoreValue: 220,
+        moneyValue: 155,
+        description: 'Structural bridge support and weapons node.'
+    },
+    ROAD_JUNCTION: {
+        id: 'ROAD_JUNCTION',
+        name: 'Road Junction Control',
+        spriteAsset: 'radarDish',
+        width: 56,
+        height: 56,
+        health: 72,
+        explosionSize: 'medium',
+        scoreValue: 135,
+        moneyValue: 95,
+        description: 'Bridge traffic control dish.'
     },
     REFINERY_TANK: {
         id: 'REFINERY_TANK',
@@ -104,6 +177,19 @@ export const environmentData = {
         chainExplosions: 4,
         description: 'Chemical processing tank with volatile contents.'
     },
+    CHEMICAL_VAT: {
+        id: 'CHEMICAL_VAT',
+        name: 'Chemical Vat',
+        spriteAsset: 'fuelTank',
+        width: 64,
+        height: 64,
+        health: 62,
+        explosionSize: 'large',
+        scoreValue: 155,
+        moneyValue: 190,
+        chainExplosions: 5,
+        description: 'Tall volatile chemical vat suspended above the inlet.'
+    },
     REFINERY_RADAR: {
         id: 'REFINERY_RADAR',
         name: 'Refinery Control Radar',
@@ -115,6 +201,18 @@ export const environmentData = {
         scoreValue: 160,
         moneyValue: 110,
         description: 'Industrial command radar.'
+    },
+    PIPELINE_HUB: {
+        id: 'PIPELINE_HUB',
+        name: 'Pipeline Hub',
+        spriteAsset: 'bunker',
+        width: 86,
+        height: 52,
+        health: 150,
+        explosionSize: 'medium',
+        scoreValue: 170,
+        moneyValue: 125,
+        description: 'Armored pipeline control and pump station.'
     },
     HARDENED_BUNKER: {
         id: 'HARDENED_BUNKER',
@@ -139,6 +237,31 @@ export const environmentData = {
         scoreValue: 210,
         moneyValue: 150,
         description: 'High-value command-and-control radar.'
+    },
+    CONTROL_TOWER: {
+        id: 'CONTROL_TOWER',
+        name: 'Control Tower',
+        spriteAsset: 'radarDish',
+        width: 78,
+        height: 90,
+        health: 145,
+        explosionSize: 'large',
+        scoreValue: 280,
+        moneyValue: 210,
+        description: 'Tall command tower guiding the hardened base approach.'
+    },
+    BASE_GENERATOR: {
+        id: 'BASE_GENERATOR',
+        name: 'Base Generator',
+        spriteAsset: 'fuelTank',
+        width: 58,
+        height: 58,
+        health: 70,
+        explosionSize: 'large',
+        scoreValue: 175,
+        moneyValue: 165,
+        chainExplosions: 3,
+        description: 'Fortified base power generator.'
     }
 };
 

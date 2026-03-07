@@ -20,66 +20,69 @@ const LEVEL1_TERRAIN_SECTIONS = [
 const LEVEL1_ENVIRONMENT_PLAN = {
     wave_01_coastal_pickett: [
         { type: 'COASTAL_RADAR', x: 110, y: -140, delay: 0 },
-        { type: 'SHORE_BUNKER', x: 620, y: -240, delay: 1200 },
-        { type: 'FUEL_TANK', x: 235, y: -360, delay: 2800 },
-        { type: 'COASTAL_RADAR', x: 540, y: -500, delay: 5200 },
-        { type: 'FUEL_DEPOT', x: 150, y: -620, delay: 7200, landmark: true }
+        { type: 'DOCK_STORAGE', x: 610, y: -240, delay: 1200, tint: 'rgba(102, 88, 72, 0.18)' },
+        { type: 'HARBOR_FUEL_LINE', x: 235, y: -360, delay: 2800 },
+        { type: 'COMM_ARRAY', x: 540, y: -500, delay: 5200 },
+        { type: 'FUEL_DEPOT', x: 150, y: -620, delay: 7200, landmark: true },
+        { type: 'SHORE_BUNKER', x: 635, y: -690, delay: 7800 }
     ],
     wave_02_harbor_intercept: [
         { type: 'SHORE_BUNKER', x: 120, y: -120, delay: 400 },
-        { type: 'FUEL_TANK', x: 650, y: -240, delay: 1800 },
-        { type: 'COASTAL_RADAR', x: 300, y: -420, delay: 4200 },
-        { type: 'FUEL_DEPOT', x: 560, y: -620, delay: 7600 }
+        { type: 'HARBOR_FUEL_LINE', x: 650, y: -240, delay: 1800 },
+        { type: 'DOCK_STORAGE', x: 320, y: -420, delay: 4200, tint: 'rgba(88, 78, 66, 0.16)' },
+        { type: 'COMM_ARRAY', x: 560, y: -620, delay: 7600, landmark: true }
     ],
     wave_03_warehouse_crossing: [
-        { type: 'SHORE_BUNKER', x: 140, y: -130, delay: 200 },
+        { type: 'WAREHOUSE_BLOCK', x: 120, y: -130, delay: 200, landmark: true, tint: 'rgba(68, 64, 60, 0.12)' },
         { type: 'FUEL_DEPOT', x: 320, y: -260, delay: 1600 },
-        { type: 'COASTAL_RADAR', x: 610, y: -410, delay: 3200 },
-        { type: 'FUEL_DEPOT', x: 500, y: -640, delay: 7000, landmark: true }
+        { type: 'COMM_ARRAY', x: 610, y: -410, delay: 3200 },
+        { type: 'WAREHOUSE_BLOCK', x: 500, y: -640, delay: 7000, tint: 'rgba(82, 74, 62, 0.14)' }
     ],
     wave_04_factory_choke: [
-        { type: 'SHORE_BUNKER', x: 80, y: -180, delay: 600 },
-        { type: 'FUEL_DEPOT', x: 240, y: -340, delay: 2200 },
-        { type: 'COASTAL_RADAR', x: 650, y: -520, delay: 4800 },
-        { type: 'BRIDGE_TURRET', x: 400, y: -690, delay: 8400 }
+        { type: 'WAREHOUSE_BLOCK', x: 80, y: -180, delay: 600, tint: 'rgba(76, 70, 64, 0.12)' },
+        { type: 'HARBOR_FUEL_LINE', x: 240, y: -340, delay: 2200 },
+        { type: 'COMM_ARRAY', x: 650, y: -520, delay: 4800 },
+        { type: 'BRIDGE_NODE', x: 400, y: -690, delay: 8400, landmark: true }
     ],
     wave_05_bridge_lockdown: [
-        { type: 'BRIDGE_TURRET', x: 110, y: -160, delay: 0, landmark: true },
-        { type: 'BRIDGE_TURRET', x: 620, y: -160, delay: 0, landmark: true },
-        { type: 'FUEL_DEPOT', x: 365, y: -360, delay: 2800 },
-        { type: 'BRIDGE_TURRET', x: 240, y: -560, delay: 6200 },
-        { type: 'BRIDGE_TURRET', x: 490, y: -560, delay: 6200 }
+        { type: 'BRIDGE_NODE', x: 90, y: -160, delay: 0, landmark: true },
+        { type: 'BRIDGE_NODE', x: 610, y: -160, delay: 0, landmark: true },
+        { type: 'ROAD_JUNCTION', x: 365, y: -320, delay: 2200 },
+        { type: 'BRIDGE_TURRET', x: 220, y: -540, delay: 5600 },
+        { type: 'BRIDGE_TURRET', x: 510, y: -540, delay: 5600 },
+        { type: 'ROAD_JUNCTION', x: 400, y: -690, delay: 7800 }
     ],
     wave_06_bridge_mine_run: [
         { type: 'BRIDGE_TURRET', x: 150, y: -180, delay: 500 },
-        { type: 'REFINERY_TANK', x: 380, y: -320, delay: 2100, landmark: true },
-        { type: 'REFINERY_TANK', x: 520, y: -460, delay: 3600 },
-        { type: 'REFINERY_RADAR', x: 230, y: -640, delay: 5600 }
+        { type: 'BRIDGE_NODE', x: 380, y: -320, delay: 2100, landmark: true },
+        { type: 'ROAD_JUNCTION', x: 520, y: -460, delay: 3600 },
+        { type: 'CHEMICAL_VAT', x: 230, y: -640, delay: 5600 }
     ],
     wave_07_refinery_strike: [
-        { type: 'REFINERY_TANK', x: 150, y: -180, delay: 200 },
-        { type: 'REFINERY_TANK', x: 310, y: -240, delay: 1200 },
+        { type: 'CHEMICAL_VAT', x: 150, y: -180, delay: 200 },
+        { type: 'PIPELINE_HUB', x: 310, y: -240, delay: 1200 },
         { type: 'REFINERY_TANK', x: 490, y: -300, delay: 2200 },
         { type: 'REFINERY_RADAR', x: 650, y: -420, delay: 4200 },
-        { type: 'FUEL_DEPOT', x: 380, y: -620, delay: 7600, landmark: true }
+        { type: 'CHEMICAL_VAT', x: 380, y: -620, delay: 7600, landmark: true }
     ],
     wave_08_refinery_crossfire: [
         { type: 'REFINERY_TANK', x: 120, y: -200, delay: 400 },
-        { type: 'REFINERY_RADAR', x: 300, y: -320, delay: 1900 },
-        { type: 'REFINERY_TANK', x: 610, y: -520, delay: 4600 },
-        { type: 'FUEL_DEPOT', x: 450, y: -700, delay: 7000 }
+        { type: 'PIPELINE_HUB', x: 300, y: -320, delay: 1900 },
+        { type: 'CHEMICAL_VAT', x: 610, y: -520, delay: 4600 },
+        { type: 'REFINERY_RADAR', x: 450, y: -700, delay: 7000 }
     ],
     wave_09_outer_wall: [
         { type: 'HARDENED_BUNKER', x: 100, y: -160, delay: 200, landmark: true },
-        { type: 'COMMAND_RADAR', x: 610, y: -240, delay: 1600 },
-        { type: 'HARDENED_BUNKER', x: 330, y: -420, delay: 3600 },
-        { type: 'FUEL_DEPOT', x: 520, y: -640, delay: 6200 }
+        { type: 'CONTROL_TOWER', x: 610, y: -240, delay: 1600, landmark: true },
+        { type: 'BASE_GENERATOR', x: 330, y: -420, delay: 3600 },
+        { type: 'HARDENED_BUNKER', x: 520, y: -640, delay: 6200 }
     ],
     wave_10_command_approach: [
         { type: 'COMMAND_RADAR', x: 180, y: -180, delay: 300 },
-        { type: 'HARDENED_BUNKER', x: 560, y: -320, delay: 2200, landmark: true },
-        { type: 'HARDENED_BUNKER', x: 280, y: -520, delay: 4800 },
-        { type: 'COMMAND_RADAR', x: 410, y: -720, delay: 7600 }
+        { type: 'CONTROL_TOWER', x: 560, y: -320, delay: 2200, landmark: true },
+        { type: 'BASE_GENERATOR', x: 280, y: -520, delay: 4800 },
+        { type: 'COMMAND_RADAR', x: 410, y: -720, delay: 7600 },
+        { type: 'HARDENED_BUNKER', x: 640, y: -860, delay: 9000 }
     ],
     wave_11_boss_finale: []
 };
@@ -159,7 +162,13 @@ class Level1 {
             return {
                 ...wave,
                 sectionId: section?.id || null,
-                environment_objects: [...(wave.environment_objects || []), ...environmentObjects.map((env) => ({ ...env }))]
+                environment_objects: [
+                    ...(wave.environment_objects || []),
+                    ...environmentObjects.map((env) => ({
+                        ...env,
+                        sectionId: section?.id || null
+                    }))
+                ]
             };
         });
     }
@@ -581,3 +590,4 @@ class Level1 {
 }
 
 export { Level1 };
+
