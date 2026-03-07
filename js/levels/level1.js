@@ -193,6 +193,9 @@ class Level1 {
         if (this.background) {
             this.background.setActiveSection(section.id);
         }
+        if (this.logicalGrid && typeof this.logicalGrid.setActiveSection === 'function') {
+            this.logicalGrid.setActiveSection(section.id);
+        }
         logger.info(`Entering terrain section: ${section.title}`);
     }
 
@@ -468,6 +471,9 @@ class Level1 {
     render(contexts) {
         const { offsetX, offsetY } = this.getPlayableOffset();
         this.background.render(contexts.background, offsetX, offsetY, Level1.PLAYABLE_WIDTH, Level1.PLAYABLE_HEIGHT);
+        if (this.logicalGrid && typeof this.logicalGrid.render === 'function') {
+            this.logicalGrid.render(contexts.environment, offsetX, offsetY, Level1.PLAYABLE_WIDTH, Level1.PLAYABLE_HEIGHT);
+        }
 
         const ctx = contexts.background;
         ctx.save();
@@ -590,4 +596,7 @@ class Level1 {
 }
 
 export { Level1 };
+
+
+
 

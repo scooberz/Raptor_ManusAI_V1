@@ -61,65 +61,24 @@ class ShopState {
             case 'rank': {
                 const rank = this.getSystemRank(playerData, item.systemId);
                 if (rank >= item.maxRank) {
-                    return {
-                        price: 0,
-                        canPurchase: false,
-                        actionLabel: 'Max',
-                        statusText: `Installed rank ${rank}/${item.maxRank}`,
-                        rank
-                    };
+                    return { price: 0, canPurchase: false, actionLabel: 'Max', statusText: `Installed rank ${rank}/${item.maxRank}`, rank };
                 }
                 const price = item.basePrice + (rank * item.priceStep);
-                return {
-                    price,
-                    canPurchase: playerData.money >= price,
-                    actionLabel: `Buy Mk ${rank + 1}`,
-                    statusText: `Current rank ${rank}/${item.maxRank}`,
-                    rank
-                };
+                return { price, canPurchase: playerData.money >= price, actionLabel: `Buy Mk ${rank + 1}`, statusText: `Current rank ${rank}/${item.maxRank}`, rank };
             }
             case 'system': {
                 const owned = this.getSystemRank(playerData, item.systemId) > 0;
-                return {
-                    price: owned ? 0 : item.price,
-                    canPurchase: !owned && playerData.money >= item.price,
-                    actionLabel: owned ? 'Installed' : 'Install',
-                    statusText: owned ? 'Already installed' : 'Not installed'
-                };
+                return { price: owned ? 0 : item.price, canPurchase: !owned && playerData.money >= item.price, actionLabel: owned ? 'Installed' : 'Install', statusText: owned ? 'Already installed' : 'Not installed' };
             }
             case 'secondary': {
                 const owned = playerData.ownedSecondaryWeapons.includes(item.weaponId);
                 const equipped = playerData.equippedSecondaryWeapon === item.weaponId;
-                if (equipped) {
-                    return {
-                        price: 0,
-                        canPurchase: false,
-                        actionLabel: 'Equipped',
-                        statusText: 'Currently equipped'
-                    };
-                }
-                if (owned) {
-                    return {
-                        price: 0,
-                        canPurchase: true,
-                        actionLabel: 'Equip',
-                        statusText: 'Owned but not equipped'
-                    };
-                }
-                return {
-                    price: item.price,
-                    canPurchase: playerData.money >= item.price,
-                    actionLabel: 'Purchase',
-                    statusText: 'Not owned'
-                };
+                if (equipped) return { price: 0, canPurchase: false, actionLabel: 'Equipped', statusText: 'Currently equipped' };
+                if (owned) return { price: 0, canPurchase: true, actionLabel: 'Equip', statusText: 'Owned but not equipped' };
+                return { price: item.price, canPurchase: playerData.money >= item.price, actionLabel: 'Purchase', statusText: 'Not owned' };
             }
             case 'consumable':
-                return {
-                    price: item.price,
-                    canPurchase: playerData.money >= item.price,
-                    actionLabel: 'Stock',
-                    statusText: `Current megabombs: ${playerData.megabombs}`
-                };
+                return { price: item.price, canPurchase: playerData.money >= item.price, actionLabel: 'Stock', statusText: `Current megabombs: ${playerData.megabombs}` };
             default:
                 return { price: item.price || 0, canPurchase: false, actionLabel: 'N/A', statusText: '' };
         }
@@ -241,6 +200,26 @@ class ShopState {
         return lines.length ? lines.join('<br>') : 'No systems installed';
     }
 
+    buildItemButton(item, state, index) {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = `dos-list-button${index === this.selectedItemIndex ? ' selected' : ''}`;
+        button.innerHTML = `
+            <span class="title">${item.name}</span>
+            <span class="meta">${state.statusText} ${state.price > 0 ? `// $${state.price}` : `// ${state.actionLabel}`}</span>
+        `;
+        button.addEventListener('click', () => {
+            if (this.selectedItemIndex === index) {
+                this.applyPurchase(item);
+                return;
+            }
+            this.selectedItemIndex = index;
+            this.game.audio.playSound('uiMove');
+            this.setupShopScreen();
+        });
+        return button;
+    }
+
     setupShopScreen() {
         let shopScreen = document.getElementById('shop-screen');
         if (!shopScreen) {
@@ -261,194 +240,124 @@ class ShopState {
         const shopBackground = this.game.assets.getImage('shopBackground');
         const ship = this.game.getPlayerShipProfile(playerData.shipId);
 
-        const mainContainer = document.createElement('div');
-        mainContainer.style.display = 'flex';
-        mainContainer.style.flexDirection = 'column';
-        mainContainer.style.width = '100%';
-        mainContainer.style.height = '100%';
-        mainContainer.style.position = 'relative';
-        mainContainer.style.overflow = 'hidden';
-
+        const shell = document.createElement('div');
+        shell.className = 'dos-shell';
         if (shopBackground) {
             const bgImg = document.createElement('img');
+            bgImg.className = 'dos-bg-image';
             bgImg.src = shopBackground.src;
-            bgImg.style.width = '100%';
-            bgImg.style.height = '100%';
-            bgImg.style.objectFit = 'cover';
-            bgImg.style.position = 'absolute';
-            bgImg.style.inset = '0';
-            bgImg.style.zIndex = '1';
-            mainContainer.appendChild(bgImg);
-        } else {
-            mainContainer.style.backgroundColor = '#0a1128';
+            bgImg.style.filter = 'brightness(0.34) saturate(0.8)';
+            shell.appendChild(bgImg);
         }
-
         const overlay = document.createElement('div');
-        overlay.style.position = 'absolute';
-        overlay.style.inset = '0';
-        overlay.style.background = 'linear-gradient(180deg, rgba(0,0,0,0.52), rgba(0,0,0,0.82))';
-        overlay.style.backdropFilter = 'blur(1px)';
-        overlay.style.zIndex = '2';
-        mainContainer.appendChild(overlay);
-
-        const header = document.createElement('div');
-        header.style.position = 'absolute';
-        header.style.top = '18px';
-        header.style.left = '50%';
-        header.style.transform = 'translateX(-50%)';
-        header.style.zIndex = '3';
-        header.style.textAlign = 'center';
-        header.innerHTML = `
-            <div style="font-size: 40px; color: #ffcc00; letter-spacing: 0.08em;">HAROLD'S EMPORIUM</div>
-            <div style="font-size: 16px; color: #dce5ee; margin-top: 8px;">Cash: $${playerData.money} | ${ship.displayName} | ${this.game.getDifficultyProfile(playerData.difficulty).displayName}</div>
-        `;
-        mainContainer.appendChild(header);
+        overlay.className = 'dos-overlay';
+        shell.appendChild(overlay);
 
         const layout = document.createElement('div');
-        layout.style.position = 'relative';
-        layout.style.zIndex = '3';
-        layout.style.display = 'grid';
-        layout.style.gridTemplateColumns = '220px 1fr 360px';
-        layout.style.gap = '18px';
-        layout.style.width = '92%';
-        layout.style.margin = '120px auto 34px';
-        layout.style.alignItems = 'start';
+        layout.className = 'dos-screen-layout';
+        layout.style.paddingTop = '20px';
+        layout.style.paddingBottom = '18px';
+
+        const header = document.createElement('div');
+        header.className = 'dos-frame compact alt';
+        header.style.padding = '16px 18px';
+        header.style.marginBottom = '16px';
+        header.innerHTML = `
+            <div class="dos-kicker">Harold's Emporium // Base Supply</div>
+            <div class="dos-title" style="font-size:34px; margin:8px 0 6px;">Harold's Emporium</div>
+            <div class="dos-subtitle">Cash $${playerData.money} // ${ship.displayName} // ${this.game.getDifficultyProfile(playerData.difficulty).displayName}</div>
+        `;
+        layout.appendChild(header);
+
+        const grid = document.createElement('div');
+        grid.className = 'dos-sidebar-layout';
 
         const categoryPanel = document.createElement('div');
-        categoryPanel.style.background = 'linear-gradient(180deg, rgba(8, 14, 20, 0.92), rgba(4, 8, 14, 0.92))';
-        categoryPanel.style.border = '1px solid rgba(255, 204, 0, 0.28)';
-        categoryPanel.style.borderRadius = '2px';
-        categoryPanel.style.fontFamily = 'Consolas, "Lucida Console", monospace';
+        categoryPanel.className = 'dos-frame compact';
         categoryPanel.style.padding = '14px';
-        categoryPanel.innerHTML = '<div style="font-size: 18px; color: #ffcc00; margin-bottom: 12px;">Categories</div>';
+        categoryPanel.innerHTML = '<div class="dos-kicker">Categories</div>';
+        const categoryList = document.createElement('div');
+        categoryList.className = 'dos-terminal-list';
+        categoryList.style.marginTop = '12px';
         this.categories.forEach((category, index) => {
             const button = document.createElement('button');
             button.type = 'button';
+            button.className = `dos-button${index === this.selectedCategoryIndex ? ' selected' : ''}`;
             button.textContent = category.label;
-            button.style.width = '100%';
-            button.style.marginBottom = '10px';
-            button.style.padding = '12px';
-            button.style.borderRadius = '8px';
-            button.style.cursor = 'pointer';
-            button.style.border = index === this.selectedCategoryIndex ? '2px solid #ffcc00' : '1px solid rgba(255,255,255,0.18)';
-            button.style.background = index === this.selectedCategoryIndex ? 'rgba(36, 25, 9, 0.92)' : 'rgba(13, 17, 24, 0.92)';
-            button.style.color = index === this.selectedCategoryIndex ? '#ffcc00' : '#ffffff';
             button.addEventListener('click', () => {
                 this.selectedCategoryIndex = index;
                 this.selectedItemIndex = 0;
                 this.game.audio.playSound('uiMove');
                 this.setupShopScreen();
             });
-            categoryPanel.appendChild(button);
+            categoryList.appendChild(button);
         });
-        layout.appendChild(categoryPanel);
+        categoryPanel.appendChild(categoryList);
+        grid.appendChild(categoryPanel);
 
         const itemPanel = document.createElement('div');
-        itemPanel.style.background = 'linear-gradient(180deg, rgba(8, 14, 20, 0.92), rgba(4, 8, 14, 0.92))';
-        itemPanel.style.border = '1px solid rgba(255, 204, 0, 0.28)';
-        itemPanel.style.borderRadius = '2px';
-        itemPanel.style.fontFamily = 'Consolas, "Lucida Console", monospace';
+        itemPanel.className = 'dos-frame compact';
         itemPanel.style.padding = '14px';
-        itemPanel.innerHTML = `<div style="font-size: 18px; color: #ffcc00; margin-bottom: 12px;">${this.categories[this.selectedCategoryIndex].label}</div>`;
-
-        visibleItems.forEach((item, index) => {
-            const state = this.getItemState(item, playerData);
-            const row = document.createElement('button');
-            row.type = 'button';
-            row.style.width = '100%';
-            row.style.display = 'grid';
-            row.style.gridTemplateColumns = '1fr auto';
-            row.style.gap = '12px';
-            row.style.alignItems = 'center';
-            row.style.textAlign = 'left';
-            row.style.marginBottom = '10px';
-            row.style.padding = '14px 16px';
-            row.style.borderRadius = '8px';
-            row.style.cursor = 'pointer';
-            row.style.background = index === this.selectedItemIndex ? 'rgba(36, 25, 9, 0.92)' : 'rgba(13, 17, 24, 0.9)';
-            row.style.border = index === this.selectedItemIndex ? '2px solid #ffcc00' : '1px solid rgba(255,255,255,0.14)';
-            row.style.color = '#ffffff';
-            row.innerHTML = `
-                <div>
-                    <div style="font-size: 18px; color: ${index === this.selectedItemIndex ? '#ffcc00' : '#ffffff'}; margin-bottom: 4px;">${item.name}</div>
-                    <div style="font-size: 13px; color: #96a8bb;">${state.statusText}</div>
-                </div>
-                <div style="font-size: 16px; color: ${state.price > 0 ? (state.canPurchase ? '#dce5ee' : '#7D8491') : '#9fd7ff'};">${state.price > 0 ? `$${state.price}` : state.actionLabel}</div>
-            `;
-            row.addEventListener('click', () => {
-                if (this.selectedItemIndex === index) {
-                    this.applyPurchase(item);
-                    return;
-                }
-                this.selectedItemIndex = index;
-                this.game.audio.playSound('uiMove');
-                this.setupShopScreen();
-            });
-            itemPanel.appendChild(row);
-        });
-        layout.appendChild(itemPanel);
+        itemPanel.innerHTML = `<div class="dos-kicker">${this.categories[this.selectedCategoryIndex].label}</div>`;
+        const itemList = document.createElement('div');
+        itemList.className = 'dos-terminal-list';
+        itemList.style.marginTop = '12px';
+        visibleItems.forEach((item, index) => itemList.appendChild(this.buildItemButton(item, this.getItemState(item, playerData), index)));
+        itemPanel.appendChild(itemList);
+        grid.appendChild(itemPanel);
 
         const detailPanel = document.createElement('div');
-        detailPanel.style.background = 'linear-gradient(180deg, rgba(8, 14, 20, 0.94), rgba(4, 8, 14, 0.94))';
-        detailPanel.style.border = '1px solid rgba(255, 204, 0, 0.28)';
-        detailPanel.style.borderRadius = '2px';
-        detailPanel.style.fontFamily = 'Consolas, "Lucida Console", monospace';
+        detailPanel.className = 'dos-frame compact';
         detailPanel.style.padding = '16px';
         detailPanel.innerHTML = selectedItem ? `
-            <div style="font-size: 18px; color: #ffcc00; margin-bottom: 8px;">Selected Contract Item</div>
-            <div style="font-size: 24px; color: white; margin-bottom: 8px;">${selectedItem.name}</div>
-            <div style="font-size: 15px; color: #d8e2ec; line-height: 1.7; margin-bottom: 12px;">${selectedItem.description}</div>
-            <div style="font-size: 14px; color: #9fd7ff; margin-bottom: 18px;">${selectedState?.statusText || ''}</div>
-            <div style="display: inline-flex; padding: 10px 14px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.16); background: rgba(0,0,0,0.35); color: ${selectedState?.canPurchase ? '#ffcc00' : '#d7d7d7'}; margin-bottom: 20px;">
-                ${selectedState?.actionLabel || ''}${selectedState?.price > 0 ? ` - $${selectedState.price}` : ''}
+            <div class="dos-kicker">Selected Contract Item</div>
+            <div class="dos-title" style="font-size:26px; margin:8px 0 10px;">${selectedItem.name}</div>
+            <div class="dos-copy">${selectedItem.description}</div>
+            <div style="margin:14px 0 16px;"><span class="dos-chip">${selectedState?.actionLabel || ''}${selectedState?.price > 0 ? ` // $${selectedState.price}` : ''}</span></div>
+            <div class="dos-panel section" style="margin-bottom:12px;">
+                <div class="dos-label">Current Loadout</div>
+                <div class="dos-copy" style="margin-top:10px; line-height:1.8;">
+                    Hull ${playerData.health}/${playerData.maxHealth}<br>
+                    Shield ${playerData.shield}/${playerData.maxShield}<br>
+                    Secondary ${playerData.equippedSecondaryWeapon || 'None'}<br>
+                    Megabombs ${playerData.megabombs}
+                </div>
             </div>
-            <div style="font-size: 18px; color: #ffcc00; margin-bottom: 8px;">Current Loadout</div>
-            <div style="font-size: 14px; color: #dce5ee; line-height: 1.8; margin-bottom: 16px;">
-                Hull: ${playerData.health}/${playerData.maxHealth}<br>
-                Shield: ${playerData.shield}/${playerData.maxShield}<br>
-                Equipped Secondary: ${playerData.equippedSecondaryWeapon || 'None'}<br>
-                Megabombs: ${playerData.megabombs}
+            <div class="dos-panel section">
+                <div class="dos-label">Installed Systems</div>
+                <div class="dos-copy" style="margin-top:10px; line-height:1.8;">${this.buildInstalledSystemsMarkup(playerData)}</div>
             </div>
-            <div style="font-size: 18px; color: #ffcc00; margin-bottom: 8px;">Installed Systems</div>
-            <div style="font-size: 14px; color: #dce5ee; line-height: 1.7;">${this.buildInstalledSystemsMarkup(playerData)}</div>
-        ` : '<div style="color:white;">No items available</div>';
-        layout.appendChild(detailPanel);
-        mainContainer.appendChild(layout);
+        ` : '<div class="dos-copy">No items available.</div>';
+        grid.appendChild(detailPanel);
+
+        layout.appendChild(grid);
 
         const footer = document.createElement('div');
-        footer.style.position = 'absolute';
-        footer.style.left = '24px';
-        footer.style.right = '24px';
-        footer.style.bottom = '18px';
-        footer.style.zIndex = '3';
+        footer.style.marginTop = '16px';
         footer.style.display = 'flex';
         footer.style.justifyContent = 'space-between';
         footer.style.alignItems = 'center';
+        footer.style.gap = '12px';
 
         const backButton = document.createElement('button');
         backButton.type = 'button';
+        backButton.className = 'dos-action-button';
         backButton.textContent = 'Back to Hangar';
-        backButton.style.padding = '12px 18px';
-        backButton.style.borderRadius = '8px';
-        backButton.style.border = '1px solid rgba(255,255,255,0.18)';
-        backButton.style.background = 'linear-gradient(180deg, rgba(8, 14, 20, 0.92), rgba(4, 8, 14, 0.9))';
-        backButton.style.fontFamily = 'Consolas, "Lucida Console", monospace';
-        backButton.style.color = '#ffffff';
-        backButton.style.cursor = 'pointer';
-        backButton.addEventListener('click', () => { this.game.audio.playSound('uiBack'); this.exitShop(); });
+        backButton.addEventListener('click', () => {
+            this.game.audio.playSound('uiBack');
+            this.exitShop();
+        });
         footer.appendChild(backButton);
 
         const hint = document.createElement('div');
-        hint.style.color = '#aab7c4';
-        hint.style.fontSize = '13px';
-        hint.style.fontFamily = 'Consolas, "Lucida Console", monospace';
-        hint.textContent = 'Left/Right: category | Up/Down: item | Enter: purchase/equip | Esc: hangar';
+        hint.className = 'dos-footer-hint';
+        hint.textContent = 'Left/Right category // Up/Down item // Enter purchase/equip // Esc hangar';
         footer.appendChild(hint);
-        mainContainer.appendChild(footer);
+        layout.appendChild(footer);
 
-        shopScreen.appendChild(mainContainer);
+        shell.appendChild(layout);
+        shopScreen.appendChild(shell);
     }
 }
 
 export default ShopState;
-

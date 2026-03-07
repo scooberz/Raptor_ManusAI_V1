@@ -54,12 +54,12 @@ The repo now ships:
 - a rewritten Level 1 combat script with named waves, short inter-wave breathers, section-aware threat labels, and a phased telegraphed boss finale
 - synthesized fallback audio for menu, mission, boss warning, pickups, purchases, and combat feedback when no shipped sound asset exists
 - layered explosion rendering with stronger shockwave / flash feedback and size-based blast cues
-- stronger section-specific background atmosphere and a more terminal-style HUD / briefing / debrief presentation pass
+- stronger section-specific background atmosphere, a revived tile-authored environment geometry layer, and a more cohesive DOS terminal presentation pass across menu, hangar, shop, and briefing
 
 Current compromise:
 - only one full player sprite set exists today, so alternate airframes currently use sprite fallback plus tinting
 - most bespoke landmark identity still comes from reused sprites with new sizing, placement, tint, and reward data rather than fully unique art
-- the shop structure is much stronger now, but its presentation still needs more DOS-authentic visual polish
+- the presentation pass is materially stronger now, but landing/game-over and final typography polish still need another pass
 - authored music and sampled SFX are still missing; the repo currently relies on procedural fallback audio
 - Level 2 is still not the active fidelity target
 
@@ -98,7 +98,7 @@ Target:
 
 Current state:
 - structurally correct
-- visual treatment still needs a stronger DOS pass
+- now uses a stronger DOS terminal treatment, but still needs final polish
 
 ### 3. Pilot Creation and Airframe Assignment
 Target:
@@ -136,7 +136,7 @@ Target:
 
 Current state:
 - hotspot alignment implemented
-- visual polish and stronger diegetic labeling still needed
+- visual treatment is materially stronger, but diegetic labeling and landing continuity still need polish
 
 ### 6. Sector Briefing / Loading
 Target:
@@ -146,7 +146,7 @@ Target:
 
 Current state:
 - implemented structurally
-- still needs more period-authentic presentation design
+- now uses a stronger DOS terminal treatment, but still needs final period-authentic polish
 
 ### 7. Gameplay Window and HUD
 Target:
@@ -273,13 +273,14 @@ Current policy:
 - [done] Level 1 terrain sections and landmark-driven background variation exist
 - [done] Level 1 wave choreography is now rebuilt around named regional beats and landmark timing
 - [done] boss arrival, phased attacks, and telegraphed pacing are implemented for the Level 1 finale
+- [partial] a visible geometry layer now anchors dock blocks, bridge spans, refinery lines, and base structures beneath destructibles
 - [partial] destructible target families are broader and more region-specific now, but still rely on reused art and need more bespoke behavior/audio
 - [partial] integrate region-specific enemy behavior more tightly with bespoke enemy art and audio
 
 ### Phase E: Presentation and Audio
 - [partial] procedural fallback audio now covers menu/UI navigation, mission ambience, pickups, damage, explosions, and boss warning cues
 - [done] explosion tiers and chain-reaction feedback are visually stronger and size-aware
-- [partial] environment regions now have stronger atmosphere plus more distinct landmark families, but still need bespoke tile and sprite variation
+- [partial] environment regions now have stronger atmosphere plus a visible geometry layer, but still need bespoke tile and sprite variation
 - [partial] HUD, briefing, landing, hangar, and shop now share a stronger terminal-style visual language
 - [next] replace the fallback sound bed with authored music and bespoke sampled weapon / UI effects when assets exist
 
@@ -297,7 +298,7 @@ Current policy:
 - [done] sector briefing exists before launch
 - [done] landing/debrief exists after mission
 - [done] pilot creation includes airframe selection
-- [next] main menu needs stronger DOS-authentic visual treatment
+- [partial] main menu now has a stronger DOS-authentic terminal treatment, but can still be tightened further
 
 ### Hangar / Shop
 - [done] hangar hotspots align to background landmarks
@@ -326,10 +327,10 @@ Current policy:
 ### Environment / Terrain
 - [done] scrolling background changes identity during the mission
 - [partial] each region now has clearer landmark structures and reward tiers, but some visual reuse is still obvious
-- [partial] destructible objects more consistently match the visible terrain beneath them, but true tile-authored placement is still incomplete
+- [partial] destructible objects now sit over a true geometry layer, but fully tile-authored placement is still incomplete
 - [done] water, shore, bridge, refinery, and military sections feel different
 - [done] each region now has stronger atmospheric tinting and overlay language in motion
-- [partial] the mission is materially less same-ey because of new landmark families and region-specific placement, but still needs bespoke landmarks and tile variation
+- [partial] the mission is materially less same-ey because of new landmark families, region-specific placement, and visible geometry, but still needs bespoke landmarks and tile variation
 
 ### Economy / Debrief
 - [partial] ground destruction meaningfully affects cash
@@ -357,7 +358,7 @@ Current policy:
 ## Remaining Gaps Against Spec
 Highest-value remaining gaps after the current pass:
 - authored sampled audio and music still need to replace the procedural fallback sound bed
-- main menu, hangar, shop, and briefing screens still need a stronger period-authentic DOS presentation pass
+- landing/game-over screens and final typography framing still need a stronger period-authentic DOS presentation pass
 - Level 1 landmark identity is stronger, but many high-value ground targets still reuse the same base sprites instead of bespoke art
 - ground targets are more region-specific now, but some placements still ride on wave timing rather than tile-authored geography
 - alternate airframes have meaningful stat hooks, but still need dedicated sprite sets, events, and endings
@@ -377,6 +378,9 @@ The next pass is successful when:
 - Level 1 waves feel authored around landmarks instead of generic timing lanes
 - airframe choice affects run feel in a way the player can notice immediately
 - the cash economy creates meaningful between-mission decisions
+
+
+
 
 
 

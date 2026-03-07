@@ -33,67 +33,41 @@ class HangarState {
     createHotspot(label, position, onClick) {
         const button = document.createElement('button');
         button.type = 'button';
-        button.style.position = 'absolute';
+        button.className = 'dos-hotspot';
         button.style.left = position.left;
         button.style.top = position.top;
         button.style.width = position.width;
         button.style.height = position.height;
-        button.style.background = this.showHotspotDebug ? 'rgba(255, 204, 0, 0.08)' : 'transparent';
-        button.style.border = this.showHotspotDebug ? '1px dashed rgba(255, 204, 0, 0.4)' : '1px solid transparent';
-        button.style.borderRadius = '12px';
-        button.style.cursor = 'pointer';
-        button.style.display = 'flex';
-        button.style.alignItems = 'center';
-        button.style.justifyContent = 'center';
-        button.style.transition = 'transform 0.15s ease, filter 0.15s ease, background 0.15s ease';
         button.style.zIndex = '4';
+        if (this.showHotspotDebug) {
+            button.style.background = 'rgba(255, 204, 0, 0.08)';
+            button.style.border = '1px dashed rgba(255, 204, 0, 0.4)';
+        }
 
         const badge = document.createElement('span');
+        badge.className = 'dos-hotspot-badge';
         badge.textContent = label;
-        badge.style.display = 'inline-flex';
-        badge.style.alignItems = 'center';
-        badge.style.justifyContent = 'center';
-        badge.style.padding = '9px 14px';
-        badge.style.background = 'linear-gradient(180deg, rgba(16, 22, 28, 0.94), rgba(6, 10, 16, 0.9))';
-        badge.style.border = '1px solid rgba(255, 204, 0, 0.45)';
-        badge.style.borderRadius = '2px';
-        badge.style.color = '#ffcc00';
-        badge.style.fontSize = '14px';
-        badge.style.fontWeight = 'bold';
-        badge.style.fontFamily = 'Consolas, "Lucida Console", monospace';
-        badge.style.letterSpacing = '0.1em';
-        badge.style.textShadow = '0 0 10px rgba(0, 0, 0, 0.9)';
-        badge.style.boxShadow = '0 8px 20px rgba(0, 0, 0, 0.35)';
         button.appendChild(badge);
 
-        const setIdleState = () => {
-            button.style.background = this.showHotspotDebug ? 'rgba(255, 204, 0, 0.08)' : 'transparent';
-            button.style.borderColor = this.showHotspotDebug ? 'rgba(255, 204, 0, 0.4)' : 'transparent';
-            button.style.transform = 'scale(1)';
-            button.style.filter = 'brightness(1)';
-            badge.style.background = 'linear-gradient(180deg, rgba(16, 22, 28, 0.94), rgba(6, 10, 16, 0.9))';
-            badge.style.borderColor = 'rgba(255, 204, 0, 0.45)';
-            badge.style.color = '#ffcc00';
-        };
-
-        const setHoverState = () => {
-            button.style.background = 'rgba(255, 204, 0, 0.06)';
-            button.style.borderColor = 'rgba(255, 204, 0, 0.3)';
-            button.style.transform = 'scale(1.02)';
-            button.style.filter = 'brightness(1.06)';
-            badge.style.background = 'linear-gradient(180deg, rgba(40, 30, 10, 0.96), rgba(18, 14, 7, 0.92))';
-            badge.style.borderColor = '#ffcc00';
-            badge.style.color = '#fff3b0';
-        };
-
-        button.addEventListener('mouseover', () => { this.game.audio.playSound('uiMove'); setHoverState(); });
-        button.addEventListener('mouseout', setIdleState);
-        button.addEventListener('focus', () => { this.game.audio.playSound('uiMove'); setHoverState(); });
-        button.addEventListener('blur', setIdleState);
-        button.addEventListener('click', () => { this.game.audio.playSound('uiConfirm'); onClick(); });
-        setIdleState();
+        button.addEventListener('mouseover', () => this.game.audio.playSound('uiMove'));
+        button.addEventListener('focus', () => this.game.audio.playSound('uiMove'));
+        button.addEventListener('click', () => {
+            this.game.audio.playSound('uiConfirm');
+            onClick();
+        });
 
         return button;
+    }
+
+    buildSystemsSummary(playerData) {
+        const systems = [];
+        if (playerData.ownedSystems.bossHealthIndicator) systems.push('Boss Readout');
+        if (playerData.ownedSystems.targetingHud) systems.push('Targeting HUD');
+        if (playerData.ownedSystems.threatComputer) systems.push('Threat Computer');
+        if (playerData.ownedSystems.reactiveShieldEmitter) systems.push('Shield Emitter');
+        if (playerData.ownedSystems.damageControlKit) systems.push('Damage Control');
+        if (playerData.ownedSystems.salvageUplink) systems.push(`Salvage Uplink Mk ${playerData.ownedSystems.salvageUplink}`);
+        return systems.length ? systems.join('<br>') : 'No fitted systems';
     }
 
     setupHangarScreen() {
@@ -103,105 +77,98 @@ class HangarState {
         const hangarScreen = document.getElementById('hangar-screen');
         hangarScreen.innerHTML = '';
 
-        const mainContainer = document.createElement('div');
-        mainContainer.style.position = 'relative';
-        mainContainer.style.width = '100%';
-        mainContainer.style.height = '100%';
-        mainContainer.style.overflow = 'hidden';
-        mainContainer.style.backgroundColor = '#05070b';
+        const shell = document.createElement('div');
+        shell.className = 'dos-shell';
+        shell.style.background = 'radial-gradient(circle at center, rgba(24, 32, 38, 0.34), rgba(4, 8, 12, 0.98) 74%)';
 
         if (this.background) {
             const bgImg = document.createElement('img');
+            bgImg.className = 'dos-bg-image';
             bgImg.src = this.background.src;
-            bgImg.style.position = 'absolute';
-            bgImg.style.inset = '0';
-            bgImg.style.width = '100%';
-            bgImg.style.height = '100%';
-            bgImg.style.objectFit = 'cover';
-            bgImg.style.objectPosition = 'center center';
-            bgImg.style.zIndex = '1';
-            mainContainer.appendChild(bgImg);
+            bgImg.style.filter = 'brightness(0.5) contrast(1.02) saturate(0.78)';
+            shell.appendChild(bgImg);
         }
 
         const overlay = document.createElement('div');
-        overlay.style.position = 'absolute';
-        overlay.style.inset = '0';
-        overlay.style.background = 'linear-gradient(180deg, rgba(0,0,0,0.18) 0%, rgba(0,0,0,0.08) 28%, rgba(0,0,0,0.3) 100%)';
-        overlay.style.zIndex = '2';
-        mainContainer.appendChild(overlay);
+        overlay.className = 'dos-overlay';
+        overlay.style.background = 'linear-gradient(180deg, rgba(0,0,0,0.15), rgba(0,0,0,0.35)), repeating-linear-gradient(180deg, rgba(255,255,255,0.028) 0, rgba(255,255,255,0.028) 1px, transparent 1px, transparent 6px)';
+        shell.appendChild(overlay);
 
         const statsPanel = document.createElement('div');
+        statsPanel.className = 'dos-frame compact';
         statsPanel.style.position = 'absolute';
         statsPanel.style.left = '3.5%';
         statsPanel.style.top = '5.5%';
-        statsPanel.style.width = '21%';
-        statsPanel.style.minWidth = '250px';
+        statsPanel.style.width = '22%';
+        statsPanel.style.minWidth = '270px';
         statsPanel.style.padding = '14px 16px';
-        statsPanel.style.background = 'linear-gradient(180deg, rgba(8, 14, 20, 0.9), rgba(4, 8, 14, 0.92))';
-        statsPanel.style.border = '1px solid rgba(255, 204, 0, 0.28)';
-        statsPanel.style.borderRadius = '2px';
-        statsPanel.style.fontFamily = 'Consolas, "Lucida Console", monospace';
-        statsPanel.style.boxShadow = '0 0 0 1px rgba(255,255,255,0.06), 0 18px 40px rgba(0,0,0,0.3)';
-        statsPanel.style.color = 'white';
         statsPanel.style.zIndex = '3';
         statsPanel.innerHTML = `
-            <div style="font: 12px Consolas, monospace; color: #8fb6d8; letter-spacing: 0.18em; margin-bottom: 8px;">BASE OPERATIONS</div>
-            <div style="font-size: 28px; color: #ffcc00; margin-bottom: 10px; font-family: Consolas, monospace;">HANGAR</div>
-            <div style="font-size: 22px; margin-bottom: 4px;">${playerData.name}</div>
-            <div style="font-size: 15px; color: #9fd7ff; margin-bottom: 10px;">Callsign: ${playerData.callsign}</div>
-            <div style="font-size: 14px; color: #d7d7d7; margin-bottom: 10px;">Airframe: ${ship.displayName} | ${difficulty.displayName}</div>
-            <div style="font-size: 14px; line-height: 1.7;">
-                <div>Funds: $${playerData.money}</div>
-                <div>Hull: ${playerData.health}/${playerData.maxHealth || ship.maxHealth}</div>
-                <div>Shield: ${playerData.shield || 0}/${playerData.maxShield || 0}</div>
-                <div>Main Gun Mk: ${playerData.primaryWeaponLevel || 1}</div>
-                <div>Secondary: ${playerData.equippedSecondaryWeapon || 'None'}</div>
-                <div>Megabombs: ${playerData.megabombs ?? 3}</div>
-                <div>Cleared Missions: ${playerData.lastCompletedLevel || 0}</div>
+            <div class="dos-kicker">Base Operations</div>
+            <div class="dos-title" style="font-size:28px; margin:8px 0 10px;">Hangar</div>
+            <div class="dos-subtitle" style="font-size:20px; color:#ffffff;">${playerData.name}</div>
+            <div class="dos-subtitle" style="color:#9fd7ff; margin-bottom:10px;">Callsign ${playerData.callsign}</div>
+            <div class="dos-copy">
+                Airframe ${ship.displayName}<br>
+                Difficulty ${difficulty.displayName}<br>
+                Funds $${playerData.money}<br>
+                Hull ${playerData.health}/${playerData.maxHealth || ship.maxHealth}<br>
+                Shield ${playerData.shield || 0}/${playerData.maxShield || 0}<br>
+                Main Gun Mk ${playerData.primaryWeaponLevel || 1}<br>
+                Secondary ${playerData.equippedSecondaryWeapon || 'None'}<br>
+                Megabombs ${playerData.megabombs ?? 3}<br>
+                Cleared Missions ${playerData.lastCompletedLevel || 0}
             </div>
         `;
-        mainContainer.appendChild(statsPanel);
+        shell.appendChild(statsPanel);
 
         const status = document.createElement('div');
+        status.className = 'dos-chip';
         status.style.position = 'absolute';
         status.style.left = '50%';
         status.style.top = '6%';
         status.style.transform = 'translateX(-50%)';
-        status.style.padding = '9px 15px';
-        status.style.background = 'linear-gradient(180deg, rgba(8, 14, 20, 0.88), rgba(4, 8, 14, 0.84))';
-        status.style.fontFamily = 'Consolas, "Lucida Console", monospace';
-        status.style.border = '1px solid rgba(255, 255, 255, 0.16)';
-        status.style.borderRadius = '999px';
-        status.style.color = this.completedLevel ? '#ffcc00' : '#d7d7d7';
-        status.style.fontSize = '15px';
         status.style.zIndex = '3';
+        status.style.color = this.completedLevel ? '#ffcc00' : '#d7d7d7';
         status.textContent = this.completedLevel
-            ? `Mission ${this.completedLevel} complete. Debrief filed and craft returned to base.`
+            ? `Mission ${this.completedLevel} complete. Craft recovered and debrief filed.`
             : 'Select the next sortie from the hangar.';
-        mainContainer.appendChild(status);
+        shell.appendChild(status);
+
+        const systemsPanel = document.createElement('div');
+        systemsPanel.className = 'dos-frame compact';
+        systemsPanel.style.position = 'absolute';
+        systemsPanel.style.right = '3.5%';
+        systemsPanel.style.top = '7.5%';
+        systemsPanel.style.width = '22%';
+        systemsPanel.style.minWidth = '250px';
+        systemsPanel.style.padding = '14px 16px';
+        systemsPanel.style.zIndex = '3';
+        systemsPanel.innerHTML = `
+            <div class="dos-kicker">Systems Board</div>
+            <div class="dos-copy" style="margin-top:10px; line-height:1.8;">${this.buildSystemsSummary(playerData)}</div>
+        `;
+        shell.appendChild(systemsPanel);
 
         if (this.missionResult) {
             const debriefBadge = document.createElement('div');
+            debriefBadge.className = 'dos-frame compact';
             debriefBadge.style.position = 'absolute';
             debriefBadge.style.left = '3.5%';
             debriefBadge.style.bottom = '8%';
             debriefBadge.style.width = '24%';
             debriefBadge.style.minWidth = '280px';
             debriefBadge.style.padding = '12px 14px';
-            debriefBadge.style.background = 'linear-gradient(180deg, rgba(8, 14, 20, 0.9), rgba(4, 8, 14, 0.9))';
-            debriefBadge.style.border = '1px solid rgba(143, 182, 216, 0.25)';
-            debriefBadge.style.borderRadius = '2px';
-            debriefBadge.style.fontFamily = 'Consolas, "Lucida Console", monospace';
-            debriefBadge.style.color = '#dce5ee';
-            debriefBadge.style.fontSize = '13px';
-            debriefBadge.style.lineHeight = '1.7';
             debriefBadge.style.zIndex = '3';
             debriefBadge.innerHTML = `
-                <div style="font-size: 16px; color: #ffcc00; margin-bottom: 6px;">Latest Debrief</div>
-                <div>Cash Earned: $${this.missionResult.moneyEarned || 0}</div>
-                <div>Air / Ground Kills: ${this.missionResult.airTargetsDestroyed || 0} / ${this.missionResult.groundTargetsDestroyed || 0}</div>
+                <div class="dos-kicker">Latest Debrief</div>
+                <div class="dos-copy" style="margin-top:10px; line-height:1.8;">
+                    Cash Earned $${this.missionResult.moneyEarned || 0}<br>
+                    Air / Ground ${this.missionResult.airTargetsDestroyed || 0} / ${this.missionResult.groundTargetsDestroyed || 0}<br>
+                    Route ${(this.missionResult.sectionsVisited || []).join(' / ') || 'Bravo Sector'}
+                </div>
             `;
-            mainContainer.appendChild(debriefBadge);
+            shell.appendChild(debriefBadge);
         }
 
         const hotspots = [
@@ -210,25 +177,19 @@ class HangarState {
             this.createHotspot('Save Game', { left: '73%', top: '26%', width: '17%', height: '9%' }, () => this.saveGame()),
             this.createHotspot('Main Menu', { left: '42%', top: '88%', width: '16%', height: '6%' }, () => this.exitToMenu())
         ];
-
-        hotspots.forEach((hotspot) => mainContainer.appendChild(hotspot));
+        hotspots.forEach((hotspot) => shell.appendChild(hotspot));
 
         const hint = document.createElement('div');
+        hint.className = 'dos-frame compact';
         hint.style.position = 'absolute';
         hint.style.right = '18px';
         hint.style.bottom = '16px';
         hint.style.padding = '8px 12px';
-        hint.style.background = 'linear-gradient(180deg, rgba(8, 14, 20, 0.88), rgba(4, 8, 14, 0.84))';
-        hint.style.fontFamily = 'Consolas, "Lucida Console", monospace';
-        hint.style.border = '1px solid rgba(255,255,255,0.12)';
-        hint.style.borderRadius = '6px';
-        hint.style.color = '#b7b7b7';
-        hint.style.fontSize = '13px';
         hint.style.zIndex = '3';
-        hint.textContent = 'Hotkeys: 1 launch, 2 shop, 3 save, 4 menu';
-        mainContainer.appendChild(hint);
+        hint.innerHTML = '<div class="dos-footer-hint">Hotkeys: 1 Launch // 2 Shop // 3 Save // 4 Menu</div>';
+        shell.appendChild(hint);
 
-        hangarScreen.appendChild(mainContainer);
+        hangarScreen.appendChild(shell);
     }
 
     update() {
@@ -244,7 +205,7 @@ class HangarState {
             this.game.audio.playSound('uiConfirm');
             this.saveGame();
         }
-        if (this.game.input.wasKeyJustPressed('4') || this.game.input.wasKeyJustPressed('e')) {
+        if (this.game.input.wasKeyJustPressed('4') || this.game.input.wasKeyJustPressed('e') || this.game.input.wasKeyJustPressed('Escape')) {
             this.game.audio.playSound('uiBack');
             this.exitToMenu();
         }
@@ -282,4 +243,3 @@ class HangarState {
 }
 
 export { HangarState };
-
