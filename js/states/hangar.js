@@ -54,13 +54,14 @@ class HangarState {
         badge.style.alignItems = 'center';
         badge.style.justifyContent = 'center';
         badge.style.padding = '9px 14px';
-        badge.style.background = 'rgba(7, 10, 16, 0.8)';
+        badge.style.background = 'linear-gradient(180deg, rgba(16, 22, 28, 0.94), rgba(6, 10, 16, 0.9))';
         badge.style.border = '1px solid rgba(255, 204, 0, 0.45)';
-        badge.style.borderRadius = '999px';
+        badge.style.borderRadius = '2px';
         badge.style.color = '#ffcc00';
-        badge.style.fontSize = '15px';
+        badge.style.fontSize = '14px';
         badge.style.fontWeight = 'bold';
-        badge.style.letterSpacing = '0.04em';
+        badge.style.fontFamily = 'Consolas, "Lucida Console", monospace';
+        badge.style.letterSpacing = '0.1em';
         badge.style.textShadow = '0 0 10px rgba(0, 0, 0, 0.9)';
         badge.style.boxShadow = '0 8px 20px rgba(0, 0, 0, 0.35)';
         button.appendChild(badge);
@@ -70,7 +71,7 @@ class HangarState {
             button.style.borderColor = this.showHotspotDebug ? 'rgba(255, 204, 0, 0.4)' : 'transparent';
             button.style.transform = 'scale(1)';
             button.style.filter = 'brightness(1)';
-            badge.style.background = 'rgba(7, 10, 16, 0.8)';
+            badge.style.background = 'linear-gradient(180deg, rgba(16, 22, 28, 0.94), rgba(6, 10, 16, 0.9))';
             badge.style.borderColor = 'rgba(255, 204, 0, 0.45)';
             badge.style.color = '#ffcc00';
         };
@@ -80,7 +81,7 @@ class HangarState {
             button.style.borderColor = 'rgba(255, 204, 0, 0.3)';
             button.style.transform = 'scale(1.02)';
             button.style.filter = 'brightness(1.06)';
-            badge.style.background = 'rgba(22, 18, 7, 0.9)';
+            badge.style.background = 'linear-gradient(180deg, rgba(40, 30, 10, 0.96), rgba(18, 14, 7, 0.92))';
             badge.style.borderColor = '#ffcc00';
             badge.style.color = '#fff3b0';
         };
@@ -136,13 +137,16 @@ class HangarState {
         statsPanel.style.width = '21%';
         statsPanel.style.minWidth = '250px';
         statsPanel.style.padding = '14px 16px';
-        statsPanel.style.background = 'rgba(8, 10, 14, 0.78)';
+        statsPanel.style.background = 'linear-gradient(180deg, rgba(8, 14, 20, 0.9), rgba(4, 8, 14, 0.92))';
         statsPanel.style.border = '1px solid rgba(255, 204, 0, 0.28)';
-        statsPanel.style.borderRadius = '8px';
+        statsPanel.style.borderRadius = '2px';
+        statsPanel.style.fontFamily = 'Consolas, "Lucida Console", monospace';
+        statsPanel.style.boxShadow = '0 0 0 1px rgba(255,255,255,0.06), 0 18px 40px rgba(0,0,0,0.3)';
         statsPanel.style.color = 'white';
         statsPanel.style.zIndex = '3';
         statsPanel.innerHTML = `
-            <div style="font-size: 28px; color: #ffcc00; margin-bottom: 10px;">HANGAR</div>
+            <div style="font: 12px Consolas, monospace; color: #8fb6d8; letter-spacing: 0.18em; margin-bottom: 8px;">BASE OPERATIONS</div>
+            <div style="font-size: 28px; color: #ffcc00; margin-bottom: 10px; font-family: Consolas, monospace;">HANGAR</div>
             <div style="font-size: 22px; margin-bottom: 4px;">${playerData.name}</div>
             <div style="font-size: 15px; color: #9fd7ff; margin-bottom: 10px;">Callsign: ${playerData.callsign}</div>
             <div style="font-size: 14px; color: #d7d7d7; margin-bottom: 10px;">Airframe: ${ship.displayName} | ${difficulty.displayName}</div>
@@ -164,7 +168,8 @@ class HangarState {
         status.style.top = '6%';
         status.style.transform = 'translateX(-50%)';
         status.style.padding = '9px 15px';
-        status.style.background = 'rgba(8, 10, 14, 0.72)';
+        status.style.background = 'linear-gradient(180deg, rgba(8, 14, 20, 0.88), rgba(4, 8, 14, 0.84))';
+        status.style.fontFamily = 'Consolas, "Lucida Console", monospace';
         status.style.border = '1px solid rgba(255, 255, 255, 0.16)';
         status.style.borderRadius = '999px';
         status.style.color = this.completedLevel ? '#ffcc00' : '#d7d7d7';
@@ -183,9 +188,10 @@ class HangarState {
             debriefBadge.style.width = '24%';
             debriefBadge.style.minWidth = '280px';
             debriefBadge.style.padding = '12px 14px';
-            debriefBadge.style.background = 'rgba(8, 10, 14, 0.8)';
+            debriefBadge.style.background = 'linear-gradient(180deg, rgba(8, 14, 20, 0.9), rgba(4, 8, 14, 0.9))';
             debriefBadge.style.border = '1px solid rgba(143, 182, 216, 0.25)';
-            debriefBadge.style.borderRadius = '8px';
+            debriefBadge.style.borderRadius = '2px';
+            debriefBadge.style.fontFamily = 'Consolas, "Lucida Console", monospace';
             debriefBadge.style.color = '#dce5ee';
             debriefBadge.style.fontSize = '13px';
             debriefBadge.style.lineHeight = '1.7';
@@ -212,7 +218,8 @@ class HangarState {
         hint.style.right = '18px';
         hint.style.bottom = '16px';
         hint.style.padding = '8px 12px';
-        hint.style.background = 'rgba(8, 10, 14, 0.72)';
+        hint.style.background = 'linear-gradient(180deg, rgba(8, 14, 20, 0.88), rgba(4, 8, 14, 0.84))';
+        hint.style.fontFamily = 'Consolas, "Lucida Console", monospace';
         hint.style.border = '1px solid rgba(255,255,255,0.12)';
         hint.style.borderRadius = '6px';
         hint.style.color = '#b7b7b7';

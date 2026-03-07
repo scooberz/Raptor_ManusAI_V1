@@ -3,7 +3,7 @@
 ## 1. High-Level Project Overview
 - **Project Name:** Project Raptor
 - **Concept:** A modern re-imagining of the classic 1994 DOS game *Raptor: Call of the Shadows*, built with a data-driven, modular JavaScript engine.
-- **Current Goal:** Stabilize the campaign framing, Level 1 environment identity, Level 1 combat composition, Harold's Emporium economy loop, end-of-run score model, and moment-to-moment audio/presentation feedback so the game plays like a faithful DOS-style contract run instead of a prototype shooter.
+- **Current Goal:** Stabilize the campaign framing, Level 1 environment identity, Level 1 combat composition, Harold's Emporium economy loop, end-of-run score model, and DOS-style presentation/audio feedback so the game plays like a faithful DOS-style contract run instead of a prototype shooter.
 - **Active Fidelity Spec:** See `docs/FAITHFUL_RECREATION_SPEC.md` for the current screen-flow, layout, and gameplay targets.
 
 ## 2. Game Architecture
@@ -21,7 +21,7 @@
 - **Typography:** Functional, readable UI fonts. Final fidelity pass should move further toward a period-appropriate DOS instrumentation look.
 - **Sprite & Asset Design:** Clear silhouettes, consistent scale, readable projectiles, layered background identity, and destructible environment targets that make sense for the terrain.
 - **Environment Design:** Smooth scrolling, destructible structures, section-based visual identity, and region-specific ground targets.
-- **UI & HUD:** Compact, readable, and cash-first during active play. Score is only surfaced in debrief/final screens and is calculated from cash, kills, completion, and the selected difficulty multiplier. Major UI states now also use synthesized fallback interaction sounds until authored samples exist.
+- **UI & HUD:** Compact, readable, and cash-first during active play. Score is only surfaced in debrief/final screens and is calculated from cash, kills, completion, and the selected difficulty multiplier. Major UI states now use a stronger terminal/cockpit visual language plus synthesized fallback interaction sounds until authored samples exist.
 
 ## 4. Game Mechanics & Flow
 - **Gameplay:** Vertical scrolling shoot 'em up. Player controls a fighter jet, battling enemies on ground and in the air. Level 1 now uses named regional encounter beats, short inter-wave breathers, and a phased telegraphed boss encounter before landing/debrief.

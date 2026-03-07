@@ -54,6 +54,7 @@ The repo now ships:
 - a rewritten Level 1 combat script with named waves, short inter-wave breathers, section-aware threat labels, and a phased telegraphed boss finale
 - synthesized fallback audio for menu, mission, boss warning, pickups, purchases, and combat feedback when no shipped sound asset exists
 - layered explosion rendering with stronger shockwave / flash feedback and size-based blast cues
+- stronger section-specific background atmosphere and a more terminal-style HUD / briefing / debrief presentation pass
 
 Current compromise:
 - only one full player sprite set exists today, so alternate airframes currently use sprite fallback plus tinting
@@ -275,8 +276,9 @@ Current policy:
 
 ### Phase E: Presentation and Audio
 - [partial] procedural fallback audio now covers menu/UI navigation, mission ambience, pickups, damage, explosions, and boss warning cues
-- [partial] explosion tiers and chain-reaction feedback are visually stronger and size-aware
-- [next] tighten final visual identity of each environment region
+- [done] explosion tiers and chain-reaction feedback are visually stronger and size-aware
+- [partial] environment regions now have stronger distinct atmosphere and overlay language, but still need more bespoke art variation
+- [partial] HUD, briefing, landing, hangar, and shop now share a stronger terminal-style visual language
 - [next] replace the fallback sound bed with authored music and bespoke sampled weapon / UI effects when assets exist
 
 ### Phase F: Campaign Expansion
@@ -324,6 +326,7 @@ Current policy:
 - [partial] each region has distinct landmark structures
 - [partial] destructible objects broadly match the visible terrain beneath them
 - [done] water, shore, bridge, refinery, and military sections feel different
+- [done] each region now has stronger atmospheric tinting and overlay language in motion
 - [partial] the mission is less visually same-ey, but still needs more bespoke landmarks and tile variation
 
 ### Economy / Debrief
@@ -336,8 +339,8 @@ Current policy:
 - [done] final contract score is calculated from cash, kills, completion, and the end-of-run difficulty multiplier
 
 ### Presentation / Audio
-- [partial] HUD reads more like instrumentation than before
-- [next] fonts and layout need a more period-authentic pass
+- [done] HUD reads more like instrumentation than before
+- [partial] fonts and layout now lean further into a period terminal look, but still need final polish and more bespoke art framing
 - [done] explosions now scale by target class with stronger layered flash / shockwave feedback
 - [partial] menu and mission audio now have procedural fallback ambience and SFX, but still need authored music and sampled effects
 - [done] pickups and major UI interactions now have stronger feedback

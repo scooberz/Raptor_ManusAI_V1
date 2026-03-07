@@ -286,7 +286,8 @@ class ShopState {
         const overlay = document.createElement('div');
         overlay.style.position = 'absolute';
         overlay.style.inset = '0';
-        overlay.style.background = 'linear-gradient(180deg, rgba(0,0,0,0.56), rgba(0,0,0,0.74))';
+        overlay.style.background = 'linear-gradient(180deg, rgba(0,0,0,0.52), rgba(0,0,0,0.82))';
+        overlay.style.backdropFilter = 'blur(1px)';
         overlay.style.zIndex = '2';
         mainContainer.appendChild(overlay);
 
@@ -314,9 +315,10 @@ class ShopState {
         layout.style.alignItems = 'start';
 
         const categoryPanel = document.createElement('div');
-        categoryPanel.style.background = 'rgba(8, 12, 18, 0.84)';
+        categoryPanel.style.background = 'linear-gradient(180deg, rgba(8, 14, 20, 0.92), rgba(4, 8, 14, 0.92))';
         categoryPanel.style.border = '1px solid rgba(255, 204, 0, 0.28)';
-        categoryPanel.style.borderRadius = '10px';
+        categoryPanel.style.borderRadius = '2px';
+        categoryPanel.style.fontFamily = 'Consolas, "Lucida Console", monospace';
         categoryPanel.style.padding = '14px';
         categoryPanel.innerHTML = '<div style="font-size: 18px; color: #ffcc00; margin-bottom: 12px;">Categories</div>';
         this.categories.forEach((category, index) => {
@@ -342,9 +344,10 @@ class ShopState {
         layout.appendChild(categoryPanel);
 
         const itemPanel = document.createElement('div');
-        itemPanel.style.background = 'rgba(8, 12, 18, 0.84)';
+        itemPanel.style.background = 'linear-gradient(180deg, rgba(8, 14, 20, 0.92), rgba(4, 8, 14, 0.92))';
         itemPanel.style.border = '1px solid rgba(255, 204, 0, 0.28)';
-        itemPanel.style.borderRadius = '10px';
+        itemPanel.style.borderRadius = '2px';
+        itemPanel.style.fontFamily = 'Consolas, "Lucida Console", monospace';
         itemPanel.style.padding = '14px';
         itemPanel.innerHTML = `<div style="font-size: 18px; color: #ffcc00; margin-bottom: 12px;">${this.categories[this.selectedCategoryIndex].label}</div>`;
 
@@ -386,9 +389,10 @@ class ShopState {
         layout.appendChild(itemPanel);
 
         const detailPanel = document.createElement('div');
-        detailPanel.style.background = 'rgba(8, 12, 18, 0.88)';
+        detailPanel.style.background = 'linear-gradient(180deg, rgba(8, 14, 20, 0.94), rgba(4, 8, 14, 0.94))';
         detailPanel.style.border = '1px solid rgba(255, 204, 0, 0.28)';
-        detailPanel.style.borderRadius = '10px';
+        detailPanel.style.borderRadius = '2px';
+        detailPanel.style.fontFamily = 'Consolas, "Lucida Console", monospace';
         detailPanel.style.padding = '16px';
         detailPanel.innerHTML = selectedItem ? `
             <div style="font-size: 18px; color: #ffcc00; margin-bottom: 8px;">Selected Contract Item</div>
@@ -427,7 +431,8 @@ class ShopState {
         backButton.style.padding = '12px 18px';
         backButton.style.borderRadius = '8px';
         backButton.style.border = '1px solid rgba(255,255,255,0.18)';
-        backButton.style.background = 'rgba(8, 12, 18, 0.88)';
+        backButton.style.background = 'linear-gradient(180deg, rgba(8, 14, 20, 0.92), rgba(4, 8, 14, 0.9))';
+        backButton.style.fontFamily = 'Consolas, "Lucida Console", monospace';
         backButton.style.color = '#ffffff';
         backButton.style.cursor = 'pointer';
         backButton.addEventListener('click', () => { this.game.audio.playSound('uiBack'); this.exitShop(); });
@@ -435,7 +440,8 @@ class ShopState {
 
         const hint = document.createElement('div');
         hint.style.color = '#aab7c4';
-        hint.style.fontSize = '14px';
+        hint.style.fontSize = '13px';
+        hint.style.fontFamily = 'Consolas, "Lucida Console", monospace';
         hint.textContent = 'Left/Right: category | Up/Down: item | Enter: purchase/equip | Esc: hangar';
         footer.appendChild(hint);
         mainContainer.appendChild(footer);
