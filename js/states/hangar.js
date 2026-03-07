@@ -7,13 +7,16 @@ import { logger } from '../utils/logger.js';
 class HangarState {
     constructor(game) {
         this.game = game;
+        this.name = 'hangar';
         this.background = null;
         this.completedLevel = 0;
+        this.missionResult = null;
         this.showHotspotDebug = false;
     }
 
     enter(context = {}) {
         this.completedLevel = Number(context.completedLevel) || 0;
+        this.missionResult = context.missionResult || null;
         this.game.setPlayerData(this.game.playerData || {});
         this.background = this.game.assets.getImage('hangarBackground');
         document.getElementById('hangar-screen').style.display = 'flex';
@@ -94,6 +97,8 @@ class HangarState {
 
     setupHangarScreen() {
         const playerData = this.game.playerData || this.game.getDefaultPlayerData();
+        const ship = this.game.getPlayerShipProfile(playerData.shipId);
+        const difficulty = this.game.getDifficultyProfile(playerData.difficulty);
         const hangarScreen = document.getElementById('hangar-screen');
         hangarScreen.innerHTML = '';
 
@@ -128,8 +133,8 @@ class HangarState {
         statsPanel.style.position = 'absolute';
         statsPanel.style.left = '3.5%';
         statsPanel.style.top = '5.5%';
-        statsPanel.style.width = '20%';
-        statsPanel.style.minWidth = '230px';
+        statsPanel.style.width = '21%';
+        statsPanel.style.minWidth = '250px';
         statsPanel.style.padding = '14px 16px';
         statsPanel.style.background = 'rgba(8, 10, 14, 0.78)';
         statsPanel.style.border = '1px solid rgba(255, 204, 0, 0.28)';
@@ -139,11 +144,12 @@ class HangarState {
         statsPanel.innerHTML = `
             <div style="font-size: 28px; color: #ffcc00; margin-bottom: 10px;">HANGAR</div>
             <div style="font-size: 22px; margin-bottom: 4px;">${playerData.name}</div>
-            <div style="font-size: 15px; color: #9fd7ff; margin-bottom: 12px;">Callsign: ${playerData.callsign}</div>
+            <div style="font-size: 15px; color: #9fd7ff; margin-bottom: 10px;">Callsign: ${playerData.callsign}</div>
+            <div style="font-size: 14px; color: #d7d7d7; margin-bottom: 10px;">Airframe: ${ship.displayName} | ${difficulty.displayName}</div>
             <div style="font-size: 14px; line-height: 1.7;">
                 <div>Funds: $${playerData.money}</div>
-                <div>Score: ${playerData.score}</div>
-                <div>Hull: ${playerData.health}/${playerData.maxHealth || 100}</div>
+                <div>Hull: ${playerData.health}/${playerData.maxHealth || ship.maxHealth}</div>
+                <div>Main Gun Mk: ${playerData.primaryWeaponLevel || 1}</div>
                 <div>Megabombs: ${playerData.megabombs ?? 3}</div>
                 <div>Cleared Missions: ${playerData.lastCompletedLevel || 0}</div>
             </div>
@@ -163,9 +169,32 @@ class HangarState {
         status.style.fontSize = '15px';
         status.style.zIndex = '3';
         status.textContent = this.completedLevel
-            ? `Mission ${this.completedLevel} complete. The ship is back in the hangar.`
+            ? `Mission ${this.completedLevel} complete. Debrief filed and craft returned to base.`
             : 'Select the next sortie from the hangar.';
         mainContainer.appendChild(status);
+
+        if (this.missionResult) {
+            const debriefBadge = document.createElement('div');
+            debriefBadge.style.position = 'absolute';
+            debriefBadge.style.left = '3.5%';
+            debriefBadge.style.bottom = '8%';
+            debriefBadge.style.width = '24%';
+            debriefBadge.style.minWidth = '280px';
+            debriefBadge.style.padding = '12px 14px';
+            debriefBadge.style.background = 'rgba(8, 10, 14, 0.8)';
+            debriefBadge.style.border = '1px solid rgba(143, 182, 216, 0.25)';
+            debriefBadge.style.borderRadius = '8px';
+            debriefBadge.style.color = '#dce5ee';
+            debriefBadge.style.fontSize = '13px';
+            debriefBadge.style.lineHeight = '1.7';
+            debriefBadge.style.zIndex = '3';
+            debriefBadge.innerHTML = `
+                <div style="font-size: 16px; color: #ffcc00; margin-bottom: 6px;">Latest Debrief</div>
+                <div>Cash Earned: $${this.missionResult.moneyEarned || 0}</div>
+                <div>Air / Ground Kills: ${this.missionResult.airTargetsDestroyed || 0} / ${this.missionResult.groundTargetsDestroyed || 0}</div>
+            `;
+            mainContainer.appendChild(debriefBadge);
+        }
 
         const hotspots = [
             this.createHotspot(this.getMissionLabel(), { left: '6%', top: '57%', width: '20%', height: '14%' }, () => this.chooseNextMission()),
@@ -193,7 +222,7 @@ class HangarState {
         hangarScreen.appendChild(mainContainer);
     }
 
-    update(deltaTime) {
+    update() {
         if (this.game.input.wasKeyJustPressed('1') || this.game.input.wasKeyJustPressed('m')) {
             this.chooseNextMission();
         }
@@ -208,13 +237,13 @@ class HangarState {
         }
     }
 
-    render(contexts) {}
+    render() {}
 
     chooseNextMission() {
         const gameState = this.game.states.game;
         const missionLevel = gameState ? gameState.getRequestedMissionLevel(this.game.playerData?.level || 1) : 1;
         document.getElementById('hangar-screen').style.display = 'none';
-        this.game.changeState('game', { missionLevel });
+        this.game.changeState('sectorBriefing', { missionLevel });
     }
 
     openShop() {

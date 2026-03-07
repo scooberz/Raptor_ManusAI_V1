@@ -25,6 +25,7 @@ class GameState {
         this.debugMode = false;
         this.effectManager = new EffectManager();
         this.supportedMissionLevels = [1];
+        this.missionStats = null;
     }
 
     getHighestSupportedLevel() {
@@ -34,6 +35,75 @@ class GameState {
     getRequestedMissionLevel(level) {
         const requested = Math.max(1, Number(level) || 1);
         return Math.min(requested, this.getHighestSupportedLevel());
+    }
+
+    initializeMissionStats() {
+        const missionProfile = this.game.getMissionProfile(this.level);
+        this.missionStats = {
+            missionLevel: this.level,
+            missionTitle: missionProfile.title,
+            missionCode: missionProfile.codeName,
+            landingText: missionProfile.landingText,
+            startScore: this.game.playerData?.score || 0,
+            startMoney: this.game.playerData?.money || 0,
+            airTargetsDestroyed: 0,
+            groundTargetsDestroyed: 0,
+            airKillsByType: {},
+            groundKillsByType: {},
+            sectionsVisited: new Map(),
+            startedAt: Date.now()
+        };
+    }
+
+    recordVisitedSection(section) {
+        if (!section || !this.missionStats) {
+            return;
+        }
+
+        if (!this.missionStats.sectionsVisited.has(section.id)) {
+            this.missionStats.sectionsVisited.set(section.id, section.title || section.id);
+        }
+    }
+
+    recordAirKill(type) {
+        if (!this.missionStats) {
+            return;
+        }
+
+        this.missionStats.airTargetsDestroyed += 1;
+        this.missionStats.airKillsByType[type] = (this.missionStats.airKillsByType[type] || 0) + 1;
+    }
+
+    recordGroundKill(type) {
+        if (!this.missionStats) {
+            return;
+        }
+
+        this.missionStats.groundTargetsDestroyed += 1;
+        this.missionStats.groundKillsByType[type] = (this.missionStats.groundKillsByType[type] || 0) + 1;
+    }
+
+    buildMissionResult() {
+        const playerData = this.game.playerData || {};
+        const missionProfile = this.game.getMissionProfile(this.level);
+        const sectionsVisited = this.missionStats ? [...this.missionStats.sectionsVisited.values()] : [];
+        return {
+            missionLevel: this.level,
+            missionTitle: missionProfile.title,
+            missionCode: missionProfile.codeName,
+            scoreEarned: Math.max(0, (this.player?.score ?? playerData.score ?? 0) - (this.missionStats?.startScore || 0)),
+            moneyEarned: Math.max(0, (this.player?.money ?? playerData.money ?? 0) - (this.missionStats?.startMoney || 0)),
+            airTargetsDestroyed: this.missionStats?.airTargetsDestroyed || 0,
+            groundTargetsDestroyed: this.missionStats?.groundTargetsDestroyed || 0,
+            airKillsByType: { ...(this.missionStats?.airKillsByType || {}) },
+            groundKillsByType: { ...(this.missionStats?.groundKillsByType || {}) },
+            sectionsVisited,
+            difficulty: playerData.difficulty,
+            shipId: playerData.shipId,
+            primaryWeaponLevel: playerData.primaryWeaponLevel,
+            landingText: missionProfile.landingText,
+            completedAt: Date.now()
+        };
     }
 
     async enter(context = {}) {
@@ -65,6 +135,7 @@ class GameState {
         this.levelComplete = false;
         this.levelCompleteTime = 0;
         this.game.states.pause.isPaused = false;
+        this.initializeMissionStats();
 
         this.player = new Player(this.game, this.game.width / 2 - 32, this.game.height - 120);
         this.player.loadSprites();
@@ -96,6 +167,10 @@ class GameState {
                 this.level = 1;
                 break;
         }
+
+        if (this.currentLevel?.currentTerrainSection) {
+            this.recordVisitedSection(this.currentLevel.currentTerrainSection);
+        }
     }
 
     syncPlayerData() {
@@ -112,7 +187,9 @@ class GameState {
             score: this.player.score,
             shield: this.player.shield,
             megabombs: this.player.megabombs,
-            unlockedWeapons: this.player.unlockedWeapons
+            unlockedWeapons: this.player.unlockedWeapons,
+            primaryWeaponLevel: this.player.weapons?.CANNON?.level || this.game.playerData?.primaryWeaponLevel || 1,
+            shipId: this.player.shipProfile?.id || this.game.playerData?.shipId
         });
 
         this.level = merged.level;
@@ -150,6 +227,9 @@ class GameState {
 
         if (this.currentLevel) {
             this.currentLevel.update(deltaTime);
+            if (this.currentLevel.currentTerrainSection) {
+                this.recordVisitedSection(this.currentLevel.currentTerrainSection);
+            }
         }
 
         this.game.entityManager.update(deltaTime);
@@ -241,13 +321,21 @@ class GameState {
 
         ctx.fillStyle = 'white';
         ctx.font = '24px Arial';
-        ctx.fillText('Returning to hangar...', this.game.width / 2, this.game.height / 2 + 30);
+        ctx.fillText('Proceeding to landing report...', this.game.width / 2, this.game.height / 2 + 30);
     }
 
     completeLevel() {
         const completedLevel = this.level;
+        const missionResult = this.buildMissionResult();
         const lastCompletedLevel = Math.max(this.game.playerData?.lastCompletedLevel || 0, completedLevel);
         const nextSupportedLevel = this.getRequestedMissionLevel(lastCompletedLevel + 1);
+        const priorResults = Array.isArray(this.game.playerData?.missionResults) ? this.game.playerData.missionResults : [];
+        const updatedMissionResults = [...priorResults, missionResult].slice(-12);
+        const eventFlags = {
+            ...(this.game.playerData?.eventFlags || {}),
+            [`mission_${completedLevel}_complete`]: true,
+            [`route_${this.game.playerData?.shipId || 'raptor'}`]: true
+        };
 
         this.game.setPlayerData({
             ...this.game.playerData,
@@ -258,11 +346,14 @@ class GameState {
             shield: this.player?.shield ?? this.game.playerData?.shield,
             megabombs: this.player?.megabombs ?? this.game.playerData?.megabombs,
             unlockedWeapons: this.player?.unlockedWeapons ?? this.game.playerData?.unlockedWeapons,
+            primaryWeaponLevel: this.player?.weapons?.CANNON?.level ?? this.game.playerData?.primaryWeaponLevel,
             level: nextSupportedLevel,
-            lastCompletedLevel
+            lastCompletedLevel,
+            missionResults: updatedMissionResults,
+            eventFlags
         });
         this.game.saveManager.saveGame();
-        this.game.changeState('hangar', { completedLevel });
+        this.game.changeState('landing', { completedLevel, missionResult });
     }
 
     async restartLevel() {
@@ -275,6 +366,7 @@ class GameState {
         this.game.collision.clearAll();
         this.game.entityManager.clear();
         this.effectManager.clear();
+        this.initializeMissionStats();
 
         this.player = new Player(this.game, this.game.width / 2 - 32, this.game.height - 120);
         this.player.loadSprites();
@@ -308,4 +400,3 @@ class GameState {
 }
 
 export { GameState };
-

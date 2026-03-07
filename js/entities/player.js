@@ -11,22 +11,24 @@ class Player extends Entity {
         super(game, x, y, 64, 64);
         this.layer = 'player';
 
-        this.speed = 575;
-        this.health = 75;
-        this.maxHealth = 100;
+        this.shipProfile = this.game.getPlayerShipProfile(this.game.playerData?.shipId);
+        this.speed = this.shipProfile.speed;
+        this.health = this.shipProfile.maxHealth;
+        this.maxHealth = this.shipProfile.maxHealth;
         this.shield = 0;
         this.money = 0;
         this.score = 0;
-        this.collisionDamage = 20;
+        this.collisionDamage = this.shipProfile.collisionDamage;
 
         this.weaponOrder = [];
         this.currentWeaponIndex = -1;
         this.currentWeapon = null;
         this.weapons = {
-            CANNON: { name: 'Autocannon', fireRate: 110, lastFired: 0, level: 1 },
+            CANNON: { name: 'Autocannon', fireRate: this.shipProfile.cannonFireRate, lastFired: 0, level: 1, damage: this.shipProfile.cannonDamage },
             MISSILE: { name: 'Missiles', fireRate: 715, lastFired: 0 }
         };
         this.unlockedWeapons = [];
+        this.bulletSpacing = this.shipProfile.bulletSpacing;
 
         this.megabombs = 3;
         this.lastMegabombTime = 0;
@@ -45,13 +47,47 @@ class Player extends Entity {
         this.syncWithPlayerData();
     }
 
+    getSpriteImage(key, fallbackKey) {
+        return this.game.assets.getImage(key) || this.game.assets.getImage(fallbackKey) || null;
+    }
+
+    loadSprites() {
+        const profile = this.shipProfile || this.game.getPlayerShipProfile(this.game.playerData?.shipId);
+        const spriteKeys = profile.spriteKeys || {};
+        this.sprites = {
+            base: this.getSpriteImage(spriteKeys.base || 'playerShipBase', 'playerShipBase'),
+            left: this.getSpriteImage(spriteKeys.left || 'playerShipLeft', 'playerShipLeft'),
+            right: this.getSpriteImage(spriteKeys.right || 'playerShipRight', 'playerShipRight'),
+            thrust: this.getSpriteImage(spriteKeys.thrust || 'playerShipThrust', 'playerShipThrust')
+        };
+
+        if (this.sprites.base && this.sprites.left && this.sprites.right) {
+            this.isReady = true;
+        } else {
+            logger.error('Failed to load one or more player sprites. Player will not be rendered.');
+        }
+    }
+
+    configurePrimaryWeapon() {
+        const level = Math.max(1, Number(this.game.playerData?.primaryWeaponLevel) || 1);
+        const ship = this.shipProfile;
+        const weapon = this.weapons.CANNON;
+        weapon.level = level;
+        weapon.damage = ship.cannonDamage + (level - 1);
+        weapon.fireRate = Math.max(ship.cannonUpgradeFloor, ship.cannonFireRate - ((level - 1) * 8));
+        this.bulletSpacing = ship.bulletSpacing;
+    }
+
     syncWithPlayerData() {
         if (!this.game.playerData) {
             return;
         }
 
-        this.health = this.game.playerData.health ?? 75;
-        this.maxHealth = this.game.playerData.maxHealth ?? 100;
+        this.shipProfile = this.game.getPlayerShipProfile(this.game.playerData.shipId);
+        this.speed = this.shipProfile.speed;
+        this.collisionDamage = this.shipProfile.collisionDamage;
+        this.maxHealth = this.game.playerData.maxHealth ?? this.shipProfile.maxHealth;
+        this.health = Math.min(this.maxHealth, this.game.playerData.health ?? this.shipProfile.maxHealth);
         this.money = this.game.playerData.money ?? 0;
         this.score = this.game.playerData.score ?? 0;
         this.shield = this.game.playerData.shield ?? 0;
@@ -63,22 +99,8 @@ class Player extends Entity {
         this.currentWeaponIndex = this.weaponOrder.length > 0 ? 0 : -1;
         this.currentWeapon = this.currentWeaponIndex >= 0 ? this.weaponOrder[this.currentWeaponIndex] : null;
         this.missileAutoFire = this.hasWeapon('MISSILE') ? this.missileAutoFire : false;
-        logger.debug(`Player synced with playerData: health=${this.health}, money=${this.money}`);
-    }
-
-    loadSprites() {
-        this.sprites = {
-            base: this.game.assets.getImage('playerShipBase'),
-            left: this.game.assets.getImage('playerShipLeft'),
-            right: this.game.assets.getImage('playerShipRight'),
-            thrust: this.game.assets.getImage('playerShipThrust')
-        };
-
-        if (this.sprites.base && this.sprites.left && this.sprites.right) {
-            this.isReady = true;
-        } else {
-            logger.error('Failed to load one or more player sprites. Player will not be rendered.');
-        }
+        this.configurePrimaryWeapon();
+        logger.debug(`Player synced with playerData: ship=${this.shipProfile.id}, health=${this.health}, money=${this.money}`);
     }
 
     update(deltaTime) {
@@ -217,26 +239,34 @@ class Player extends Entity {
                 ? this.sprites.right
                 : this.sprites.base;
 
+        context.save();
         context.globalCompositeOperation = 'source-over';
         context.drawImage(sprite, this.x, this.y, this.width, this.height);
+
+        if (this.shipProfile?.tint) {
+            context.globalCompositeOperation = 'screen';
+            context.fillStyle = this.shipProfile.tint;
+            context.fillRect(this.x, this.y, this.width, this.height);
+        }
+        context.restore();
     }
 
     fireCannon() {
-        const bulletSpacing = 10;
         const bulletVelocityY = -1200;
-        const bulletDamage = 3;
+        const bulletDamage = this.weapons.CANNON.damage;
         const bulletSprite = this.game.assets.getImage('playerBullet') || null;
+        const bulletOriginY = this.y - 6;
 
         const leftBullet = this.game.projectilePool.get();
         if (leftBullet) {
-            leftBullet.activate(this.x + this.width / 2 - bulletSpacing, this.y, 0, bulletVelocityY, bulletDamage, 'player', bulletSprite);
+            leftBullet.activate(this.x + this.width / 2 - this.bulletSpacing, bulletOriginY, 0, bulletVelocityY, bulletDamage, 'player', bulletSprite);
             this.game.entityManager.add(leftBullet);
             this.game.collision.addToGroup(leftBullet, 'playerProjectiles');
         }
 
         const rightBullet = this.game.projectilePool.get();
         if (rightBullet) {
-            rightBullet.activate(this.x + this.width / 2 + bulletSpacing, this.y, 0, bulletVelocityY, bulletDamage, 'player', bulletSprite);
+            rightBullet.activate(this.x + this.width / 2 + this.bulletSpacing, bulletOriginY, 0, bulletVelocityY, bulletDamage, 'player', bulletSprite);
             this.game.entityManager.add(rightBullet);
             this.game.collision.addToGroup(rightBullet, 'playerProjectiles');
         }
@@ -280,11 +310,11 @@ class Player extends Entity {
         const enemies = this.game.collision.collisionGroups.enemies;
         const enemyProjectiles = this.game.collision.collisionGroups.enemyProjectiles;
 
-        enemies.forEach(enemy => {
+        enemies.forEach((enemy) => {
             enemy.takeDamage(100);
         });
 
-        enemyProjectiles.forEach(projectile => {
+        enemyProjectiles.forEach((projectile) => {
             projectile.destroy();
         });
         this.game.collision.collisionGroups.enemyProjectiles = [];
@@ -375,11 +405,12 @@ class Player extends Entity {
     }
 
     upgradePrimaryWeapon() {
-        const weapon = this.weapons.CANNON;
-        if (weapon && weapon.level < 5) {
-            weapon.level++;
-            weapon.fireRate = Math.max(100, 150 - (weapon.level - 1) * 25);
+        const currentLevel = Math.max(1, Number(this.game.playerData?.primaryWeaponLevel) || this.weapons.CANNON.level || 1);
+        const nextLevel = Math.min(5, currentLevel + 1);
+        if (this.game.playerData) {
+            this.game.playerData.primaryWeaponLevel = nextLevel;
         }
+        this.configurePrimaryWeapon();
     }
 }
 

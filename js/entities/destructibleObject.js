@@ -87,11 +87,13 @@ class DestructibleObject extends Entity {
 
     destroyObject() {
         const player = this.game.currentState?.player || this.game.player;
+        const rewardMultiplier = this.game.getDifficultyProfile(this.game.playerData?.difficulty)?.rewardMultiplier || 1;
         if (player) {
-            player.addScore(this.scoreValue);
-            player.addMoney(this.moneyValue);
+            player.addScore(Math.max(0, Math.round(this.scoreValue * rewardMultiplier)));
+            player.addMoney(Math.max(0, Math.round(this.moneyValue * rewardMultiplier)));
         }
 
+        this.game.currentState?.recordGroundKill?.(this.environmentType, this);
         this.createExplosion();
         this.destroy();
     }
@@ -258,3 +260,4 @@ class DestructibleObject extends Entity {
 }
 
 export { DestructibleObject };
+

@@ -228,7 +228,7 @@ class MenuState {
                 <strong>Saved Pilot:</strong><br>
                 ${playerData.name} (${playerData.callsign})<br>
                 Mission: ${playerData.level || 1} | Credits: $${playerData.money || 0}<br>
-                Score: ${playerData.score || 0}
+                Airframe: ${this.game.getPlayerShipProfile(playerData.shipId).displayName} | ${this.game.getDifficultyProfile(playerData.difficulty).displayName}
             `;
             loadContainer.appendChild(pilotInfo);
             
@@ -722,6 +722,11 @@ class MenuState {
 }
 
 export { MenuState };
+
+
+
+
+
 
 
 

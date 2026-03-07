@@ -1,5 +1,5 @@
 /**
- * EnemyFactory class 2
+ * EnemyFactory class
  * Factory for creating different types of enemies.
  */
 import { Enemy } from './enemy.js';
@@ -11,6 +11,25 @@ import { logger } from '../utils/logger.js';
 class EnemyFactory {
     constructor(game) {
         this.game = game;
+    }
+
+    applyDifficultyModifiers(enemy, translatedOverrides = {}) {
+        if (!enemy || enemy instanceof DestructibleObject) {
+            return;
+        }
+
+        const difficulty = this.game.getDifficultyProfile(this.game.playerData?.difficulty);
+        const baseHealth = translatedOverrides.health ?? enemy.health;
+        const scaledHealth = Math.max(1, Math.round(baseHealth * difficulty.enemyHealthMultiplier));
+        enemy.health = scaledHealth;
+        enemy.maxHealth = scaledHealth;
+
+        if (enemy.fireRate) {
+            enemy.fireRate = Math.max(120, Math.round(enemy.fireRate * difficulty.enemyFireIntervalMultiplier));
+        }
+
+        enemy.scoreValue = Math.max(10, Math.round((enemy.scoreValue || 0) * difficulty.rewardMultiplier));
+        enemy.moneyValue = Math.max(5, Math.round((enemy.moneyValue || 0) * difficulty.rewardMultiplier));
     }
 
     createEnemy(enemyInfo, level) {
@@ -92,7 +111,7 @@ class EnemyFactory {
             enemy.overrides = translatedOverrides;
             if (translatedOverrides.health) {
                 enemy.health = translatedOverrides.health;
-                if (enemy.isBoss) enemy.maxHealth = translatedOverrides.health;
+                enemy.maxHealth = translatedOverrides.health;
             }
             if (translatedOverrides.fireRate) enemy.fireRate = translatedOverrides.fireRate;
             if (translatedOverrides.velocityX) enemy.velocityX = translatedOverrides.velocityX;
@@ -104,6 +123,8 @@ class EnemyFactory {
             if (translatedOverrides.firingPattern && translatedOverrides.firingPattern !== 'none') {
                 enemy.canFire = true;
             }
+
+            this.applyDifficultyModifiers(enemy, translatedOverrides);
         }
 
         if (enemy) {

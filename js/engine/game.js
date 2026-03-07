@@ -22,6 +22,12 @@ import { GameOverState } from '../states/gameover.js';
 import { HangarState } from '../states/hangar.js';
 import ShopState from '../states/shop.js';
 import { CharacterSelectState } from '../states/characterSelect.js';
+import { DifficultySelectState } from '../states/difficultySelect.js';
+import { SectorBriefingState } from '../states/sectorBriefing.js';
+import { LandingState } from '../states/landing.js';
+import { getPlayerShipProfile, getAllPlayerShips } from '../data/playerShips.js';
+import { getDifficultyProfile, getAllDifficultyProfiles } from '../data/difficultyProfiles.js';
+import { getMissionProfile } from '../data/missions.js';
 import { logger } from '../utils/logger.js';
 
 class Game {
@@ -80,7 +86,10 @@ class Game {
             gameover: new GameOverState(this),
             hangar: new HangarState(this),
             shop: new ShopState(this),
-            characterSelect: new CharacterSelectState(this)
+            characterSelect: new CharacterSelectState(this),
+            difficultySelect: new DifficultySelectState(this),
+            sectorBriefing: new SectorBriefingState(this),
+            landing: new LandingState(this)
         };
         this.currentState = null;
 
@@ -92,6 +101,7 @@ class Game {
     }
 
     getDefaultPlayerData() {
+        const ship = this.getPlayerShipProfile('raptor');
         return {
             name: 'Pilot',
             callsign: 'RAPTOR',
@@ -99,31 +109,66 @@ class Game {
             level: 1,
             score: 0,
             lives: 3,
-            health: 75,
-            maxHealth: 100,
+            health: ship.maxHealth,
+            maxHealth: ship.maxHealth,
             shield: 0,
             megabombs: 3,
             unlockedWeapons: [],
             lastCompletedLevel: 0,
+            difficulty: 'rookie',
+            shipId: ship.id,
+            primaryWeaponLevel: 1,
+            eventFlags: {},
+            endingFlags: {},
+            missionResults: [],
             timestamp: Date.now()
         };
+    }
+
+    getPlayerShipProfile(shipId = 'raptor') {
+        return getPlayerShipProfile(shipId);
+    }
+
+    getAllPlayerShips() {
+        return getAllPlayerShips();
+    }
+
+    getDifficultyProfile(difficultyId = 'rookie') {
+        return getDifficultyProfile(difficultyId);
+    }
+
+    getAllDifficultyProfiles() {
+        return getAllDifficultyProfiles();
+    }
+
+    getMissionProfile(level = 1) {
+        return getMissionProfile(level);
     }
 
     normalizePlayerData(data = {}) {
         const defaults = this.getDefaultPlayerData();
         const merged = { ...defaults, ...data };
+        const ship = this.getPlayerShipProfile(merged.shipId || defaults.shipId);
+        const difficulty = this.getDifficultyProfile(merged.difficulty || defaults.difficulty);
+
+        merged.shipId = ship.id;
+        merged.difficulty = difficulty.id;
         merged.level = Math.max(1, Number(merged.level) || 1);
         merged.money = Number(merged.money) || 0;
         merged.score = Number(merged.score) || 0;
         merged.lives = Math.max(1, Number(merged.lives) || defaults.lives);
-        merged.maxHealth = Math.max(1, Number(merged.maxHealth) || defaults.maxHealth);
-        merged.health = Math.min(merged.maxHealth, Math.max(0, Number(merged.health) || defaults.health));
+        merged.maxHealth = Math.max(1, Number(merged.maxHealth) || ship.maxHealth);
+        merged.health = Math.min(merged.maxHealth, Math.max(0, Number(merged.health) || ship.maxHealth));
         merged.shield = Math.max(0, Number(merged.shield) || 0);
         merged.megabombs = Math.max(0, Number(merged.megabombs) || defaults.megabombs);
         merged.lastCompletedLevel = Math.max(0, Number(merged.lastCompletedLevel) || 0);
+        merged.primaryWeaponLevel = Math.max(1, Number(merged.primaryWeaponLevel) || 1);
         merged.unlockedWeapons = Array.isArray(merged.unlockedWeapons) && merged.unlockedWeapons.length > 0
             ? [...new Set(merged.unlockedWeapons)]
             : [...defaults.unlockedWeapons];
+        merged.eventFlags = merged.eventFlags && typeof merged.eventFlags === 'object' ? { ...merged.eventFlags } : {};
+        merged.endingFlags = merged.endingFlags && typeof merged.endingFlags === 'object' ? { ...merged.endingFlags } : {};
+        merged.missionResults = Array.isArray(merged.missionResults) ? [...merged.missionResults] : [];
         merged.timestamp = Date.now();
         return merged;
     }
@@ -143,8 +188,8 @@ class Game {
             const canvas = this.layers[key];
             canvas.width = windowWidth;
             canvas.height = windowHeight;
-            canvas.style.width = windowWidth + 'px';
-            canvas.style.height = windowHeight + 'px';
+            canvas.style.width = `${windowWidth}px`;
+            canvas.style.height = `${windowHeight}px`;
             canvas.style.position = 'absolute';
             canvas.style.left = '0';
             canvas.style.top = '0';
@@ -233,13 +278,11 @@ class Game {
 
         const newState = this.states[stateName];
         if (!newState) {
-            logger.error(`State \"${stateName}\" not found!`);
+            logger.error(`State "${stateName}" not found!`);
             return;
         }
 
-        logger.info(`Found new state: ${stateName}, entering...`);
         this.currentState = newState;
-
         if (typeof this.currentState.enter === 'function') {
             const result = this.currentState.enter({
                 ...context,
@@ -256,4 +299,3 @@ class Game {
 }
 
 export { Game };
-
