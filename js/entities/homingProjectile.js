@@ -86,9 +86,9 @@ class HomingProjectile extends Entity {
         this.health -= amount;
         if (this.health <= 0) {
             this.destroy();
-            const explosion = new Explosion(this.game, this.x + this.width / 2 - 16, this.y + this.height / 2 - 16, 32, 32);
+            const explosion = new Explosion(this.game, this.x + this.width / 2 - 16, this.y + this.height / 2 - 16, 32, 32, { variant: 'small' });
             this.game.entityManager.add(explosion);
-            this.game.audio.playSound('explosion');
+            this.game.audio.playSound('explosionSmall');
         }
     }
 

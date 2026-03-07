@@ -66,7 +66,9 @@ class Enemy extends Entity {
             }
 
             this.game.currentState?.recordAirKill?.(this.type, this);
-            this.game.entityManager.add(new Explosion(this.game, this.x, this.y, this.width, this.height));
+            const explosionVariant = this.isBoss || this.width >= 140 ? 'large' : this.width >= 88 ? 'medium' : 'small';
+            this.game.entityManager.add(new Explosion(this.game, this.x, this.y, this.width, this.height, { variant: explosionVariant }));
+            this.game.audio.playSound(explosionVariant === 'large' ? 'explosionLarge' : explosionVariant === 'medium' ? 'explosionMedium' : 'explosionSmall', 0.05, this.x);
 
             if (this.isBoss && this.level) {
                 this.level.bossDefeated = true;

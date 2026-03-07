@@ -52,6 +52,8 @@ The repo now ships:
 - Harold''s Emporium categories with repairs, systems, secondaries, and consumables
 - end-of-run contract scoring built from cash, kills, and completion with the difficulty multiplier applied at the end
 - a rewritten Level 1 combat script with named waves, short inter-wave breathers, section-aware threat labels, and a phased telegraphed boss finale
+- synthesized fallback audio for menu, mission, boss warning, pickups, purchases, and combat feedback when no shipped sound asset exists
+- layered explosion rendering with stronger shockwave / flash feedback and size-based blast cues
 
 Current compromise:
 - only one full player sprite set exists today, so alternate airframes currently use sprite fallback plus tinting
@@ -272,9 +274,10 @@ Current policy:
 - [partial] integrate region-specific enemy behavior more tightly with bespoke enemy art and audio
 
 ### Phase E: Presentation and Audio
-- [next] audio pass for menu, UI, weapons, explosions, and boss stings
-- [next] improve explosion tiers and chain-reaction feedback
+- [partial] procedural fallback audio now covers menu/UI navigation, mission ambience, pickups, damage, explosions, and boss warning cues
+- [partial] explosion tiers and chain-reaction feedback are visually stronger and size-aware
 - [next] tighten final visual identity of each environment region
+- [next] replace the fallback sound bed with authored music and bespoke sampled weapon / UI effects when assets exist
 
 ### Phase F: Campaign Expansion
 - [next] apply the same fidelity structure to Level 2 and later sectors
@@ -335,9 +338,9 @@ Current policy:
 ### Presentation / Audio
 - [partial] HUD reads more like instrumentation than before
 - [next] fonts and layout need a more period-authentic pass
-- [partial] explosions scale by target class, but need richer tiers
-- [next] menu and mission audio need a real pass
-- [next] pickups and UI interactions need stronger feedback
+- [done] explosions now scale by target class with stronger layered flash / shockwave feedback
+- [partial] menu and mission audio now have procedural fallback ambience and SFX, but still need authored music and sampled effects
+- [done] pickups and major UI interactions now have stronger feedback
 
 ### Airframes / Route Hooks
 - [done] save data supports multiple jets

@@ -133,6 +133,7 @@ class ShopState {
                 playerData.equippedSecondaryWeapon = item.weaponId;
                 this.game.setPlayerData(playerData);
                 this.game.saveManager.saveGame();
+                this.game.audio.playSound('uiConfirm');
                 this.setupShopScreen();
             }
             return;
@@ -182,6 +183,7 @@ class ShopState {
 
         this.game.setPlayerData(playerData);
         this.game.saveManager.saveGame();
+        this.game.audio.playSound(item.purchaseMode === 'service' ? 'repair' : item.purchaseMode === 'consumable' ? 'uiConfirm' : 'purchase');
         this.setupShopScreen();
     }
 
@@ -191,25 +193,30 @@ class ShopState {
         if (this.game.input.wasKeyJustPressed('ArrowLeft') || this.game.input.wasKeyJustPressed('a')) {
             this.selectedCategoryIndex = (this.selectedCategoryIndex - 1 + this.categories.length) % this.categories.length;
             this.selectedItemIndex = 0;
+            this.game.audio.playSound('uiMove');
             this.setupShopScreen();
         }
         if (this.game.input.wasKeyJustPressed('ArrowRight') || this.game.input.wasKeyJustPressed('d')) {
             this.selectedCategoryIndex = (this.selectedCategoryIndex + 1) % this.categories.length;
             this.selectedItemIndex = 0;
+            this.game.audio.playSound('uiMove');
             this.setupShopScreen();
         }
         if (this.game.input.wasKeyJustPressed('ArrowUp') || this.game.input.wasKeyJustPressed('w')) {
             this.selectedItemIndex = (this.selectedItemIndex - 1 + visibleItems.length) % Math.max(visibleItems.length, 1);
+            this.game.audio.playSound('uiMove');
             this.setupShopScreen();
         }
         if (this.game.input.wasKeyJustPressed('ArrowDown') || this.game.input.wasKeyJustPressed('s')) {
             this.selectedItemIndex = (this.selectedItemIndex + 1) % Math.max(visibleItems.length, 1);
+            this.game.audio.playSound('uiMove');
             this.setupShopScreen();
         }
         if ((this.game.input.wasKeyJustPressed('Enter') || this.game.input.wasKeyJustPressed(' ')) && visibleItems[this.selectedItemIndex]) {
             this.applyPurchase(visibleItems[this.selectedItemIndex]);
         }
         if (this.game.input.wasKeyJustPressed('Escape')) {
+            this.game.audio.playSound('uiBack');
             this.exitShop();
         }
     }
@@ -327,6 +334,7 @@ class ShopState {
             button.addEventListener('click', () => {
                 this.selectedCategoryIndex = index;
                 this.selectedItemIndex = 0;
+                this.game.audio.playSound('uiMove');
                 this.setupShopScreen();
             });
             categoryPanel.appendChild(button);
@@ -370,6 +378,7 @@ class ShopState {
                     return;
                 }
                 this.selectedItemIndex = index;
+                this.game.audio.playSound('uiMove');
                 this.setupShopScreen();
             });
             itemPanel.appendChild(row);
@@ -421,7 +430,7 @@ class ShopState {
         backButton.style.background = 'rgba(8, 12, 18, 0.88)';
         backButton.style.color = '#ffffff';
         backButton.style.cursor = 'pointer';
-        backButton.addEventListener('click', () => this.exitShop());
+        backButton.addEventListener('click', () => { this.game.audio.playSound('uiBack'); this.exitShop(); });
         footer.appendChild(backButton);
 
         const hint = document.createElement('div');

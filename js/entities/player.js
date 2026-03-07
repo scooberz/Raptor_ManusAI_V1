@@ -316,7 +316,7 @@ class Player extends Entity {
 
         this.megabombs--;
 
-        const explosion = new Explosion(this.game, this.game.width / 2 - 128, this.game.height / 2 - 128, 256, 256);
+        const explosion = new Explosion(this.game, this.game.width / 2 - 128, this.game.height / 2 - 128, 256, 256, { variant: 'large' });
         this.game.entityManager.add(explosion);
 
         const enemies = this.game.collision.collisionGroups.enemies;
@@ -361,7 +361,7 @@ class Player extends Entity {
         if (this.health <= 0) {
             this.health = 0;
             this.destroy();
-            const explosion = new Explosion(this.game, this.x + this.width / 2 - 32, this.y + this.height / 2 - 32, 64, 64);
+            const explosion = new Explosion(this.game, this.x + this.width / 2 - 32, this.y + this.height / 2 - 32, 64, 64, { variant: 'medium' });
             this.game.entityManager.add(explosion);
             this.game.changeState('gameover');
         } else {

@@ -85,11 +85,11 @@ class HangarState {
             badge.style.color = '#fff3b0';
         };
 
-        button.addEventListener('mouseover', setHoverState);
+        button.addEventListener('mouseover', () => { this.game.audio.playSound('uiMove'); setHoverState(); });
         button.addEventListener('mouseout', setIdleState);
-        button.addEventListener('focus', setHoverState);
+        button.addEventListener('focus', () => { this.game.audio.playSound('uiMove'); setHoverState(); });
         button.addEventListener('blur', setIdleState);
-        button.addEventListener('click', onClick);
+        button.addEventListener('click', () => { this.game.audio.playSound('uiConfirm'); onClick(); });
         setIdleState();
 
         return button;
@@ -226,15 +226,19 @@ class HangarState {
 
     update() {
         if (this.game.input.wasKeyJustPressed('1') || this.game.input.wasKeyJustPressed('m')) {
+            this.game.audio.playSound('uiConfirm');
             this.chooseNextMission();
         }
         if (this.game.input.wasKeyJustPressed('2') || this.game.input.wasKeyJustPressed('s')) {
+            this.game.audio.playSound('uiConfirm');
             this.openShop();
         }
         if (this.game.input.wasKeyJustPressed('3')) {
+            this.game.audio.playSound('uiConfirm');
             this.saveGame();
         }
         if (this.game.input.wasKeyJustPressed('4') || this.game.input.wasKeyJustPressed('e')) {
+            this.game.audio.playSound('uiBack');
             this.exitToMenu();
         }
     }
@@ -255,6 +259,7 @@ class HangarState {
 
     saveGame() {
         this.game.saveManager.saveGame();
+        this.game.audio.playSound('saveConfirm');
         this.setupHangarScreen();
     }
 

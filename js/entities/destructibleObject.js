@@ -126,9 +126,12 @@ class DestructibleObject extends Entity {
             centerX - explosionWidth / 2,
             centerY - explosionHeight / 2,
             explosionWidth,
-            explosionHeight
+            explosionHeight,
+            { variant: this.explosionSize || 'medium' }
         );
         this.game.entityManager.add(explosion);
+        const explosionSound = this.explosionSize === 'large' ? 'explosionLarge' : this.explosionSize === 'small' ? 'explosionSmall' : 'explosionMedium';
+        this.game.audio.playSound(explosionSound, 0.05, centerX);
 
         if (this.explosionSize === 'large' || this.chainExplosions > 0) {
             this.createSecondaryExplosions(centerX, centerY, Math.max(3, this.chainExplosions));
@@ -143,7 +146,7 @@ class DestructibleObject extends Entity {
             const offsetY = Math.sin(angle) * radius;
             setTimeout(() => {
                 if (this.game.entityManager) {
-                    const secondaryExplosion = new Explosion(this.game, centerX + offsetX - 24, centerY + offsetY - 24, 48, 48);
+                    const secondaryExplosion = new Explosion(this.game, centerX + offsetX - 24, centerY + offsetY - 24, 48, 48, { variant: 'small' });
                     this.game.entityManager.add(secondaryExplosion);
                 }
             }, i * 120);

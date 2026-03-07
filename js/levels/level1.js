@@ -349,6 +349,7 @@ class Level1 {
         this.bossWarningDuration = bossWave?.boss_warning_duration_ms || 3000;
         this.showBossWarning = true;
         this.bossWarningTimer = 0;
+        this.game.audio.playSound('bossWarning');
         logger.info('BOSS APPROACHING!');
     }
 

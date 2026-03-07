@@ -129,11 +129,17 @@ class MenuState {
             optionElement.style.borderRadius = '6px';
 
             optionElement.addEventListener('mouseover', () => {
+                if (this.selectedOption !== index) {
+                    this.game.audio.playSound('uiMove');
+                }
                 this.selectedOption = index;
                 this.highlightSelectedOption();
             });
 
             optionElement.addEventListener('focus', () => {
+                if (this.selectedOption !== index) {
+                    this.game.audio.playSound('uiMove');
+                }
                 this.selectedOption = index;
                 this.highlightSelectedOption();
             });
@@ -141,6 +147,7 @@ class MenuState {
             optionElement.addEventListener('click', () => {
                 this.selectedOption = index;
                 this.highlightSelectedOption();
+                this.game.audio.playSound('uiConfirm');
                 option.action();
             });
 

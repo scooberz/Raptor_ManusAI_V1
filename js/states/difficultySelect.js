@@ -70,6 +70,7 @@ class DifficultySelectState {
             `;
             card.addEventListener('click', () => {
                 this.selectedIndex = index;
+                this.game.audio.playSound('uiConfirm');
                 this.selectDifficulty();
             });
             list.appendChild(card);
@@ -98,24 +99,30 @@ class DifficultySelectState {
         const options = this.game.getAllDifficultyProfiles();
         if (this.game.input.wasKeyJustPressed('ArrowLeft') || this.game.input.wasKeyJustPressed('a')) {
             this.selectedIndex = (this.selectedIndex - 1 + options.length) % options.length;
+            this.game.audio.playSound('uiMove');
             this.setupScreen();
         }
         if (this.game.input.wasKeyJustPressed('ArrowRight') || this.game.input.wasKeyJustPressed('d')) {
             this.selectedIndex = (this.selectedIndex + 1) % options.length;
+            this.game.audio.playSound('uiMove');
             this.setupScreen();
         }
         if (this.game.input.wasKeyJustPressed('ArrowUp') || this.game.input.wasKeyJustPressed('w')) {
             this.selectedIndex = (this.selectedIndex - 2 + options.length) % options.length;
+            this.game.audio.playSound('uiMove');
             this.setupScreen();
         }
         if (this.game.input.wasKeyJustPressed('ArrowDown') || this.game.input.wasKeyJustPressed('s')) {
             this.selectedIndex = (this.selectedIndex + 2) % options.length;
+            this.game.audio.playSound('uiMove');
             this.setupScreen();
         }
         if (this.game.input.wasKeyJustPressed('Enter') || this.game.input.wasKeyJustPressed(' ')) {
+            this.game.audio.playSound('uiConfirm');
             this.selectDifficulty();
         }
         if (this.game.input.wasKeyJustPressed('Escape')) {
+            this.game.audio.playSound('uiBack');
             this.game.changeState('characterSelect');
         }
     }
