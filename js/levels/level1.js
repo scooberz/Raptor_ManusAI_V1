@@ -385,26 +385,30 @@ class Level1 {
         ctx.strokeRect(offsetX, offsetY, Level1.PLAYABLE_WIDTH, Level1.PLAYABLE_HEIGHT);
         ctx.restore();
 
+        const ctxUI = contexts.ui;
         if (this.showBossWarning) {
-            const ctxUI = contexts.ui;
             ctxUI.save();
             ctxUI.font = 'bold 48px Arial';
             ctxUI.fillStyle = 'yellow';
             ctxUI.textAlign = 'center';
             ctxUI.fillText('BOSS APPROACHING', this.game.width / 2, offsetY + 180);
-            const barWidth = 400;
-            const barHeight = 20;
-            const barX = (this.game.width - barWidth) / 2;
-            const barY = offsetY + 40;
-            ctxUI.fillStyle = 'rgba(0,0,0,0.7)';
-            ctxUI.fillRect(barX, barY, barWidth, barHeight);
-            ctxUI.fillStyle = 'red';
-            ctxUI.fillRect(barX, barY, barWidth * this.bossHealthBarFill, barHeight);
-            ctxUI.strokeStyle = 'white';
-            ctxUI.lineWidth = 2;
-            ctxUI.strokeRect(barX, barY, barWidth, barHeight);
+            if (this.game.hasSystem('bossHealthIndicator')) {
+                const barWidth = 400;
+                const barHeight = 20;
+                const barX = (this.game.width - barWidth) / 2;
+                const barY = offsetY + 40;
+                ctxUI.fillStyle = 'rgba(0,0,0,0.7)';
+                ctxUI.fillRect(barX, barY, barWidth, barHeight);
+                ctxUI.fillStyle = 'red';
+                ctxUI.fillRect(barX, barY, barWidth * this.bossHealthBarFill, barHeight);
+                ctxUI.strokeStyle = 'white';
+                ctxUI.lineWidth = 2;
+                ctxUI.strokeRect(barX, barY, barWidth, barHeight);
+            }
             ctxUI.restore();
         }
+
+        this.renderBossIndicator(ctxUI, offsetY);
 
         if (this.sectionBannerTimer > 0 && this.sectionBannerText) {
             this.renderSectionBanner(contexts.ui, offsetY);
@@ -425,6 +429,35 @@ class Level1 {
         ctx.font = 'bold 26px Arial';
         ctx.fillText(this.sectionBannerText, this.game.width / 2, offsetY + 56);
         ctx.restore();
+    }
+
+    getActiveBoss() {
+        return this.game.collision?.collisionGroups?.enemies?.find((enemy) => enemy.isBoss && enemy.active) || null;
+    }
+
+    renderBossIndicator(ctxUI, offsetY) {
+        const boss = this.getActiveBoss();
+        if (!boss || !this.game.hasSystem('bossHealthIndicator')) {
+            return;
+        }
+
+        const barWidth = 440;
+        const barHeight = 18;
+        const barX = (this.game.width - barWidth) / 2;
+        const barY = offsetY + 18;
+        ctxUI.save();
+        ctxUI.fillStyle = 'rgba(0,0,0,0.76)';
+        ctxUI.fillRect(barX, barY, barWidth, barHeight);
+        ctxUI.fillStyle = '#d64848';
+        ctxUI.fillRect(barX, barY, barWidth * (boss.health / Math.max(boss.maxHealth, 1)), barHeight);
+        ctxUI.strokeStyle = '#ffffff';
+        ctxUI.lineWidth = 2;
+        ctxUI.strokeRect(barX, barY, barWidth, barHeight);
+        ctxUI.fillStyle = '#ffcc00';
+        ctxUI.font = 'bold 16px Arial';
+        ctxUI.textAlign = 'center';
+        ctxUI.fillText('BOSS STRUCTURAL READOUT', this.game.width / 2, barY - 20);
+        ctxUI.restore();
     }
 
     isComplete() {
@@ -465,3 +498,5 @@ class Level1 {
 }
 
 export { Level1 };
+
+

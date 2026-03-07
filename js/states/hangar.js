@@ -149,7 +149,9 @@ class HangarState {
             <div style="font-size: 14px; line-height: 1.7;">
                 <div>Funds: $${playerData.money}</div>
                 <div>Hull: ${playerData.health}/${playerData.maxHealth || ship.maxHealth}</div>
+                <div>Shield: ${playerData.shield || 0}/${playerData.maxShield || 0}</div>
                 <div>Main Gun Mk: ${playerData.primaryWeaponLevel || 1}</div>
+                <div>Secondary: ${playerData.equippedSecondaryWeapon || 'None'}</div>
                 <div>Megabombs: ${playerData.megabombs ?? 3}</div>
                 <div>Cleared Missions: ${playerData.lastCompletedLevel || 0}</div>
             </div>
@@ -268,3 +270,4 @@ class HangarState {
 }
 
 export { HangarState };
+

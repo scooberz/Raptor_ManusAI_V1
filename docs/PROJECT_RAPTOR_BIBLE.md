@@ -3,7 +3,7 @@
 ## 1. High-Level Project Overview
 - **Project Name:** Project Raptor
 - **Concept:** A modern re-imagining of the classic 1994 DOS game *Raptor: Call of the Shadows*, built with a data-driven, modular JavaScript engine.
-- **Current Goal:** Stabilize the campaign framing, Level 1 environment identity, and between-mission economy loop so the game plays like a faithful DOS-style contract run instead of a prototype shooter.
+- **Current Goal:** Stabilize the campaign framing, Level 1 environment identity, Harold's Emporium economy loop, and end-of-run score model so the game plays like a faithful DOS-style contract run instead of a prototype shooter.
 - **Active Fidelity Spec:** See `docs/FAITHFUL_RECREATION_SPEC.md` for the current screen-flow, layout, and gameplay targets.
 
 ## 2. Game Architecture
@@ -21,7 +21,7 @@
 - **Typography:** Functional, readable UI fonts. Final fidelity pass should move further toward a period-appropriate DOS instrumentation look.
 - **Sprite & Asset Design:** Clear silhouettes, consistent scale, readable projectiles, layered background identity, and destructible environment targets that make sense for the terrain.
 - **Environment Design:** Smooth scrolling, destructible structures, section-based visual identity, and region-specific ground targets.
-- **UI & HUD:** Compact, readable, and cash-first during active play. Score remains an internal progression metric until later summary/end screens.
+- **UI & HUD:** Compact, readable, and cash-first during active play. Score is only surfaced in debrief/final screens and is calculated from cash, kills, completion, and the selected difficulty multiplier.
 
 ## 4. Game Mechanics & Flow
 - **Gameplay:** Vertical scrolling shoot 'em up. Player controls a fighter jet, battling enemies on ground and in the air. Levels end with a boss or mission-complete encounter.
@@ -50,3 +50,4 @@
 - Prefer explicit state-flow fixes and data-shape fixes over cosmetic patches that hide architectural problems.
 - Update the design docs when implementation meaningfully changes the active target.
 - Verify syntax and runtime-critical paths before pushing.
+

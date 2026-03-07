@@ -37,6 +37,43 @@ export class HUD {
         }
     }
 
+    drawShieldBar(context, player, panelX, panelY) {
+        if (player.maxShield <= 0) {
+            return;
+        }
+
+        const barWidth = 126;
+        const barHeight = 10;
+        context.fillStyle = 'rgba(18, 45, 76, 0.72)';
+        context.fillRect(panelX, panelY, barWidth, barHeight);
+        context.fillStyle = '#52b8ff';
+        context.fillRect(panelX, panelY, barWidth * (player.shield / Math.max(player.maxShield, 1)), barHeight);
+        context.strokeStyle = 'rgba(255,255,255,0.28)';
+        context.strokeRect(panelX, panelY, barWidth, barHeight);
+    }
+
+    drawThreatPanel(context, playableRight) {
+        if (!this.game.hasSystem('threatComputer')) {
+            return;
+        }
+
+        const level = this.game.currentState?.currentLevel;
+        const panelWidth = 240;
+        const panelX = playableRight - panelWidth - 64;
+        const panelY = 18;
+        this.renderPanel(context, panelX, panelY, panelWidth, 76);
+        context.fillStyle = '#ffcc00';
+        context.font = `bold 15px ${this.fontFamily}`;
+        context.fillText('THREAT COMPUTER', panelX + 14, panelY + 12);
+        context.fillStyle = '#dbe6ef';
+        context.font = `14px ${this.fontFamily}`;
+        const sectionLabel = level?.currentTerrainSection?.title || 'Sector Sweep';
+        const waveLabel = level ? `Wave ${Math.min((level.waveIndex || 0) + 1, 11)}` : 'Wave 1';
+        const threatLabel = level?.bossSpawned ? 'Flagship Engaged' : level?.showBossWarning ? 'Boss Approaching' : 'Contract Airspace';
+        context.fillText(sectionLabel, panelX + 14, panelY + 34);
+        context.fillText(`${waveLabel} | ${threatLabel}`, panelX + 14, panelY + 54);
+    }
+
     draw(context) {
         const player = this.game.player;
         if (!player) {
@@ -54,7 +91,7 @@ export class HUD {
         context.textAlign = 'left';
         context.textBaseline = 'top';
 
-        this.renderPanel(context, playableBounds.left + 18, 18, 320, 132);
+        this.renderPanel(context, playableBounds.left + 18, 18, 340, player.maxShield > 0 ? 150 : 132);
         context.fillStyle = '#ffcc00';
         context.font = `bold 18px ${this.fontFamily}`;
         context.fillText(`${ship.displayName} | ${difficulty.displayName}`, playableBounds.left + 32, 30);
@@ -64,11 +101,19 @@ export class HUD {
         context.fillText(`Funds $${player.money}`, playableBounds.left + 32, 60);
         context.fillText(`Hull ${player.health}/${player.maxHealth}`, playableBounds.left + 32, 84);
         context.fillText(`Main Gun Mk ${this.game.playerData?.primaryWeaponLevel || 1}`, playableBounds.left + 32, 108);
-        context.fillText(`Secondary ${player.hasWeapon('MISSILE') ? 'Missiles' : 'None'}`, playableBounds.left + 170, 60);
-        context.fillText(`Megabombs ${player.megabombs}`, playableBounds.left + 170, 84);
-        context.fillText(`Route ${ship.storyTrack}`, playableBounds.left + 170, 108);
+
+        context.fillText(`Secondary ${player.equippedSecondaryWeapon || 'None'}`, playableBounds.left + 182, 60);
+        context.fillText(`Megabombs ${player.megabombs}`, playableBounds.left + 182, 84);
+        context.fillText(`Salvage +${this.game.getSystemRank('salvageUplink') * 15}%`, playableBounds.left + 182, 108);
+
+        if (player.maxShield > 0) {
+            context.fillStyle = '#9fd7ff';
+            context.fillText(`Shield ${player.shield}/${player.maxShield}`, playableBounds.left + 32, 132);
+            this.drawShieldBar(context, player, playableBounds.left + 118, 136);
+        }
 
         this.drawHealthTicks(context, player, playableBounds.right);
+        this.drawThreatPanel(context, playableBounds.right);
 
         if (this.game.gameOver) {
             context.textAlign = 'center';

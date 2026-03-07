@@ -44,15 +44,17 @@ The repo now ships:
 - controlled intro skip behavior with a visible prompt
 - pilot creation with airframe selection
 - four-step campaign framing: pilot -> difficulty -> hangar -> briefing -> mission -> landing -> hangar
-- persistent difficulty, airframe, primary weapon level, and mission results in pilot saves
+- persistent difficulty, airframe, primary weapon level, systems, secondaries, and mission results in pilot saves
 - hangar hotspots aligned to the background art
 - Level 1 terrain sections with cash-bearing destructible ground targets
-- a cash-first flight HUD that prioritizes hull, weapons, and megabombs over live score
+- a cash-first flight HUD that prioritizes hull, shield state, weapons, and megabombs over live score
 - multi-airframe architecture with per-ship stats, route seeds, and ending/event scaffolding
+- Harold''s Emporium categories with repairs, systems, secondaries, and consumables
+- end-of-run contract scoring built from cash, kills, and completion with the difficulty multiplier applied at the end
 
 Current compromise:
 - only one full player sprite set exists today, so alternate airframes currently use sprite fallback plus tinting
-- score is still tracked internally for mission summaries and future endings, but is intentionally hidden from active flight and hangar UI to save space
+- the shop structure is much stronger now, but its presentation still needs more DOS-authentic visual polish
 - Level 2 is still not the active fidelity target
 
 ## Core Fidelity Goals
@@ -255,10 +257,11 @@ Current policy:
 - [done] multi-airframe pilot architecture with route/ending scaffolding
 
 ### Phase C: Economy and Loadout
-- [next] rework shop into a real Harold's Emporium loop
-- [partial] primary/secondary ownership persists, but shop-driven loadout management is incomplete
-- [partial] cash curves are better because of terrain targets and difficulty scaling, but still need tuning
+- [done] Harold''s Emporium loop exists with repairs, systems, secondaries, and consumables
+- [done] primary/secondary ownership persists through shop and save data
+- [partial] cash curves are better because of terrain targets, utility purchases, and difficulty scaling, but still need tuning
 - [done] mission result summaries exist through landing/debrief
+- [done] boss health indicator, targeting HUD, threat computer, hull/shield upgrades, and missile support are purchasable
 
 ### Phase D: Level 1 Combat Composition
 - [partial] Level 1 terrain sections and landmark-driven background variation exist
@@ -291,9 +294,9 @@ Current policy:
 - [done] hangar hotspots align to background landmarks
 - [done] hangar supports keyboard and mouse
 - [partial] stats panel is compact and useful
-- [next] shop should feel diegetic, not web-like
-- [next] Harold's shop language should be fully in-universe
-- [next] repairs, loadout, and airframe context should be better integrated into shop flow
+- [partial] shop now has a stronger Harold''s Emporium structure, but still needs more visual polish
+- [partial] Harold''s shop language is closer to in-universe, but can be pushed further
+- [done] repairs, loadout, and airframe context are integrated into shop flow
 
 ### Gameplay / Weapons
 - [done] primary weapon is always available
@@ -322,9 +325,10 @@ Current policy:
 - [partial] ground destruction meaningfully affects cash
 - [partial] high-value targets are somewhat recognizable but need stronger art separation
 - [partial] chain-reaction targets exist in limited form
-- [next] mission income should influence shop decisions more strongly
+- [done] mission income now directly influences repair, system, and secondary decisions in the shop
 - [implemented by design] active HUD is cash-first and score is hidden until later summary/end screens
 - [done] debrief summarizes payout and mission results
+- [done] final contract score is calculated from cash, kills, completion, and the end-of-run difficulty multiplier
 
 ### Presentation / Audio
 - [partial] HUD reads more like instrumentation than before
@@ -353,3 +357,7 @@ The next pass is successful when:
 - Level 1 waves feel authored around landmarks instead of generic timing lanes
 - airframe choice affects run feel in a way the player can notice immediately
 - the cash economy creates meaningful between-mission decisions
+
+
+
+

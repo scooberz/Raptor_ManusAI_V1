@@ -132,6 +132,17 @@ class Enemy extends Entity {
             return;
         }
         super.render(context);
+
+        if (this.game.hasSystem('targetingHud') && !this.isBoss && this.maxHealth > 0) {
+            const barX = this.x;
+            const barY = this.y - 6;
+            context.save();
+            context.fillStyle = 'rgba(0,0,0,0.7)';
+            context.fillRect(barX, barY, this.width, 4);
+            context.fillStyle = '#ff7a5e';
+            context.fillRect(barX, barY, this.width * (this.health / Math.max(this.maxHealth, 1)), 4);
+            context.restore();
+        }
     }
 
     updateMovement(deltaTime) {

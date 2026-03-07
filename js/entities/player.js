@@ -16,6 +16,7 @@ class Player extends Entity {
         this.health = this.shipProfile.maxHealth;
         this.maxHealth = this.shipProfile.maxHealth;
         this.shield = 0;
+        this.maxShield = 0;
         this.money = 0;
         this.score = 0;
         this.collisionDamage = this.shipProfile.collisionDamage;
@@ -28,6 +29,8 @@ class Player extends Entity {
             MISSILE: { name: 'Missiles', fireRate: 715, lastFired: 0 }
         };
         this.unlockedWeapons = [];
+        this.ownedSecondaryWeapons = [];
+        this.equippedSecondaryWeapon = null;
         this.bulletSpacing = this.shipProfile.bulletSpacing;
 
         this.megabombs = 3;
@@ -78,6 +81,11 @@ class Player extends Entity {
         this.bulletSpacing = ship.bulletSpacing;
     }
 
+    configureSecondaryWeapons() {
+        const missileLoaderRank = this.game.getSystemRank('missileLoader');
+        this.weapons.MISSILE.fireRate = Math.max(360, 715 - missileLoaderRank * 110);
+    }
+
     syncWithPlayerData() {
         if (!this.game.playerData) {
             return;
@@ -88,18 +96,22 @@ class Player extends Entity {
         this.collisionDamage = this.shipProfile.collisionDamage;
         this.maxHealth = this.game.playerData.maxHealth ?? this.shipProfile.maxHealth;
         this.health = Math.min(this.maxHealth, this.game.playerData.health ?? this.shipProfile.maxHealth);
+        this.maxShield = this.game.playerData.maxShield ?? 0;
+        this.shield = Math.min(this.maxShield, this.game.playerData.shield ?? 0);
         this.money = this.game.playerData.money ?? 0;
         this.score = this.game.playerData.score ?? 0;
-        this.shield = this.game.playerData.shield ?? 0;
         this.megabombs = this.game.playerData.megabombs ?? 3;
-        this.unlockedWeapons = Array.isArray(this.game.playerData.unlockedWeapons)
-            ? [...new Set(this.game.playerData.unlockedWeapons)]
+        this.ownedSecondaryWeapons = Array.isArray(this.game.playerData.ownedSecondaryWeapons)
+            ? [...new Set(this.game.playerData.ownedSecondaryWeapons)]
             : [];
-        this.weaponOrder = [...this.unlockedWeapons];
+        this.unlockedWeapons = [...this.ownedSecondaryWeapons];
+        this.weaponOrder = [...this.ownedSecondaryWeapons];
         this.currentWeaponIndex = this.weaponOrder.length > 0 ? 0 : -1;
         this.currentWeapon = this.currentWeaponIndex >= 0 ? this.weaponOrder[this.currentWeaponIndex] : null;
+        this.equippedSecondaryWeapon = this.game.playerData.equippedSecondaryWeapon || null;
         this.missileAutoFire = this.hasWeapon('MISSILE') ? this.missileAutoFire : false;
         this.configurePrimaryWeapon();
+        this.configureSecondaryWeapons();
         logger.debug(`Player synced with playerData: ship=${this.shipProfile.id}, health=${this.health}, money=${this.money}`);
     }
 
@@ -189,7 +201,7 @@ class Player extends Entity {
         const now = Date.now();
         const primaryPressed = input.isMouseButtonPressed('left') || input.isKeyPressed(' ') || input.isKeyPressed('Control');
         const specialPressed = input.isKeyPressed('Shift');
-        const hasMissiles = this.hasWeapon('MISSILE');
+        const hasMissiles = this.equippedSecondaryWeapon === 'MISSILE' && this.hasWeapon('MISSILE');
 
         if (primaryPressed) {
             const cannon = this.weapons.CANNON;
@@ -273,7 +285,7 @@ class Player extends Entity {
     }
 
     fireMissile() {
-        if (!this.hasWeapon('MISSILE')) {
+        if (!this.hasWeapon('MISSILE') || this.equippedSecondaryWeapon !== 'MISSILE') {
             return;
         }
 
@@ -330,9 +342,20 @@ class Player extends Entity {
             return;
         }
 
-        this.health -= amount;
+        let remainingDamage = amount;
+        if (this.shield > 0) {
+            const absorbed = Math.min(this.shield, remainingDamage);
+            this.shield -= absorbed;
+            remainingDamage -= absorbed;
+        }
+
+        if (remainingDamage > 0) {
+            this.health -= remainingDamage;
+        }
+
         if (this.game.playerData) {
             this.game.playerData.health = this.health;
+            this.game.playerData.shield = this.shield;
         }
 
         if (this.health <= 0) {
@@ -361,7 +384,10 @@ class Player extends Entity {
     }
 
     addMoney(amount) {
-        this.money += amount;
+        const salvageRank = this.game.getSystemRank('salvageUplink');
+        const multiplier = 1 + salvageRank * 0.15;
+        const adjustedAmount = Math.round(amount * multiplier);
+        this.money += adjustedAmount;
         if (this.game.playerData) {
             this.game.playerData.money = this.money;
         }
@@ -382,25 +408,36 @@ class Player extends Entity {
     }
 
     hasWeapon(weaponId) {
-        return this.unlockedWeapons.includes(weaponId);
+        return this.ownedSecondaryWeapons.includes(weaponId);
+    }
+
+    equipSecondaryWeapon(weaponId) {
+        if (!this.hasWeapon(weaponId)) {
+            return;
+        }
+
+        this.equippedSecondaryWeapon = weaponId;
+        if (this.game.playerData) {
+            this.game.playerData.equippedSecondaryWeapon = weaponId;
+        }
     }
 
     unlockWeapon(weaponId) {
         if (!weaponId || this.hasWeapon(weaponId)) {
+            this.equipSecondaryWeapon(weaponId);
             return;
         }
 
-        this.unlockedWeapons.push(weaponId);
-        this.weaponOrder = [...this.unlockedWeapons];
-        if (this.currentWeaponIndex < 0) {
-            this.currentWeaponIndex = 0;
-            this.currentWeapon = this.weaponOrder[0] || null;
-        }
+        this.ownedSecondaryWeapons.push(weaponId);
+        this.unlockedWeapons = [...this.ownedSecondaryWeapons];
+        this.weaponOrder = [...this.ownedSecondaryWeapons];
+        this.equipSecondaryWeapon(weaponId);
         if (weaponId === 'MISSILE') {
             this.missileAutoFire = false;
         }
         if (this.game.playerData) {
-            this.game.playerData.unlockedWeapons = [...this.unlockedWeapons];
+            this.game.playerData.ownedSecondaryWeapons = [...this.ownedSecondaryWeapons];
+            this.game.playerData.unlockedWeapons = [...this.ownedSecondaryWeapons];
         }
     }
 

@@ -21,8 +21,11 @@ class SaveManager {
             baseData.money = livePlayer.money;
             baseData.score = livePlayer.score;
             baseData.shield = livePlayer.shield;
+            baseData.maxShield = livePlayer.maxShield;
             baseData.megabombs = livePlayer.megabombs;
-            baseData.unlockedWeapons = [...new Set(livePlayer.unlockedWeapons || baseData.unlockedWeapons)];
+            baseData.ownedSecondaryWeapons = [...new Set(livePlayer.ownedSecondaryWeapons || baseData.ownedSecondaryWeapons || [])];
+            baseData.unlockedWeapons = [...baseData.ownedSecondaryWeapons];
+            baseData.equippedSecondaryWeapon = livePlayer.equippedSecondaryWeapon || baseData.equippedSecondaryWeapon;
         }
 
         if (gameState && !gameState.levelComplete) {
@@ -89,4 +92,3 @@ class SaveManager {
 }
 
 export { SaveManager };
-

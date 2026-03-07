@@ -83,11 +83,11 @@ class GameState {
         this.missionStats.groundKillsByType[type] = (this.missionStats.groundKillsByType[type] || 0) + 1;
     }
 
-    buildMissionResult() {
+    buildMissionResult(completed = true) {
         const playerData = this.game.playerData || {};
         const missionProfile = this.game.getMissionProfile(this.level);
         const sectionsVisited = this.missionStats ? [...this.missionStats.sectionsVisited.values()] : [];
-        return {
+        const missionResult = {
             missionLevel: this.level,
             missionTitle: missionProfile.title,
             missionCode: missionProfile.codeName,
@@ -102,8 +102,11 @@ class GameState {
             shipId: playerData.shipId,
             primaryWeaponLevel: playerData.primaryWeaponLevel,
             landingText: missionProfile.landingText,
+            completed,
             completedAt: Date.now()
         };
+        missionResult.baseScore = this.game.calculateMissionScore(missionResult);
+        return missionResult;
     }
 
     async enter(context = {}) {
@@ -139,6 +142,10 @@ class GameState {
 
         this.player = new Player(this.game, this.game.width / 2 - 32, this.game.height - 120);
         this.player.loadSprites();
+        if (this.game.hasSystem('reactiveShieldEmitter') && this.player.maxShield > 0) {
+            this.player.shield = this.player.maxShield;
+            this.game.playerData.shield = this.player.shield;
+        }
         this.game.entityManager.add(this.player);
         this.game.collision.addToGroup(this.player, 'player');
         this.game.player = this.player;
@@ -186,8 +193,11 @@ class GameState {
             money: this.player.money,
             score: this.player.score,
             shield: this.player.shield,
+            maxShield: this.player.maxShield,
             megabombs: this.player.megabombs,
-            unlockedWeapons: this.player.unlockedWeapons,
+            ownedSecondaryWeapons: this.player.ownedSecondaryWeapons,
+            unlockedWeapons: this.player.ownedSecondaryWeapons,
+            equippedSecondaryWeapon: this.player.equippedSecondaryWeapon,
             primaryWeaponLevel: this.player.weapons?.CANNON?.level || this.game.playerData?.primaryWeaponLevel || 1,
             shipId: this.player.shipProfile?.id || this.game.playerData?.shipId
         });
@@ -326,7 +336,11 @@ class GameState {
 
     completeLevel() {
         const completedLevel = this.level;
-        const missionResult = this.buildMissionResult();
+        const damageControlRepair = this.game.hasSystem('damageControlKit') ? 20 : 0;
+        if (damageControlRepair > 0 && this.player) {
+            this.player.addHealth(damageControlRepair);
+        }
+        const missionResult = this.buildMissionResult(true);
         const lastCompletedLevel = Math.max(this.game.playerData?.lastCompletedLevel || 0, completedLevel);
         const nextSupportedLevel = this.getRequestedMissionLevel(lastCompletedLevel + 1);
         const priorResults = Array.isArray(this.game.playerData?.missionResults) ? this.game.playerData.missionResults : [];
@@ -344,8 +358,11 @@ class GameState {
             money: this.player?.money ?? this.game.playerData?.money,
             score: this.player?.score ?? this.game.playerData?.score,
             shield: this.player?.shield ?? this.game.playerData?.shield,
+            maxShield: this.player?.maxShield ?? this.game.playerData?.maxShield,
             megabombs: this.player?.megabombs ?? this.game.playerData?.megabombs,
-            unlockedWeapons: this.player?.unlockedWeapons ?? this.game.playerData?.unlockedWeapons,
+            ownedSecondaryWeapons: this.player?.ownedSecondaryWeapons ?? this.game.playerData?.ownedSecondaryWeapons,
+            unlockedWeapons: this.player?.ownedSecondaryWeapons ?? this.game.playerData?.ownedSecondaryWeapons,
+            equippedSecondaryWeapon: this.player?.equippedSecondaryWeapon ?? this.game.playerData?.equippedSecondaryWeapon,
             primaryWeaponLevel: this.player?.weapons?.CANNON?.level ?? this.game.playerData?.primaryWeaponLevel,
             level: nextSupportedLevel,
             lastCompletedLevel,
@@ -370,6 +387,10 @@ class GameState {
 
         this.player = new Player(this.game, this.game.width / 2 - 32, this.game.height - 120);
         this.player.loadSprites();
+        if (this.game.hasSystem('reactiveShieldEmitter') && this.player.maxShield > 0) {
+            this.player.shield = this.player.maxShield;
+            this.game.playerData.shield = this.player.shield;
+        }
         this.game.entityManager.add(this.player);
         this.game.collision.addToGroup(this.player, 'player');
         this.game.player = this.player;
@@ -400,3 +421,4 @@ class GameState {
 }
 
 export { GameState };
+

@@ -179,7 +179,7 @@ class DestructibleObject extends Entity {
             this.renderPlaceholder(context);
         }
 
-        if (this.game.debug) {
+        if (this.game.debug || this.game.hasSystem('targetingHud')) {
             this.renderHealthBar(context);
         }
     }
@@ -260,4 +260,5 @@ class DestructibleObject extends Entity {
 }
 
 export { DestructibleObject };
+
 

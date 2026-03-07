@@ -100,6 +100,31 @@ class Game {
         requestAnimationFrame(this.gameLoop);
     }
 
+    getDefaultOwnedSystems() {
+        return {
+            armorPlating: 0,
+            shieldCells: 0,
+            reactiveShieldEmitter: 0,
+            bossHealthIndicator: 0,
+            targetingHud: 0,
+            threatComputer: 0,
+            damageControlKit: 0,
+            salvageUplink: 0,
+            missileLoader: 0
+        };
+    }
+
+    normalizeOwnedSystems(value = {}) {
+        const defaults = this.getDefaultOwnedSystems();
+        const normalized = { ...defaults };
+        if (value && typeof value === 'object') {
+            Object.keys(defaults).forEach((key) => {
+                normalized[key] = Math.max(0, Number(value[key]) || 0);
+            });
+        }
+        return normalized;
+    }
+
     getDefaultPlayerData() {
         const ship = this.getPlayerShipProfile('raptor');
         return {
@@ -112,8 +137,12 @@ class Game {
             health: ship.maxHealth,
             maxHealth: ship.maxHealth,
             shield: 0,
+            maxShield: 0,
             megabombs: 3,
             unlockedWeapons: [],
+            ownedSecondaryWeapons: [],
+            equippedSecondaryWeapon: null,
+            ownedSystems: this.getDefaultOwnedSystems(),
             lastCompletedLevel: 0,
             difficulty: 'rookie',
             shipId: ship.id,
@@ -145,11 +174,53 @@ class Game {
         return getMissionProfile(level);
     }
 
+    getSystemRank(systemId, data = this.playerData) {
+        return Math.max(0, Number(data?.ownedSystems?.[systemId]) || 0);
+    }
+
+    hasSystem(systemId, data = this.playerData) {
+        return this.getSystemRank(systemId, data) > 0;
+    }
+
+    calculateMissionScore(missionResult) {
+        if (!missionResult) {
+            return 0;
+        }
+
+        const moneyComponent = Math.max(0, missionResult.moneyEarned || 0);
+        const airKillComponent = Math.max(0, missionResult.airTargetsDestroyed || 0) * 18;
+        const groundKillComponent = Math.max(0, missionResult.groundTargetsDestroyed || 0) * 8;
+        const completionComponent = missionResult.completed ? 750 : 0;
+        return moneyComponent + airKillComponent + groundKillComponent + completionComponent;
+    }
+
+    calculateCampaignScore(playerData = this.playerData, extraMissionResult = null) {
+        const results = Array.isArray(playerData?.missionResults) ? [...playerData.missionResults] : [];
+        if (extraMissionResult) {
+            results.push(extraMissionResult);
+        }
+
+        const subtotal = results.reduce((sum, result) => sum + (result.baseScore || this.calculateMissionScore(result)), 0);
+        const difficulty = this.getDifficultyProfile(playerData?.difficulty);
+        const total = Math.floor(subtotal * (difficulty.scoreMultiplier || 1));
+
+        return {
+            total,
+            subtotal,
+            completedMissions: results.filter((result) => result.completed).length,
+            difficulty,
+            resultsCount: results.length
+        };
+    }
+
     normalizePlayerData(data = {}) {
         const defaults = this.getDefaultPlayerData();
         const merged = { ...defaults, ...data };
         const ship = this.getPlayerShipProfile(merged.shipId || defaults.shipId);
         const difficulty = this.getDifficultyProfile(merged.difficulty || defaults.difficulty);
+        const ownedSecondaryWeapons = Array.isArray(merged.ownedSecondaryWeapons) ? merged.ownedSecondaryWeapons : [];
+        const unlockedWeapons = Array.isArray(merged.unlockedWeapons) ? merged.unlockedWeapons : [];
+        const combinedSecondaries = [...new Set([...ownedSecondaryWeapons, ...unlockedWeapons])];
 
         merged.shipId = ship.id;
         merged.difficulty = difficulty.id;
@@ -157,15 +228,23 @@ class Game {
         merged.money = Number(merged.money) || 0;
         merged.score = Number(merged.score) || 0;
         merged.lives = Math.max(1, Number(merged.lives) || defaults.lives);
-        merged.maxHealth = Math.max(1, Number(merged.maxHealth) || ship.maxHealth);
-        merged.health = Math.min(merged.maxHealth, Math.max(0, Number(merged.health) || ship.maxHealth));
-        merged.shield = Math.max(0, Number(merged.shield) || 0);
+        const parsedMaxHealth = Number(merged.maxHealth);
+        const parsedHealth = Number(merged.health);
+        const parsedMaxShield = Number(merged.maxShield);
+        const parsedShield = Number(merged.shield);
+        merged.maxHealth = Math.max(1, Number.isFinite(parsedMaxHealth) && parsedMaxHealth > 0 ? parsedMaxHealth : ship.maxHealth);
+        merged.health = Math.min(merged.maxHealth, Math.max(0, Number.isFinite(parsedHealth) ? parsedHealth : ship.maxHealth));
+        merged.maxShield = Math.max(0, Number.isFinite(parsedMaxShield) ? parsedMaxShield : 0);
+        merged.shield = Math.min(merged.maxShield, Math.max(0, Number.isFinite(parsedShield) ? parsedShield : 0));
         merged.megabombs = Math.max(0, Number(merged.megabombs) || defaults.megabombs);
         merged.lastCompletedLevel = Math.max(0, Number(merged.lastCompletedLevel) || 0);
         merged.primaryWeaponLevel = Math.max(1, Number(merged.primaryWeaponLevel) || 1);
-        merged.unlockedWeapons = Array.isArray(merged.unlockedWeapons) && merged.unlockedWeapons.length > 0
-            ? [...new Set(merged.unlockedWeapons)]
-            : [...defaults.unlockedWeapons];
+        merged.ownedSecondaryWeapons = combinedSecondaries;
+        merged.unlockedWeapons = [...combinedSecondaries];
+        merged.equippedSecondaryWeapon = combinedSecondaries.includes(merged.equippedSecondaryWeapon)
+            ? merged.equippedSecondaryWeapon
+            : (combinedSecondaries[0] || null);
+        merged.ownedSystems = this.normalizeOwnedSystems(merged.ownedSystems);
         merged.eventFlags = merged.eventFlags && typeof merged.eventFlags === 'object' ? { ...merged.eventFlags } : {};
         merged.endingFlags = merged.endingFlags && typeof merged.endingFlags === 'object' ? { ...merged.endingFlags } : {};
         merged.missionResults = Array.isArray(merged.missionResults) ? [...merged.missionResults] : [];
@@ -299,3 +378,5 @@ class Game {
 }
 
 export { Game };
+
+
