@@ -197,6 +197,16 @@ class AssetManager {
                 fuelTank: 'assets/images/environment/FUEL_TANK.png',
                 bunker: 'assets/images/environment/BUNKER.png',
                 radarDish: 'assets/images/environment/RADAR_DISH.png',
+                dockStorage: 'assets/images/environment/dock_storage_a.svg',
+                warehouseBlock: 'assets/images/environment/warehouse_block_a.svg',
+                warehouseBlockB: 'assets/images/environment/warehouse_block_b.svg',
+                bridgeNode: 'assets/images/environment/bridge_node_a.svg',
+                bridgeNodeB: 'assets/images/environment/bridge_node_b.svg',
+                controlTower: 'assets/images/environment/control_tower_a.svg',
+                baseGenerator: 'assets/images/environment/base_generator_a.svg',
+                chemicalVat: 'assets/images/environment/chemical_vat_a.svg',
+                cargoBarge: 'assets/images/environment/cargo_barge_a.svg',
+                patrolBoat: 'assets/images/environment/patrol_boat_a.svg',
                 explosion1: 'assets/images/explosions/explosion_1.png',
                 explosion2: 'assets/images/explosions/explosion_2.png',
                 impactEffect: 'assets/images/explosions/explosion_2.png',
@@ -223,4 +233,6 @@ class AssetManager {
 }
 
 export { AssetManager };
+
+
 

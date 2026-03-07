@@ -20,7 +20,8 @@ const LEVEL1_TERRAIN_SECTIONS = [
 const LEVEL1_ENVIRONMENT_PLAN = {
     wave_01_coastal_pickett: [
         { type: 'COASTAL_RADAR', x: 110, y: -140, delay: 0 },
-        { type: 'DOCK_STORAGE', x: 610, y: -240, delay: 1200, tint: 'rgba(102, 88, 72, 0.18)' },
+        { type: 'DOCK_STORAGE', x: 610, y: -240, delay: 1200 },
+        { type: 'CARGO_BARGE', x: 690, y: -330, delay: 2100, landmark: true },
         { type: 'HARBOR_FUEL_LINE', x: 235, y: -360, delay: 2800 },
         { type: 'COMM_ARRAY', x: 540, y: -500, delay: 5200 },
         { type: 'FUEL_DEPOT', x: 150, y: -620, delay: 7200, landmark: true },
@@ -28,25 +29,26 @@ const LEVEL1_ENVIRONMENT_PLAN = {
     ],
     wave_02_harbor_intercept: [
         { type: 'SHORE_BUNKER', x: 120, y: -120, delay: 400 },
+        { type: 'PATROL_BOAT', x: 676, y: -170, delay: 900 },
         { type: 'HARBOR_FUEL_LINE', x: 650, y: -240, delay: 1800 },
-        { type: 'DOCK_STORAGE', x: 320, y: -420, delay: 4200, tint: 'rgba(88, 78, 66, 0.16)' },
+        { type: 'DOCK_STORAGE', x: 320, y: -420, delay: 4200 },
         { type: 'COMM_ARRAY', x: 560, y: -620, delay: 7600, landmark: true }
     ],
     wave_03_warehouse_crossing: [
-        { type: 'WAREHOUSE_BLOCK', x: 120, y: -130, delay: 200, landmark: true, tint: 'rgba(68, 64, 60, 0.12)' },
+        { type: 'WAREHOUSE_BLOCK', x: 120, y: -130, delay: 200, landmark: true },
         { type: 'FUEL_DEPOT', x: 320, y: -260, delay: 1600 },
         { type: 'COMM_ARRAY', x: 610, y: -410, delay: 3200 },
-        { type: 'WAREHOUSE_BLOCK', x: 500, y: -640, delay: 7000, tint: 'rgba(82, 74, 62, 0.14)' }
+        { type: 'WAREHOUSE_BLOCK_B', x: 500, y: -640, delay: 7000 }
     ],
     wave_04_factory_choke: [
-        { type: 'WAREHOUSE_BLOCK', x: 80, y: -180, delay: 600, tint: 'rgba(76, 70, 64, 0.12)' },
+        { type: 'WAREHOUSE_BLOCK_B', x: 80, y: -180, delay: 600 },
         { type: 'HARBOR_FUEL_LINE', x: 240, y: -340, delay: 2200 },
         { type: 'COMM_ARRAY', x: 650, y: -520, delay: 4800 },
         { type: 'BRIDGE_NODE', x: 400, y: -690, delay: 8400, landmark: true }
     ],
     wave_05_bridge_lockdown: [
         { type: 'BRIDGE_NODE', x: 90, y: -160, delay: 0, landmark: true },
-        { type: 'BRIDGE_NODE', x: 610, y: -160, delay: 0, landmark: true },
+        { type: 'BRIDGE_NODE_B', x: 610, y: -160, delay: 0, landmark: true },
         { type: 'ROAD_JUNCTION', x: 365, y: -320, delay: 2200 },
         { type: 'BRIDGE_TURRET', x: 220, y: -540, delay: 5600 },
         { type: 'BRIDGE_TURRET', x: 510, y: -540, delay: 5600 },
@@ -54,18 +56,20 @@ const LEVEL1_ENVIRONMENT_PLAN = {
     ],
     wave_06_bridge_mine_run: [
         { type: 'BRIDGE_TURRET', x: 150, y: -180, delay: 500 },
-        { type: 'BRIDGE_NODE', x: 380, y: -320, delay: 2100, landmark: true },
+        { type: 'BRIDGE_NODE_B', x: 380, y: -320, delay: 2100, landmark: true },
         { type: 'ROAD_JUNCTION', x: 520, y: -460, delay: 3600 },
         { type: 'CHEMICAL_VAT', x: 230, y: -640, delay: 5600 }
     ],
     wave_07_refinery_strike: [
         { type: 'CHEMICAL_VAT', x: 150, y: -180, delay: 200 },
+        { type: 'CARGO_BARGE', x: 654, y: -250, delay: 1000 },
         { type: 'PIPELINE_HUB', x: 310, y: -240, delay: 1200 },
         { type: 'REFINERY_TANK', x: 490, y: -300, delay: 2200 },
         { type: 'REFINERY_RADAR', x: 650, y: -420, delay: 4200 },
         { type: 'CHEMICAL_VAT', x: 380, y: -620, delay: 7600, landmark: true }
     ],
     wave_08_refinery_crossfire: [
+        { type: 'PATROL_BOAT', x: 110, y: -160, delay: 300 },
         { type: 'REFINERY_TANK', x: 120, y: -200, delay: 400 },
         { type: 'PIPELINE_HUB', x: 300, y: -320, delay: 1900 },
         { type: 'CHEMICAL_VAT', x: 610, y: -520, delay: 4600 },
@@ -596,6 +600,9 @@ class Level1 {
 }
 
 export { Level1 };
+
+
+
 
 
 

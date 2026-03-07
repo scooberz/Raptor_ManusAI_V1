@@ -82,7 +82,7 @@ export const environmentData = {
     DOCK_STORAGE: {
         id: 'DOCK_STORAGE',
         name: 'Dock Storage Yard',
-        spriteAsset: 'bunker',
+        spriteAsset: 'dockStorage',
         width: 96,
         height: 56,
         health: 170,
@@ -104,10 +104,34 @@ export const environmentData = {
         chainExplosions: 2,
         description: 'Pipeline-fed harbor storage tank.'
     },
+    CARGO_BARGE: {
+        id: 'CARGO_BARGE',
+        name: 'Cargo Barge',
+        spriteAsset: 'cargoBarge',
+        width: 88,
+        height: 58,
+        health: 95,
+        explosionSize: 'medium',
+        scoreValue: 165,
+        moneyValue: 145,
+        description: 'Loaded harbor barge carrying military cargo through the inlet.'
+    },
+    PATROL_BOAT: {
+        id: 'PATROL_BOAT',
+        name: 'Patrol Boat',
+        spriteAsset: 'patrolBoat',
+        width: 74,
+        height: 42,
+        health: 70,
+        explosionSize: 'medium',
+        scoreValue: 120,
+        moneyValue: 105,
+        description: 'Armed patrol boat escorting coastal shipping lanes.'
+    },
     WAREHOUSE_BLOCK: {
         id: 'WAREHOUSE_BLOCK',
         name: 'Warehouse Block',
-        spriteAsset: 'bunker',
+        spriteAsset: 'warehouseBlock',
         width: 108,
         height: 62,
         health: 185,
@@ -115,6 +139,18 @@ export const environmentData = {
         scoreValue: 210,
         moneyValue: 145,
         description: 'Heavy warehouse roofline overlooking the shoreline.'
+    },
+    WAREHOUSE_BLOCK_B: {
+        id: 'WAREHOUSE_BLOCK_B',
+        name: 'Warehouse Block B',
+        spriteAsset: 'warehouseBlockB',
+        width: 112,
+        height: 64,
+        health: 195,
+        explosionSize: 'large',
+        scoreValue: 225,
+        moneyValue: 155,
+        description: 'Alternate heavy warehouse complex overlooking the shoreline.'
     },
     COMM_ARRAY: {
         id: 'COMM_ARRAY',
@@ -143,7 +179,7 @@ export const environmentData = {
     BRIDGE_NODE: {
         id: 'BRIDGE_NODE',
         name: 'Bridge Support Node',
-        spriteAsset: 'bunker',
+        spriteAsset: 'bridgeNode',
         width: 88,
         height: 58,
         health: 175,
@@ -151,6 +187,18 @@ export const environmentData = {
         scoreValue: 220,
         moneyValue: 155,
         description: 'Structural bridge support and weapons node.'
+    },
+    BRIDGE_NODE_B: {
+        id: 'BRIDGE_NODE_B',
+        name: 'Bridge Support Node B',
+        spriteAsset: 'bridgeNodeB',
+        width: 96,
+        height: 64,
+        health: 190,
+        explosionSize: 'large',
+        scoreValue: 235,
+        moneyValue: 165,
+        description: 'Secondary bridge support platform with reinforced anchor points.'
     },
     ROAD_JUNCTION: {
         id: 'ROAD_JUNCTION',
@@ -180,7 +228,7 @@ export const environmentData = {
     CHEMICAL_VAT: {
         id: 'CHEMICAL_VAT',
         name: 'Chemical Vat',
-        spriteAsset: 'fuelTank',
+        spriteAsset: 'chemicalVat',
         width: 64,
         height: 64,
         health: 62,
@@ -241,7 +289,7 @@ export const environmentData = {
     CONTROL_TOWER: {
         id: 'CONTROL_TOWER',
         name: 'Control Tower',
-        spriteAsset: 'radarDish',
+        spriteAsset: 'controlTower',
         width: 78,
         height: 90,
         health: 145,
@@ -253,7 +301,7 @@ export const environmentData = {
     BASE_GENERATOR: {
         id: 'BASE_GENERATOR',
         name: 'Base Generator',
-        spriteAsset: 'fuelTank',
+        spriteAsset: 'baseGenerator',
         width: 58,
         height: 58,
         health: 70,

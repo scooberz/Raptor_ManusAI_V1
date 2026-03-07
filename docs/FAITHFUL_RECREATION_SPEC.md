@@ -46,7 +46,7 @@ The repo now ships:
 - four-step campaign framing: pilot -> difficulty -> hangar -> briefing -> mission -> landing -> hangar
 - persistent difficulty, airframe, primary weapon level, systems, secondaries, and mission results in pilot saves
 - hangar hotspots aligned to the background art
-- Level 1 terrain sections with cash-bearing destructible ground targets and broader region-specific landmark families (dock storage, warehouses, bridge nodes, chemical vats, control towers, generators)
+- Level 1 terrain sections with cash-bearing destructible ground targets, bespoke landmark art for key structures, and broader region-specific families (dock storage, warehouses, bridge nodes, chemical vats, control towers, generators, barges, patrol boats)
 - a cash-first flight HUD that prioritizes hull, shield state, weapons, and megabombs over live score
 - multi-airframe architecture with per-ship stats, route seeds, and ending/event scaffolding
 - Harold''s Emporium categories with repairs, systems, secondaries, and consumables
@@ -58,7 +58,7 @@ The repo now ships:
 
 Current compromise:
 - only one full player sprite set exists today, so alternate airframes currently use sprite fallback plus tinting
-- most bespoke landmark identity still comes from reused sprites with new sizing, placement, tint, and reward data rather than fully unique art
+- several high-value landmarks now have bespoke art, but many secondary structures still rely on reused sprites and shared silhouettes
 - the presentation pass is materially stronger now, but final typography polish and bespoke art framing still need another pass
 - authored music and sampled SFX are still missing; the repo currently relies on procedural fallback audio
 - Level 2 is still not the active fidelity target
@@ -284,7 +284,7 @@ Current policy:
 - [done] Level 1 wave choreography is now rebuilt around named regional beats and landmark timing
 - [done] boss arrival, phased attacks, and telegraphed pacing are implemented for the Level 1 finale
 - [partial] a visible geometry layer now anchors dock blocks, bridge spans, refinery lines, and base structures beneath destructibles
-- [partial] destructible target families are broader and more region-specific now, but still rely on reused art and need more bespoke behavior/audio
+- [partial] destructible target families are broader and more region-specific now, with bespoke art on key landmarks, but still need more bespoke behavior/audio
 - [partial] integrate region-specific enemy behavior more tightly with bespoke enemy art and audio
 
 ### Phase E: Presentation and Audio
@@ -336,7 +336,7 @@ Current policy:
 
 ### Environment / Terrain
 - [done] scrolling background changes identity during the mission
-- [partial] each region now has clearer landmark structures and reward tiers, but some visual reuse is still obvious
+- [partial] each region now has clearer landmark structures, reward tiers, and some bespoke sprites, but visual reuse is still obvious in secondary targets
 - [partial] destructible objects now sit over a true geometry layer, but fully tile-authored placement is still incomplete
 - [done] water, shore, bridge, refinery, and military sections feel different
 - [done] each region now has stronger atmospheric tinting and overlay language in motion
@@ -344,7 +344,7 @@ Current policy:
 
 ### Economy / Debrief
 - [partial] ground destruction meaningfully affects cash
-- [partial] high-value targets are somewhat recognizable but need stronger art separation
+- [partial] high-value targets are more recognizable now, but some still need stronger art separation and animation
 - [partial] chain-reaction targets exist in limited form
 - [done] mission income now directly influences repair, system, and secondary decisions in the shop
 - [implemented by design] active HUD is cash-first and score is hidden until later summary/end screens
@@ -369,7 +369,7 @@ Current policy:
 Highest-value remaining gaps after the current pass:
 - authored sampled audio and music still need to replace the procedural fallback sound bed
 - final typography framing and bespoke art treatment still need another polish pass
-- Level 1 landmark identity is stronger, but many high-value ground targets still reuse the same base sprites instead of bespoke art
+- Level 1 landmark identity is stronger, but many secondary and mid-value ground targets still reuse base sprites instead of bespoke art
 - ground targets are more region-specific now, but some placements still ride on wave timing rather than tile-authored geography
 - alternate airframes have meaningful stat hooks, but still need dedicated sprite sets, events, and endings
 - Level 2 and later sectors are still outside the active fidelity target
@@ -388,6 +388,7 @@ The next pass is successful when:
 - Level 1 waves feel authored around landmarks instead of generic timing lanes
 - airframe choice affects run feel in a way the player can notice immediately
 - the cash economy creates meaningful between-mission decisions
+
 
 
 

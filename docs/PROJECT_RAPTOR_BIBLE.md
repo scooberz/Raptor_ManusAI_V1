@@ -3,7 +3,7 @@
 ## 1. High-Level Project Overview
 - **Project Name:** Project Raptor
 - **Concept:** A modern re-imagining of the classic 1994 DOS game *Raptor: Call of the Shadows*, built with a data-driven, modular JavaScript engine.
-- **Current Goal:** Stabilize the campaign framing, keep the new Level 1 geometry-backed landmark identity and combat composition intact, strengthen Harold's Emporium economy loop, and continue closing the remaining DOS-style presentation/audio gaps so the game plays like a faithful DOS-style contract run instead of a prototype shooter.
+- **Current Goal:** Stabilize the campaign framing, keep the new Level 1 geometry-backed landmark identity and bespoke landmark sprite pass intact, strengthen Harold's Emporium economy loop, and continue closing the remaining DOS-style presentation/audio gaps so the game plays like a faithful DOS-style contract run instead of a prototype shooter.
 - **Active Fidelity Spec:** See `docs/FAITHFUL_RECREATION_SPEC.md` for the current screen-flow, layout, and gameplay targets.
 
 ## 2. Game Architecture
@@ -19,7 +19,7 @@
 - **Core Aesthetic:** Modern Retro - a modern interpretation of the 1994 classic with higher fidelity, cleaner lines, and modern effects. Gritty and industrial military setting. High-contrast readability is mandatory.
 - **Color Palette:** Deep blues, military greens, steel grays, warning reds, energy blues, accent oranges, highlight yellows, and water teals.
 - **Typography:** Functional, readable UI fonts. Final fidelity pass should move further toward a period-appropriate DOS instrumentation look.
-- **Sprite & Asset Design:** Clear silhouettes, consistent scale, readable projectiles, layered background identity, and destructible environment targets that make sense for the terrain.
+- **Sprite & Asset Design:** Clear silhouettes, consistent scale, readable projectiles, layered background identity, and destructible environment targets that make sense for the terrain. Key Level 1 landmarks now have bespoke SVG spritework for docks, bridge nodes, vats, towers, generators, and small watercraft.
 - **Environment Design:** Smooth scrolling, destructible structures, section-based visual identity, a visible environment geometry layer, region-specific ground targets, and landmark-driven reward routing that makes the player read the ground as well as the air.
 - **UI & HUD:** Compact, readable, and cash-first during active play. Score is only surfaced in debrief/final screens and is calculated from cash, kills, completion, and the selected difficulty multiplier. Menu, hangar, shop, briefing, landing, and game-over now share a stronger DOS terminal language, with only final typography and bespoke art framing still open for polish.
 
@@ -50,6 +50,7 @@
 - Prefer explicit state-flow fixes and data-shape fixes over cosmetic patches that hide architectural problems.
 - Update the design docs when implementation meaningfully changes the active target.
 - Verify syntax and runtime-critical paths before pushing.
+
 
 
 
